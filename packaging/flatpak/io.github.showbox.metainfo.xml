@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.showbox</id>
+  <name>ShowBox</name>
+  <summary>GUI widgets for shell scripts</summary>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+  
+  <description>
+    <p>
+      ShowBox is a Qt6-based tool that provides GUI widgets for shell scripts.
+      It allows creating dialogs, forms, and interactive interfaces directly
+      from bash scripts using a simple command-based syntax.
+    </p>
+    <p>Features:</p>
+    <ul>
+      <li>Standard widgets: buttons, labels, checkboxes, text boxes, sliders, etc.</li>
+      <li>Extended widgets: calendar, table, chart</li>
+      <li>Theme support (light/dark/system)</li>
+      <li>Resizable windows</li>
+      <li>Event-driven communication with scripts</li>
+    </ul>
+  </description>
+  
+  <launchable type="desktop-id">io.github.showbox.desktop</launchable>
+  
+  <url type="homepage">https://github.com/helton-godoy/showbox</url>
+  <url type="bugtracker">https://github.com/helton-godoy/showbox/issues</url>
+  
+  <provides>
+    <binary>showbox</binary>
+  </provides>
+  
+  <releases>
+    <release version="1.0.0" date="2026-01-12">
+      <description>
+        <p>Initial release with full Qt6 support.</p>
+      </description>
+    </release>
+  </releases>
+  
+  <content_rating type="oars-1.1" />
+</component>

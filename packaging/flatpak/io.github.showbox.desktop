@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=ShowBox
+Comment=GUI widgets for shell scripts
+Exec=showbox
+Icon=io.github.showbox
+Terminal=false
+Type=Application
+Categories=Development;Utility;
+Keywords=dialog;gui;shell;script;qt;

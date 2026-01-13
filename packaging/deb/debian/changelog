@@ -1,0 +1,10 @@
+showbox (1.0.0-1) unstable; urgency=medium
+
+  * Initial release
+  * Qt6-based GUI widgets for shell scripts
+  * Standard widgets: button, label, checkbox, radiobutton, textbox, etc.
+  * Extended widgets: calendar, table, chart
+  * Theme support (light/dark/system)
+  * Resizable windows option
+
+ -- Helton Godoy <helton@example.com>  Sun, 12 Jan 2026 23:00:00 -0400
