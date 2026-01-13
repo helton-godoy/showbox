@@ -16,6 +16,9 @@ echo "Project root: $PROJECT_ROOT"
 # Create dist directory
 mkdir -p "$DIST_DIR"
 
+# Clean any previous debian directory (may have old compat file)
+rm -rf "$PROJECT_ROOT/debian"
+
 # Copy debian directory to project root (required by dpkg-buildpackage)
 cp -r "$SCRIPT_DIR/debian" "$PROJECT_ROOT/"
 

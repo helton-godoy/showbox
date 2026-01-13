@@ -29,6 +29,8 @@
 #include "commands/set_command.h"
 #include "commands/query_command.h"
 #include "commands/simple_commands.h"
+#include "commands/position_command.h"
+#include "commands/unset_command.h"
 
 /*  EXIT CODES */
 #define E_SUCCESS 0
@@ -127,6 +129,8 @@ int main(int argc, char *argv[])
         registry.registerCommand("step", std::make_unique<StepCommandFactory>());
         registry.registerCommand("clear", std::make_unique<ClearCommandFactory>());
         registry.registerCommand("remove", std::make_unique<RemoveCommandFactory>());
+        registry.registerCommand("position", std::make_unique<PositionCommandFactory>());
+        registry.registerCommand("unset", std::make_unique<UnsetCommandFactory>());
 
         ExecutionContext context(&dialog);
         ParserDriver driver(registry, context, &dialog);

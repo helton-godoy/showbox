@@ -1,6 +1,7 @@
 #include "theme_manager.h"
 #include "logger.h"
 #include <QDebug>
+#include <QPalette>
 
 ThemeManager::ThemeManager(QObject *parent)
     : QObject(parent)
@@ -13,12 +14,41 @@ ThemeManager::ThemeManager(QObject *parent)
         m_currentTheme = Light;
     } else {
         // Initialize current theme from system
-        onColorSchemeChanged(QGuiApplication::styleHints()->colorScheme());
+        detectSystemTheme();
     }
     
-    // Connect to system changes
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+    // Qt 6.5+ has colorSchemeChanged signal
     connect(QGuiApplication::styleHints(), &QStyleHints::colorSchemeChanged,
             this, &ThemeManager::onColorSchemeChanged);
+#endif
+}
+
+void ThemeManager::detectSystemTheme()
+{
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+    // Qt 6.5+ has colorScheme()
+    Qt::ColorScheme scheme = QGuiApplication::styleHints()->colorScheme();
+    switch (scheme) {
+        case Qt::ColorScheme::Dark:
+            m_currentTheme = Dark;
+            break;
+        case Qt::ColorScheme::Light:
+            m_currentTheme = Light;
+            break;
+        default:
+            m_currentTheme = Unknown;
+            break;
+    }
+#else
+    // Qt 6.4.x fallback: detect theme from palette
+    QPalette palette = QGuiApplication::palette();
+    QColor windowColor = palette.color(QPalette::Window);
+    // If window background is dark (luminance < 128), assume dark theme
+    int luminance = (windowColor.red() * 299 + windowColor.green() * 587 + windowColor.blue() * 114) / 1000;
+    m_currentTheme = (luminance < 128) ? Dark : Light;
+#endif
+    qCDebug(guiLog) << "Theme changed to:" << (m_currentTheme == Dark ? "Dark" : (m_currentTheme == Light ? "Light" : "Unknown"));
 }
 
 ThemeManager::ThemeMode ThemeManager::currentTheme() const
@@ -26,6 +56,7 @@ ThemeManager::ThemeMode ThemeManager::currentTheme() const
     return m_currentTheme;
 }
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
 void ThemeManager::onColorSchemeChanged(Qt::ColorScheme scheme)
 {
     ThemeMode newTheme;
@@ -47,3 +78,4 @@ void ThemeManager::onColorSchemeChanged(Qt::ColorScheme scheme)
         emit themeChanged(m_currentTheme);
     }
 }
+#endif

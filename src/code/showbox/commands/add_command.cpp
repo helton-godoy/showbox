@@ -395,6 +395,39 @@ void AddCommand::execute(ExecutionContext &context, const QList<QString> &args)
                             readonly, selection, search);
         });
     }
+    else if (type == "textbox") {
+        QString title, name, text, placeholder;
+        bool password = false;
+        
+        int posIndex = 0;
+        bool inOptions = false;
+        for (int i = 1; i < args.size(); ++i) {
+            QString arg = args[i];
+            if (arg == "password") { password = true; inOptions = true; }
+            else if (arg == "text" && i + 1 < args.size()) { text = args[++i]; inOptions = true; }
+            else if (arg == "placeholder" && i + 1 < args.size()) { placeholder = args[++i]; inOptions = true; }
+            else parseGeneric(posIndex, inOptions, title, name, arg);
+        }
+        context.executeOnGui([=]() {
+            dialog->addTextBox(title.toUtf8().constData(), name.toUtf8().constData(),
+                              text.isEmpty() ? nullptr : text.toUtf8().constData(),
+                              placeholder.isEmpty() ? nullptr : placeholder.toUtf8().constData(),
+                              password);
+        });
+    }
+    else if (type == "chart") {
+        QString title, name;
+        
+        int posIndex = 0;
+        bool inOptions = false;
+        for (int i = 1; i < args.size(); ++i) {
+            QString arg = args[i];
+            parseGeneric(posIndex, inOptions, title, name, arg);
+        }
+        context.executeOnGui([=]() {
+            dialog->addChart(title.toUtf8().constData(), name.toUtf8().constData());
+        });
+    }
     else {
         qCWarning(parserLog) << "Unsupported widget type in AddCommand:" << type;
     }

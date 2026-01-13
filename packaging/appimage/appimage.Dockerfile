@@ -1,61 +1,49 @@
-FROM ubuntu:24.04 AS builder
+FROM ubuntu:24.04
 
-# Evita perguntas interativas durante a instalação
+# Avoid interactive prompts during package installation
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Instalar dependências necessárias
+# Install build and runtime dependencies
 RUN apt-get update -qq && apt-get install -qqy --no-install-recommends \
+    # Build tools
     build-essential \
-    cmake \
-    git \
+    qmake6 \
     wget \
     file \
+    # FUSE for AppImage
     libfuse2 \
-    python3-pip \
+    # Qt6 development packages
     qt6-base-dev \
+    qt6-charts-dev \
+    libqt6charts6-dev \
+    libqt6svg6-dev \
+    libqt6opengl6-dev \
+    libgl-dev \
+    libopengl-dev \
+    # Qt6 runtime libraries  
+    libqt6charts6 \
+    libqt6svg6 \
+    libqt6opengl6 \
+    libqt6widgets6 \
+    libqt6gui6 \
+    libqt6core6t64 \
+    # Icon themes
+    adwaita-icon-theme \
+    hicolor-icon-theme \
     && rm -rf /var/lib/apt/lists/*
 
-# Baixar o linuxdeploy
+# Download linuxdeploy and Qt plugin
 WORKDIR /tools
-RUN wget https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage \
-    && chmod +x linuxdeploy-x86_64.AppImage
+RUN wget -q https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage \
+    && chmod +x linuxdeploy-x86_64.AppImage \
+    && wget -q https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage \
+    && chmod +x linuxdeploy-plugin-qt-x86_64.AppImage
 
-# Instala Qt 6.6.1 via aqt
-RUN pip install aqtinstall \
-    && aqt install-qt linux desktop 6.6.1 gcc_64 -O /opt/qt
-
-# Configura ambiente Qt
-ENV PATH="/opt/qt/6.6.1/gcc_64/bin:${PATH}"
-ENV QT_ROOT="/opt/qt/6.6.1/gcc_64"
+# Set environment for Qt
+ENV QMAKE=/usr/bin/qmake6
+ENV QT_SELECT=qt6
 
 WORKDIR /build
 
-# Copiar código fonte
-COPY . /build
-
-# Construir o projeto (assumindo qmake)
-RUN mkdir build && cd build && qmake .. && make
-
-# Criar AppDir
-RUN mkdir -p AppDir/usr/bin AppDir/usr/lib AppDir/usr/share/applications AppDir/usr/share/icons/hicolor/256x256/apps
-
-# Copiar binário
-RUN cp build/showbox AppDir/usr/bin/ || cp src/code/showbox/bin/showbox AppDir/usr/bin/
-
-# Copiar bibliotecas Qt necessárias (simplificado)
-RUN cp -r /opt/qt/6.6.1/gcc_64/lib/*.so* AppDir/usr/lib/ 2>/dev/null || true
-
-# Criar desktop file
-RUN echo "[Desktop Entry]\nName=ShowBox\nExec=showbox\nIcon=showbox\nType=Application\nCategories=Utility;" > AppDir/usr/share/applications/showbox.desktop
-
-# Copiar ícone (se existir)
-RUN cp src/code/showbox/icon.png AppDir/usr/share/icons/hicolor/256x256/apps/showbox.png 2>/dev/null || echo "Icon not found, skipping"
-
-# Criar AppRun
-RUN echo '#!/bin/bash\nexec "$APPDIR/usr/bin/showbox" "$@"' > AppDir/AppRun && chmod +x AppDir/AppRun
-
-# Usar linuxdeploy para criar AppImage
-RUN /tools/linuxdeploy-x86_64.AppImage --appdir AppDir --output appimage
-
-# Copiar AppImage para /dist
-RUN mkdir -p /dist && cp *.AppImage /dist/
+# Default command: build AppImage
+CMD ["bash", "-c", "./packaging/appimage/build.sh"]

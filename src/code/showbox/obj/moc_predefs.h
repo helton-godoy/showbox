@@ -29,6 +29,7 @@
 #define __FLT_EVAL_METHOD__ 0
 #define __cpp_binary_literals 201304L
 #define __FLT64_DECIMAL_DIG__ 17
+#define __CET__ 3
 #define __cpp_noexcept_function_type 201510L
 #define __GCC_ATOMIC_CHAR32_T_LOCK_FREE 2
 #define __cpp_variadic_templates 200704L
@@ -82,8 +83,10 @@
 #define __FLT128_MANT_DIG__ 113
 #define __WCHAR_MIN__ (-__WCHAR_MAX__ - 1)
 #define __INT64_C(c) c ## L
+#define __SSP_STRONG__ 3
 #define __GCC_ATOMIC_POINTER_LOCK_FREE 2
 #define __ATOMIC_SEQ_CST 5
+#define _FORTIFY_SOURCE 3
 #define __unix 1
 #define __INT_LEAST64_MAX__ 0x7fffffffffffffffL
 #define __FLT32X_MANT_DIG__ 53
@@ -124,9 +127,8 @@
 #define _REENTRANT 1
 #define __FLT64X_MANT_DIG__ 64
 #define __BFLT16_DIG__ 2
-#define __GNUC__ 14
+#define __GNUC__ 13
 #define __GXX_RTTI 1
-#define __pie__ 2
 #define __MMX__ 1
 #define __FLT_HAS_DENORM__ 1
 #define __SIZEOF_LONG_DOUBLE__ 16
@@ -167,7 +169,7 @@
 #define __PTRDIFF_MAX__ 0x7fffffffffffffffL
 #define __amd64 1
 #define __ATOMIC_HLE_ACQUIRE 65536
-#define __GNUG__ 14
+#define __GNUG__ 13
 #define __LONG_LONG_MAX__ 0x7fffffffffffffffLL
 #define __SIZEOF_SIZE_T__ 8
 #define __BFLT16_HAS_INFINITY__ 1
@@ -178,7 +180,7 @@
 #define __cpp_initializer_lists 200806L
 #define __FLT32_MAX_EXP__ 128
 #define __cpp_hex_float 201603L
-#define __GXX_ABI_VERSION 1019
+#define __GXX_ABI_VERSION 1018
 #define __FLT_MIN_EXP__ (-125)
 #define __GCC_HAVE_DWARF2_CFI_ASM 1
 #define __x86_64 1
@@ -210,7 +212,7 @@
 #define __DEC_EVAL_METHOD__ 2
 #define __FLT_MANT_DIG__ 24
 #define __LDBL_DECIMAL_DIG__ 21
-#define __VERSION__ "14.2.0"
+#define __VERSION__ "13.3.0"
 #define __UINT64_C(c) c ## UL
 #define __cpp_unicode_characters 201411L
 #define _STDC_PREDEF_H 1
@@ -276,6 +278,7 @@
 #define __FLT16_EPSILON__ 9.76562500000000000000000000000000000e-4F16
 #define __FLT_HAS_QUIET_NAN__ 1
 #define __FLT_MAX_10_EXP__ 38
+#define __LONG_MAX__ 0x7fffffffffffffffL
 #define __FLT64X_HAS_DENORM__ 1
 #define __DEC128_SUBNORMAL_MIN__ 0.000000000000000000000000000000001E-6143DL
 #define __FLT_HAS_INFINITY__ 1
@@ -426,10 +429,9 @@
 #define __GLIBCXX_BITSIZE_INT_N_0 128
 #define __FLT32X_HAS_QUIET_NAN__ 1
 #define __ATOMIC_CONSUME 1
-#define __GNUC_MINOR__ 2
+#define __GNUC_MINOR__ 3
 #define __GLIBCXX_TYPE_INT_N_0 __int128
 #define __UINTMAX_MAX__ 0xffffffffffffffffUL
-#define __PIE__ 2
 #define __FLT32X_DENORM_MIN__ 4.94065645841246544176568792868221372e-324F32x
 #define __cpp_template_template_args 201611L
 #define __DBL_MAX_10_EXP__ 308
@@ -437,7 +439,6 @@
 #define __INT16_C(c) c
 #define __STDC__ 1
 #define __PTRDIFF_TYPE__ long int
-#define __LONG_MAX__ 0x7fffffffffffffffL
 #define __FLT32X_MIN_10_EXP__ (-307)
 #define __UINTPTR_TYPE__ long unsigned int
 #define __DEC64_SUBNORMAL_MIN__ 0.000000000000001E-383DD

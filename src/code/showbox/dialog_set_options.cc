@@ -23,6 +23,7 @@
 #include "showbox.h"
 #include "custom_table_widget.h"
 #include "custom_chart_widget.h"
+#include "icon_helper.h"
 
 using namespace DialogCommandTokens;
 
@@ -223,7 +224,7 @@ void ShowBox::setOptions(QWidget *widget, unsigned int options,
             QAbstractItemModel *model = chosenView->model();
             if (chosenRow >= 0) {
                 model->setData(model->index(chosenRow, 0),
-                               QIcon(options & PropertyIcon & PropertyMask
+                               IconHelper::loadIcon(options & PropertyIcon & PropertyMask
                                      ? text : nullptr), Qt::DecorationRole);
             }
             break;
@@ -231,7 +232,7 @@ void ShowBox::setOptions(QWidget *widget, unsigned int options,
         case PageWidget: {
             QTabWidget *tabs = (QTabWidget *)widget->parent()->parent();
             tabs->setTabIcon(tabs->indexOf(widget),
-                             QIcon(options & PropertyIcon & PropertyMask
+                             IconHelper::loadIcon(options & PropertyIcon & PropertyMask
                                    ? text : nullptr));
             break;
         }
@@ -241,7 +242,7 @@ void ShowBox::setOptions(QWidget *widget, unsigned int options,
                 || (property = metaObj->property(
                     metaObj->indexOfProperty("windowIcon"))).isWritable()) {
                 property.write(widget,
-                               QVariant(QIcon(options & PropertyIcon
+                               QVariant(IconHelper::loadIcon(options & PropertyIcon
                                               & PropertyMask
                                               ? text : nullptr)));
             }

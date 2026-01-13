@@ -1,0 +1,34 @@
+Format: 1.8
+Date: Sun, 12 Jan 2026 23:00:00 -0400
+Source: showbox
+Binary: showbox
+Built-For-Profiles: noudeb
+Architecture: amd64
+Version: 1.0.0-1
+Distribution: unstable
+Urgency: medium
+Maintainer: Helton Godoy <helton@example.com>
+Changed-By: Helton Godoy <helton@example.com>
+Description:
+ showbox    - GUI widgets for shell scripts
+Changes:
+ showbox (1.0.0-1) unstable; urgency=medium
+ .
+   * Initial release
+   * Qt6-based GUI widgets for shell scripts
+   * Standard widgets: button, label, checkbox, radiobutton, textbox, etc.
+   * Extended widgets: calendar, table, chart
+   * Theme support (light/dark/system)
+   * Resizable windows option
+Checksums-Sha1:
+ 539fc6edc75ccb382d6834d64029b28b22b161cf 22126 showbox-dbgsym_1.0.0-1_amd64.ddeb
+ 8048fb7739e83520c9403bf29a530907d59fbc0b 11935 showbox_1.0.0-1_amd64.buildinfo
+ ceaf7d8dd24003fad7946fb283ef5aea3d95aa27 93044 showbox_1.0.0-1_amd64.deb
+Checksums-Sha256:
+ 13c31ae5eacb044f9e6d9c0061f5a16841020b1f94d84f792853828bdbc451eb 22126 showbox-dbgsym_1.0.0-1_amd64.ddeb
+ 2dec3edf7a70aa254def0611f69b6a12bf16751593ec092cc37e21ffcd3d8d9b 11935 showbox_1.0.0-1_amd64.buildinfo
+ 628de6c8d3239e5bf5333d58298dbd8866654487f5683de15f2be534e554db0e 93044 showbox_1.0.0-1_amd64.deb
+Files:
+ 48239c57152ed93e0fdd5a20d5017727 22126 debug optional showbox-dbgsym_1.0.0-1_amd64.ddeb
+ 908d0afa342081eb4305c3d6b687df53 11935 x11 optional showbox_1.0.0-1_amd64.buildinfo
+ a842844bc5c71b0b3ecc62cef099d52e 93044 x11 optional showbox_1.0.0-1_amd64.deb

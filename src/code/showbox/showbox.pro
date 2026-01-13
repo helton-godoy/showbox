@@ -24,7 +24,9 @@ HEADERS += showbox.h \
            commands/set_command.h \
            commands/query_command.h \
            commands/simple_commands.h \
-           commands/command_utils.h
+           commands/command_utils.h \
+           commands/position_command.h \
+           commands/unset_command.h
 
 SOURCES += showbox.cc \
            dialog_parser.cc \
@@ -45,7 +47,9 @@ SOURCES += showbox.cc \
            commands/set_command.cpp \
            commands/query_command.cpp \
            commands/simple_commands.cpp \
-           commands/command_utils.cpp
+           commands/command_utils.cpp \
+           commands/position_command.cpp \
+           commands/unset_command.cpp
 
 # install recipe options
 target.path = /usr/bin

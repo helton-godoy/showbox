@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QGuiApplication>
 #include <QStyleHints>
+#include <QtGlobal>
 
 class ThemeManager : public QObject
 {
@@ -23,10 +24,13 @@ signals:
     void themeChanged(ThemeMode newTheme);
 
 private slots:
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
     void onColorSchemeChanged(Qt::ColorScheme scheme);
+#endif
 
 private:
     ThemeMode m_currentTheme;
+    void detectSystemTheme();
 };
 
 #endif // THEME_MANAGER_H

@@ -32,6 +32,9 @@ RUN apt-get update -qq && apt-get install -qqy \
     libxcb-render-util0 \
     libxcb-shape0 \
     libxkbcommon-x11-0 \
+    # Icon themes for GUI icon support
+    adwaita-icon-theme \
+    hicolor-icon-theme \
     # Utilities
     git \
     locales \

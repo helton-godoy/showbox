@@ -36,12 +36,25 @@ void DisableCommand::execute(ExecutionContext &context, const QList<QString> &ar
 }
 
 void EndCommand::execute(ExecutionContext &context, const QList<QString> &args) {
-    Q_UNUSED(args); // Could handle type
-    context.executeOnGui([&context]() {
-        // Simple end logic, prioritize based on current state?
-        // Old parser priority: list, group, page, tabs
-        context.dialogBox()->endGroup();
-        context.dialogBox()->endList();
+    QString type = args.isEmpty() ? "" : args[0];
+    
+    context.executeOnGui([&context, type]() {
+        ShowBox *dialog = context.dialogBox();
+        
+        if (type == "groupbox" || type == "frame") {
+            dialog->endGroup();
+        } else if (type == "listbox" || type == "combobox" || type == "dropdownlist" || type == "table") {
+            dialog->endList();
+        } else if (type == "tabs") {
+            dialog->endTabs();
+        } else if (type == "page") {
+            dialog->endPage();
+        } else {
+            // Default behavior when no type specified:
+            // Try to end in order of priority: list, group, page, tabs
+            dialog->endGroup();
+            dialog->endList();
+        }
     });
 }
 
