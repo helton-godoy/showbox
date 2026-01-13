@@ -191,6 +191,7 @@ void DialogParser::processToken()
         {"page", PageWidget},
         {"table", TableWidget},
         {"chart", ChartWidget},
+        {"calendar", CalendarWidget},
         {nullptr, 0}
     };
 
@@ -257,6 +258,9 @@ void DialogParser::processToken()
         {"append", PropertyAppend, false, false},
         {"axis", PropertyAxis, false, false},
         {"export", PropertyExport, false, false},
+        {"date", PropertyDate, false, false},
+        {"format", PropertyFormat, false, false},
+        {"navigation", PropertyNavigation, false, false},
         {nullptr, 0, false, false}
     };
 

@@ -344,6 +344,15 @@ void ShowBox::setOptions(QWidget *widget, unsigned int options,
         }
     }
 
+    // Append data to chart - standalone support
+    if (type & PropertyAppend && mask & PropertyAppend & PropertyMask) {
+        if (type == ChartWidget) {
+            if (options & PropertyAppend & PropertyMask) {
+                ((CustomChartWidget *)widget)->appendData(QString(text));
+            }
+        }
+    }
+
     // Apply and exit make sense for QPushButton objects only
     if (type & PropertyApply & PropertyExit
         && (mask & PropertyApply & PropertyMask

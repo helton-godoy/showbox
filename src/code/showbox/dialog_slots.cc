@@ -320,6 +320,21 @@ void ShowBox::executeCommand(DialogCommand command)
         case ChartWidget:
             addChart(command.getTitle(), command.getName());
             break;
+        case CalendarWidget:
+            addCalendar(command.getTitle(), command.getName(),
+                        command.getText(),  // date
+                        nullptr,            // min
+                        nullptr,            // max
+                        nullptr,            // format
+                        command.control & PropertySelection & PropertyMask);
+            break;
+        case TableWidget:
+            addTable(command.getTitle(), command.getName(),
+                     command.getText(),  // file
+                     command.control & PropertyReadOnly & PropertyMask,
+                     command.control & PropertySelection & PropertyMask,
+                     command.control & PropertySearch & PropertyMask);
+            break;
         }
         break;
     case ClearCommand:
@@ -333,6 +348,7 @@ void ShowBox::executeCommand(DialogCommand command)
             break;
         case ListBoxWidget:
         case ComboBoxWidget:
+        case TableWidget:
             endList();
             break;
         case TabsWidget:
