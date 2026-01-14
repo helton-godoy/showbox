@@ -8,6 +8,8 @@ OBJECTS_DIR = $$PWD/obj
 MOC_DIR = $$OBJECTS_DIR
 
 # Input
+INCLUDEPATH += $$PWD/../../../libs/showbox-ui/include
+
 HEADERS += showbox.h \
            tokenizer.h \
            command.h \
@@ -15,9 +17,9 @@ HEADERS += showbox.h \
            parser.h \
            parser_driver.h \
            execution_context.h \
-           icon_helper.h \
+           ../../../libs/showbox-ui/include/icon_helper.h \
            theme_manager.h \
-           logger.h \
+           ../../../libs/showbox-ui/include/logger.h \
            custom_table_widget.h \
            custom_chart_widget.h \
            commands/add_command.h \
@@ -39,9 +41,9 @@ SOURCES += showbox.cc \
            parser.cpp \
            parser_driver.cpp \
            execution_context.cpp \
-           icon_helper.cpp \
+           ../../../libs/showbox-ui/src/icon_helper.cpp \
            theme_manager.cpp \
-           logger.cpp \
+           ../../../libs/showbox-ui/src/logger.cpp \
            custom_chart_widget.cpp \
            commands/add_command.cpp \
            commands/set_command.cpp \

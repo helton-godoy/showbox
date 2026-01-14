@@ -1,20 +1,26 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'showbox.h'
 **
-** Created by: The Qt Meta Object Compiler version 68 (Qt 6.4.2)
+** Created by: The Qt Meta Object Compiler version 68 (Qt 6.8.2)
 **
 ** WARNING! All changes made in this file will be lost!
 *****************************************************************************/
 
-#include <memory>
 #include "../showbox.h"
 #include <QtGui/qtextcursor.h>
-#include <QScreen>
+#include <QtGui/qscreen.h>
 #include <QtCore/qmetatype.h>
+
+#include <QtCore/qtmochelpers.h>
+
+#include <memory>
+
+
+#include <QtCore/qxptype_traits.h>
 #if !defined(Q_MOC_OUTPUT_REVISION)
 #error "The header file 'showbox.h' doesn't include <QObject>."
 #elif Q_MOC_OUTPUT_REVISION != 68
-#error "This file was generated using the moc from 6.4.2. It"
+#error "This file was generated using the moc from 6.8.2. It"
 #error "cannot be used with the include files from this version of Qt."
 #error "(The moc has changed too much.)"
 #endif
@@ -23,66 +29,16 @@
 #define Q_CONSTINIT
 #endif
 
-QT_BEGIN_MOC_NAMESPACE
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
+QT_WARNING_DISABLE_GCC("-Wuseless-cast")
 namespace {
-struct qt_meta_stringdata_ShowBox_t {
-    uint offsetsAndSizes[48];
-    char stringdata0[8];
-    char stringdata1[15];
-    char stringdata2[1];
-    char stringdata3[14];
-    char stringdata4[7];
-    char stringdata5[5];
-    char stringdata6[18];
-    char stringdata7[18];
-    char stringdata8[21];
-    char stringdata9[12];
-    char stringdata10[20];
-    char stringdata11[17];
-    char stringdata12[21];
-    char stringdata13[16];
-    char stringdata14[4];
-    char stringdata15[4];
-    char stringdata16[5];
-    char stringdata17[17];
-    char stringdata18[17];
-    char stringdata19[6];
-    char stringdata20[17];
-    char stringdata21[19];
-    char stringdata22[19];
-    char stringdata23[11];
-};
-#define QT_MOC_LITERAL(ofs, len) \
-    uint(sizeof(qt_meta_stringdata_ShowBox_t::offsetsAndSizes) + ofs), len 
-Q_CONSTINIT static const qt_meta_stringdata_ShowBox_t qt_meta_stringdata_ShowBox = {
-    {
-        QT_MOC_LITERAL(0, 7),  // "ShowBox"
-        QT_MOC_LITERAL(8, 14),  // "executeCommand"
-        QT_MOC_LITERAL(23, 0),  // ""
-        QT_MOC_LITERAL(24, 13),  // "DialogCommand"
-        QT_MOC_LITERAL(38, 6),  // "report"
-        QT_MOC_LITERAL(45, 4),  // "done"
-        QT_MOC_LITERAL(50, 17),  // "pushButtonClicked"
-        QT_MOC_LITERAL(68, 17),  // "pushButtonToggled"
-        QT_MOC_LITERAL(86, 20),  // "listBoxItemActivated"
-        QT_MOC_LITERAL(107, 11),  // "QModelIndex"
-        QT_MOC_LITERAL(119, 19),  // "listBoxItemSelected"
-        QT_MOC_LITERAL(139, 16),  // "QListWidgetItem*"
-        QT_MOC_LITERAL(156, 20),  // "comboBoxItemSelected"
-        QT_MOC_LITERAL(177, 15),  // "tableCellEdited"
-        QT_MOC_LITERAL(193, 3),  // "row"
-        QT_MOC_LITERAL(197, 3),  // "col"
-        QT_MOC_LITERAL(201, 4),  // "text"
-        QT_MOC_LITERAL(206, 16),  // "tableRowSelected"
-        QT_MOC_LITERAL(223, 16),  // "chartItemClicked"
-        QT_MOC_LITERAL(240, 5),  // "label"
-        QT_MOC_LITERAL(246, 16),  // "calendarSelected"
-        QT_MOC_LITERAL(263, 18),  // "sliderValueChanged"
-        QT_MOC_LITERAL(282, 18),  // "sliderRangeChanged"
-        QT_MOC_LITERAL(301, 10)   // "removePage"
-    },
+struct qt_meta_tag_ZN7ShowBoxE_t {};
+} // unnamed namespace
+
+
+#ifdef QT_MOC_HAS_STRINGDATA
+static constexpr auto qt_meta_stringdata_ZN7ShowBoxE = QtMocHelpers::stringData(
     "ShowBox",
     "executeCommand",
     "",
@@ -107,14 +63,15 @@ Q_CONSTINIT static const qt_meta_stringdata_ShowBox_t qt_meta_stringdata_ShowBox
     "sliderValueChanged",
     "sliderRangeChanged",
     "removePage"
-};
-#undef QT_MOC_LITERAL
-} // unnamed namespace
+);
+#else  // !QT_MOC_HAS_STRINGDATA
+#error "qtmochelpers.h not found or too old."
+#endif // !QT_MOC_HAS_STRINGDATA
 
-Q_CONSTINIT static const uint qt_meta_data_ShowBox[] = {
+Q_CONSTINIT static const uint qt_meta_data_ZN7ShowBoxE[] = {
 
  // content:
-      10,       // revision
+      12,       // revision
        0,       // classname
        0,    0, // classinfo
       15,   14, // methods
@@ -163,11 +120,11 @@ Q_CONSTINIT static const uint qt_meta_data_ShowBox[] = {
 
 Q_CONSTINIT const QMetaObject ShowBox::staticMetaObject = { {
     QMetaObject::SuperData::link<QDialog::staticMetaObject>(),
-    qt_meta_stringdata_ShowBox.offsetsAndSizes,
-    qt_meta_data_ShowBox,
+    qt_meta_stringdata_ZN7ShowBoxE.offsetsAndSizes,
+    qt_meta_data_ZN7ShowBoxE,
     qt_static_metacall,
     nullptr,
-    qt_incomplete_metaTypeArray<qt_meta_stringdata_ShowBox_t,
+    qt_incomplete_metaTypeArray<qt_meta_tag_ZN7ShowBoxE_t,
         // Q_OBJECT / Q_GADGET
         QtPrivate::TypeAndForceComplete<ShowBox, std::true_type>,
         // method 'executeCommand'
@@ -221,9 +178,8 @@ Q_CONSTINIT const QMetaObject ShowBox::staticMetaObject = { {
 
 void ShowBox::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
+    auto *_t = static_cast<ShowBox *>(_o);
     if (_c == QMetaObject::InvokeMetaMethod) {
-        auto *_t = static_cast<ShowBox *>(_o);
-        (void)_t;
         switch (_id) {
         case 0: _t->executeCommand((*reinterpret_cast< std::add_pointer_t<DialogCommand>>(_a[1]))); break;
         case 1: _t->report(); break;
@@ -253,7 +209,7 @@ const QMetaObject *ShowBox::metaObject() const
 void *ShowBox::qt_metacast(const char *_clname)
 {
     if (!_clname) return nullptr;
-    if (!strcmp(_clname, qt_meta_stringdata_ShowBox.stringdata0))
+    if (!strcmp(_clname, qt_meta_stringdata_ZN7ShowBoxE.stringdata0))
         return static_cast<void*>(this);
     return QDialog::qt_metacast(_clname);
 }
@@ -267,7 +223,8 @@ int ShowBox::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
         if (_id < 15)
             qt_static_metacall(this, _c, _id, _a);
         _id -= 15;
-    } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
+    }
+    if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
         if (_id < 15)
             *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType();
         _id -= 15;
@@ -275,34 +232,25 @@ int ShowBox::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     return _id;
 }
 namespace {
-struct qt_meta_stringdata_DialogParser_t {
-    uint offsetsAndSizes[8];
-    char stringdata0[13];
-    char stringdata1[12];
-    char stringdata2[1];
-    char stringdata3[14];
-};
-#define QT_MOC_LITERAL(ofs, len) \
-    uint(sizeof(qt_meta_stringdata_DialogParser_t::offsetsAndSizes) + ofs), len 
-Q_CONSTINIT static const qt_meta_stringdata_DialogParser_t qt_meta_stringdata_DialogParser = {
-    {
-        QT_MOC_LITERAL(0, 12),  // "DialogParser"
-        QT_MOC_LITERAL(13, 11),  // "sendCommand"
-        QT_MOC_LITERAL(25, 0),  // ""
-        QT_MOC_LITERAL(26, 13)   // "DialogCommand"
-    },
+struct qt_meta_tag_ZN12DialogParserE_t {};
+} // unnamed namespace
+
+
+#ifdef QT_MOC_HAS_STRINGDATA
+static constexpr auto qt_meta_stringdata_ZN12DialogParserE = QtMocHelpers::stringData(
     "DialogParser",
     "sendCommand",
     "",
     "DialogCommand"
-};
-#undef QT_MOC_LITERAL
-} // unnamed namespace
+);
+#else  // !QT_MOC_HAS_STRINGDATA
+#error "qtmochelpers.h not found or too old."
+#endif // !QT_MOC_HAS_STRINGDATA
 
-Q_CONSTINIT static const uint qt_meta_data_DialogParser[] = {
+Q_CONSTINIT static const uint qt_meta_data_ZN12DialogParserE[] = {
 
  // content:
-      10,       // revision
+      12,       // revision
        0,       // classname
        0,    0, // classinfo
        1,   14, // methods
@@ -323,11 +271,11 @@ Q_CONSTINIT static const uint qt_meta_data_DialogParser[] = {
 
 Q_CONSTINIT const QMetaObject DialogParser::staticMetaObject = { {
     QMetaObject::SuperData::link<QThread::staticMetaObject>(),
-    qt_meta_stringdata_DialogParser.offsetsAndSizes,
-    qt_meta_data_DialogParser,
+    qt_meta_stringdata_ZN12DialogParserE.offsetsAndSizes,
+    qt_meta_data_ZN12DialogParserE,
     qt_static_metacall,
     nullptr,
-    qt_incomplete_metaTypeArray<qt_meta_stringdata_DialogParser_t,
+    qt_incomplete_metaTypeArray<qt_meta_tag_ZN12DialogParserE_t,
         // Q_OBJECT / Q_GADGET
         QtPrivate::TypeAndForceComplete<DialogParser, std::true_type>,
         // method 'sendCommand'
@@ -339,18 +287,18 @@ Q_CONSTINIT const QMetaObject DialogParser::staticMetaObject = { {
 
 void DialogParser::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
+    auto *_t = static_cast<DialogParser *>(_o);
     if (_c == QMetaObject::InvokeMetaMethod) {
-        auto *_t = static_cast<DialogParser *>(_o);
-        (void)_t;
         switch (_id) {
         case 0: _t->sendCommand((*reinterpret_cast< std::add_pointer_t<DialogCommand>>(_a[1]))); break;
         default: ;
         }
-    } else if (_c == QMetaObject::IndexOfMethod) {
+    }
+    if (_c == QMetaObject::IndexOfMethod) {
         int *result = reinterpret_cast<int *>(_a[0]);
         {
-            using _t = void (DialogParser::*)(DialogCommand );
-            if (_t _q_method = &DialogParser::sendCommand; *reinterpret_cast<_t *>(_a[1]) == _q_method) {
+            using _q_method_type = void (DialogParser::*)(DialogCommand );
+            if (_q_method_type _q_method = &DialogParser::sendCommand; *reinterpret_cast<_q_method_type *>(_a[1]) == _q_method) {
                 *result = 0;
                 return;
             }
@@ -366,7 +314,7 @@ const QMetaObject *DialogParser::metaObject() const
 void *DialogParser::qt_metacast(const char *_clname)
 {
     if (!_clname) return nullptr;
-    if (!strcmp(_clname, qt_meta_stringdata_DialogParser.stringdata0))
+    if (!strcmp(_clname, qt_meta_stringdata_ZN12DialogParserE.stringdata0))
         return static_cast<void*>(this);
     return QThread::qt_metacast(_clname);
 }
@@ -380,7 +328,8 @@ int DialogParser::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
         if (_id < 1)
             qt_static_metacall(this, _c, _id, _a);
         _id -= 1;
-    } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
+    }
+    if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
         if (_id < 1)
             *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType();
         _id -= 1;
@@ -395,25 +344,22 @@ void DialogParser::sendCommand(DialogCommand _t1)
     QMetaObject::activate(this, &staticMetaObject, 0, _a);
 }
 namespace {
-struct qt_meta_stringdata_ListBox_t {
-    uint offsetsAndSizes[2];
-    char stringdata0[8];
-};
-#define QT_MOC_LITERAL(ofs, len) \
-    uint(sizeof(qt_meta_stringdata_ListBox_t::offsetsAndSizes) + ofs), len 
-Q_CONSTINIT static const qt_meta_stringdata_ListBox_t qt_meta_stringdata_ListBox = {
-    {
-        QT_MOC_LITERAL(0, 7)   // "ListBox"
-    },
-    "ListBox"
-};
-#undef QT_MOC_LITERAL
+struct qt_meta_tag_ZN7ListBoxE_t {};
 } // unnamed namespace
 
-Q_CONSTINIT static const uint qt_meta_data_ListBox[] = {
+
+#ifdef QT_MOC_HAS_STRINGDATA
+static constexpr auto qt_meta_stringdata_ZN7ListBoxE = QtMocHelpers::stringData(
+    "ListBox"
+);
+#else  // !QT_MOC_HAS_STRINGDATA
+#error "qtmochelpers.h not found or too old."
+#endif // !QT_MOC_HAS_STRINGDATA
+
+Q_CONSTINIT static const uint qt_meta_data_ZN7ListBoxE[] = {
 
  // content:
-      10,       // revision
+      12,       // revision
        0,       // classname
        0,    0, // classinfo
        0,    0, // methods
@@ -428,11 +374,11 @@ Q_CONSTINIT static const uint qt_meta_data_ListBox[] = {
 
 Q_CONSTINIT const QMetaObject ListBox::staticMetaObject = { {
     QMetaObject::SuperData::link<QListWidget::staticMetaObject>(),
-    qt_meta_stringdata_ListBox.offsetsAndSizes,
-    qt_meta_data_ListBox,
+    qt_meta_stringdata_ZN7ListBoxE.offsetsAndSizes,
+    qt_meta_data_ZN7ListBoxE,
     qt_static_metacall,
     nullptr,
-    qt_incomplete_metaTypeArray<qt_meta_stringdata_ListBox_t,
+    qt_incomplete_metaTypeArray<qt_meta_tag_ZN7ListBoxE_t,
         // Q_OBJECT / Q_GADGET
         QtPrivate::TypeAndForceComplete<ListBox, std::true_type>
     >,
@@ -441,9 +387,10 @@ Q_CONSTINIT const QMetaObject ListBox::staticMetaObject = { {
 
 void ListBox::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
-    (void)_o;
-    (void)_id;
+    auto *_t = static_cast<ListBox *>(_o);
+    (void)_t;
     (void)_c;
+    (void)_id;
     (void)_a;
 }
 
@@ -455,7 +402,7 @@ const QMetaObject *ListBox::metaObject() const
 void *ListBox::qt_metacast(const char *_clname)
 {
     if (!_clname) return nullptr;
-    if (!strcmp(_clname, qt_meta_stringdata_ListBox.stringdata0))
+    if (!strcmp(_clname, qt_meta_stringdata_ZN7ListBoxE.stringdata0))
         return static_cast<void*>(this);
     return QListWidget::qt_metacast(_clname);
 }
@@ -466,4 +413,3 @@ int ListBox::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     return _id;
 }
 QT_WARNING_POP
-QT_END_MOC_NAMESPACE

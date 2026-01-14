@@ -7,6 +7,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 # Build dependencies (dev packages)
 RUN apt-get update -qq && apt-get install -qqy \
     build-essential \
+    cmake \
     qmake6 \
     qt6-base-dev \
     qt6-charts-dev \

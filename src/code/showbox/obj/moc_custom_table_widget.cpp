@@ -1,19 +1,25 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'custom_table_widget.h'
 **
-** Created by: The Qt Meta Object Compiler version 68 (Qt 6.4.2)
+** Created by: The Qt Meta Object Compiler version 68 (Qt 6.8.2)
 **
 ** WARNING! All changes made in this file will be lost!
 *****************************************************************************/
 
-#include <memory>
 #include "../custom_table_widget.h"
 #include <QtGui/qtextcursor.h>
 #include <QtCore/qmetatype.h>
+
+#include <QtCore/qtmochelpers.h>
+
+#include <memory>
+
+
+#include <QtCore/qxptype_traits.h>
 #if !defined(Q_MOC_OUTPUT_REVISION)
 #error "The header file 'custom_table_widget.h' doesn't include <QObject>."
 #elif Q_MOC_OUTPUT_REVISION != 68
-#error "This file was generated using the moc from 6.4.2. It"
+#error "This file was generated using the moc from 6.8.2. It"
 #error "cannot be used with the include files from this version of Qt."
 #error "(The moc has changed too much.)"
 #endif
@@ -22,34 +28,16 @@
 #define Q_CONSTINIT
 #endif
 
-QT_BEGIN_MOC_NAMESPACE
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
+QT_WARNING_DISABLE_GCC("-Wuseless-cast")
 namespace {
-struct qt_meta_stringdata_CustomTableWidget_t {
-    uint offsetsAndSizes[16];
-    char stringdata0[18];
-    char stringdata1[11];
-    char stringdata2[1];
-    char stringdata3[4];
-    char stringdata4[4];
-    char stringdata5[5];
-    char stringdata6[12];
-    char stringdata7[12];
-};
-#define QT_MOC_LITERAL(ofs, len) \
-    uint(sizeof(qt_meta_stringdata_CustomTableWidget_t::offsetsAndSizes) + ofs), len 
-Q_CONSTINIT static const qt_meta_stringdata_CustomTableWidget_t qt_meta_stringdata_CustomTableWidget = {
-    {
-        QT_MOC_LITERAL(0, 17),  // "CustomTableWidget"
-        QT_MOC_LITERAL(18, 10),  // "cellEdited"
-        QT_MOC_LITERAL(29, 0),  // ""
-        QT_MOC_LITERAL(30, 3),  // "row"
-        QT_MOC_LITERAL(34, 3),  // "col"
-        QT_MOC_LITERAL(38, 4),  // "text"
-        QT_MOC_LITERAL(43, 11),  // "rowSelected"
-        QT_MOC_LITERAL(55, 11)   // "filterTable"
-    },
+struct qt_meta_tag_ZN17CustomTableWidgetE_t {};
+} // unnamed namespace
+
+
+#ifdef QT_MOC_HAS_STRINGDATA
+static constexpr auto qt_meta_stringdata_ZN17CustomTableWidgetE = QtMocHelpers::stringData(
     "CustomTableWidget",
     "cellEdited",
     "",
@@ -58,14 +46,15 @@ Q_CONSTINIT static const qt_meta_stringdata_CustomTableWidget_t qt_meta_stringda
     "text",
     "rowSelected",
     "filterTable"
-};
-#undef QT_MOC_LITERAL
-} // unnamed namespace
+);
+#else  // !QT_MOC_HAS_STRINGDATA
+#error "qtmochelpers.h not found or too old."
+#endif // !QT_MOC_HAS_STRINGDATA
 
-Q_CONSTINIT static const uint qt_meta_data_CustomTableWidget[] = {
+Q_CONSTINIT static const uint qt_meta_data_ZN17CustomTableWidgetE[] = {
 
  // content:
-      10,       // revision
+      12,       // revision
        0,       // classname
        0,    0, // classinfo
        3,   14, // methods
@@ -94,11 +83,11 @@ Q_CONSTINIT static const uint qt_meta_data_CustomTableWidget[] = {
 
 Q_CONSTINIT const QMetaObject CustomTableWidget::staticMetaObject = { {
     QMetaObject::SuperData::link<QWidget::staticMetaObject>(),
-    qt_meta_stringdata_CustomTableWidget.offsetsAndSizes,
-    qt_meta_data_CustomTableWidget,
+    qt_meta_stringdata_ZN17CustomTableWidgetE.offsetsAndSizes,
+    qt_meta_data_ZN17CustomTableWidgetE,
     qt_static_metacall,
     nullptr,
-    qt_incomplete_metaTypeArray<qt_meta_stringdata_CustomTableWidget_t,
+    qt_incomplete_metaTypeArray<qt_meta_tag_ZN17CustomTableWidgetE_t,
         // Q_OBJECT / Q_GADGET
         QtPrivate::TypeAndForceComplete<CustomTableWidget, std::true_type>,
         // method 'cellEdited'
@@ -118,27 +107,27 @@ Q_CONSTINIT const QMetaObject CustomTableWidget::staticMetaObject = { {
 
 void CustomTableWidget::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
+    auto *_t = static_cast<CustomTableWidget *>(_o);
     if (_c == QMetaObject::InvokeMetaMethod) {
-        auto *_t = static_cast<CustomTableWidget *>(_o);
-        (void)_t;
         switch (_id) {
         case 0: _t->cellEdited((*reinterpret_cast< std::add_pointer_t<int>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<int>>(_a[2])),(*reinterpret_cast< std::add_pointer_t<QString>>(_a[3]))); break;
         case 1: _t->rowSelected((*reinterpret_cast< std::add_pointer_t<int>>(_a[1]))); break;
         case 2: _t->filterTable((*reinterpret_cast< std::add_pointer_t<QString>>(_a[1]))); break;
         default: ;
         }
-    } else if (_c == QMetaObject::IndexOfMethod) {
+    }
+    if (_c == QMetaObject::IndexOfMethod) {
         int *result = reinterpret_cast<int *>(_a[0]);
         {
-            using _t = void (CustomTableWidget::*)(int , int , const QString & );
-            if (_t _q_method = &CustomTableWidget::cellEdited; *reinterpret_cast<_t *>(_a[1]) == _q_method) {
+            using _q_method_type = void (CustomTableWidget::*)(int , int , const QString & );
+            if (_q_method_type _q_method = &CustomTableWidget::cellEdited; *reinterpret_cast<_q_method_type *>(_a[1]) == _q_method) {
                 *result = 0;
                 return;
             }
         }
         {
-            using _t = void (CustomTableWidget::*)(int );
-            if (_t _q_method = &CustomTableWidget::rowSelected; *reinterpret_cast<_t *>(_a[1]) == _q_method) {
+            using _q_method_type = void (CustomTableWidget::*)(int );
+            if (_q_method_type _q_method = &CustomTableWidget::rowSelected; *reinterpret_cast<_q_method_type *>(_a[1]) == _q_method) {
                 *result = 1;
                 return;
             }
@@ -154,7 +143,7 @@ const QMetaObject *CustomTableWidget::metaObject() const
 void *CustomTableWidget::qt_metacast(const char *_clname)
 {
     if (!_clname) return nullptr;
-    if (!strcmp(_clname, qt_meta_stringdata_CustomTableWidget.stringdata0))
+    if (!strcmp(_clname, qt_meta_stringdata_ZN17CustomTableWidgetE.stringdata0))
         return static_cast<void*>(this);
     return QWidget::qt_metacast(_clname);
 }
@@ -168,7 +157,8 @@ int CustomTableWidget::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
         if (_id < 3)
             qt_static_metacall(this, _c, _id, _a);
         _id -= 3;
-    } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
+    }
+    if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
         if (_id < 3)
             *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType();
         _id -= 3;
@@ -190,4 +180,3 @@ void CustomTableWidget::rowSelected(int _t1)
     QMetaObject::activate(this, &staticMetaObject, 1, _a);
 }
 QT_WARNING_POP
-QT_END_MOC_NAMESPACE
