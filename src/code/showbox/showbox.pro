@@ -18,10 +18,10 @@ HEADERS += showbox.h \
            parser_driver.h \
            execution_context.h \
            ../../../libs/showbox-ui/include/icon_helper.h \
-           theme_manager.h \
+           ../../../libs/showbox-ui/include/theme_manager.h \
            ../../../libs/showbox-ui/include/logger.h \
-           custom_table_widget.h \
-           custom_chart_widget.h \
+           ../../../libs/showbox-ui/include/custom_table_widget.h \
+           ../../../libs/showbox-ui/include/custom_chart_widget.h \
            commands/add_command.h \
            commands/set_command.h \
            commands/query_command.h \
@@ -42,9 +42,9 @@ SOURCES += showbox.cc \
            parser_driver.cpp \
            execution_context.cpp \
            ../../../libs/showbox-ui/src/icon_helper.cpp \
-           theme_manager.cpp \
+           ../../../libs/showbox-ui/src/theme_manager.cpp \
            ../../../libs/showbox-ui/src/logger.cpp \
-           custom_chart_widget.cpp \
+           ../../../libs/showbox-ui/src/custom_chart_widget.cpp \
            commands/add_command.cpp \
            commands/set_command.cpp \
            commands/query_command.cpp \

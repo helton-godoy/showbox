@@ -64,9 +64,9 @@ SOURCES       = showbox.cc \
 		parser_driver.cpp \
 		execution_context.cpp \
 		../../../libs/showbox-ui/src/icon_helper.cpp \
-		theme_manager.cpp \
+		../../../libs/showbox-ui/src/theme_manager.cpp \
 		../../../libs/showbox-ui/src/logger.cpp \
-		custom_chart_widget.cpp \
+		../../../libs/showbox-ui/src/custom_chart_widget.cpp \
 		commands/add_command.cpp \
 		commands/set_command.cpp \
 		commands/query_command.cpp \
@@ -185,10 +185,10 @@ DIST          = /usr/lib/x86_64-linux-gnu/qt6/mkspecs/features/spec_pre.prf \
 		parser_driver.h \
 		execution_context.h \
 		../../../libs/showbox-ui/include/icon_helper.h \
-		theme_manager.h \
+		../../../libs/showbox-ui/include/theme_manager.h \
 		../../../libs/showbox-ui/include/logger.h \
-		custom_table_widget.h \
-		custom_chart_widget.h \
+		../../../libs/showbox-ui/include/custom_table_widget.h \
+		../../../libs/showbox-ui/include/custom_chart_widget.h \
 		commands/add_command.h \
 		commands/set_command.h \
 		commands/query_command.h \
@@ -207,9 +207,9 @@ DIST          = /usr/lib/x86_64-linux-gnu/qt6/mkspecs/features/spec_pre.prf \
 		parser_driver.cpp \
 		execution_context.cpp \
 		../../../libs/showbox-ui/src/icon_helper.cpp \
-		theme_manager.cpp \
+		../../../libs/showbox-ui/src/theme_manager.cpp \
 		../../../libs/showbox-ui/src/logger.cpp \
-		custom_chart_widget.cpp \
+		../../../libs/showbox-ui/src/custom_chart_widget.cpp \
 		commands/add_command.cpp \
 		commands/set_command.cpp \
 		commands/query_command.cpp \
@@ -405,8 +405,8 @@ distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents /usr/lib/x86_64-linux-gnu/qt6/mkspecs/features/data/dummy.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents showbox.h tokenizer.h command.h command_registry.h parser.h parser_driver.h execution_context.h ../../../libs/showbox-ui/include/icon_helper.h theme_manager.h ../../../libs/showbox-ui/include/logger.h custom_table_widget.h custom_chart_widget.h commands/add_command.h commands/set_command.h commands/query_command.h commands/simple_commands.h commands/command_utils.h commands/position_command.h commands/unset_command.h $(DISTDIR)/
-	$(COPY_FILE) --parents showbox.cc dialog_parser.cc dialog_main.cc dialog_set_options.cc dialog_slots.cc dialog_private.cc tokenizer.cpp command_registry.cpp parser.cpp parser_driver.cpp execution_context.cpp ../../../libs/showbox-ui/src/icon_helper.cpp theme_manager.cpp ../../../libs/showbox-ui/src/logger.cpp custom_chart_widget.cpp commands/add_command.cpp commands/set_command.cpp commands/query_command.cpp commands/simple_commands.cpp commands/command_utils.cpp commands/position_command.cpp commands/unset_command.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents showbox.h tokenizer.h command.h command_registry.h parser.h parser_driver.h execution_context.h ../../../libs/showbox-ui/include/icon_helper.h ../../../libs/showbox-ui/include/theme_manager.h ../../../libs/showbox-ui/include/logger.h ../../../libs/showbox-ui/include/custom_table_widget.h ../../../libs/showbox-ui/include/custom_chart_widget.h commands/add_command.h commands/set_command.h commands/query_command.h commands/simple_commands.h commands/command_utils.h commands/position_command.h commands/unset_command.h $(DISTDIR)/
+	$(COPY_FILE) --parents showbox.cc dialog_parser.cc dialog_main.cc dialog_set_options.cc dialog_slots.cc dialog_private.cc tokenizer.cpp command_registry.cpp parser.cpp parser_driver.cpp execution_context.cpp ../../../libs/showbox-ui/src/icon_helper.cpp ../../../libs/showbox-ui/src/theme_manager.cpp ../../../libs/showbox-ui/src/logger.cpp ../../../libs/showbox-ui/src/custom_chart_widget.cpp commands/add_command.cpp commands/set_command.cpp commands/query_command.cpp commands/simple_commands.cpp commands/command_utils.cpp commands/position_command.cpp commands/unset_command.cpp $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -442,7 +442,7 @@ compiler_moc_header_make_all: obj/moc_showbox.cpp obj/moc_parser_driver.cpp obj/
 compiler_moc_header_clean:
 	-$(DEL_FILE) obj/moc_showbox.cpp obj/moc_parser_driver.cpp obj/moc_theme_manager.cpp obj/moc_custom_table_widget.cpp obj/moc_custom_chart_widget.cpp
 obj/moc_showbox.cpp: showbox.h \
-		theme_manager.h \
+		../../../libs/showbox-ui/include/theme_manager.h \
 		obj/moc_predefs.h \
 		/usr/lib/qt6/libexec/moc
 	/usr/lib/qt6/libexec/moc $(DEFINES) --include /app/src/code/showbox/obj/moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt6/mkspecs/linux-g++ -I/app/src/code/showbox -I/app/libs/showbox-ui/include -I/usr/include/x86_64-linux-gnu/qt6 -I/usr/include/x86_64-linux-gnu/qt6/QtCharts -I/usr/include/x86_64-linux-gnu/qt6/QtOpenGLWidgets -I/usr/include/x86_64-linux-gnu/qt6/QtWidgets -I/usr/include/x86_64-linux-gnu/qt6/QtSvg -I/usr/include/x86_64-linux-gnu/qt6/QtOpenGL -I/usr/include/x86_64-linux-gnu/qt6/QtGui -I/usr/include/x86_64-linux-gnu/qt6/QtCore -I/usr/include/c++/14 -I/usr/include/x86_64-linux-gnu/c++/14 -I/usr/include/c++/14/backward -I/usr/lib/gcc/x86_64-linux-gnu/14/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include showbox.h -o obj/moc_showbox.cpp
@@ -456,20 +456,20 @@ obj/moc_parser_driver.cpp: parser_driver.h \
 		/usr/lib/qt6/libexec/moc
 	/usr/lib/qt6/libexec/moc $(DEFINES) --include /app/src/code/showbox/obj/moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt6/mkspecs/linux-g++ -I/app/src/code/showbox -I/app/libs/showbox-ui/include -I/usr/include/x86_64-linux-gnu/qt6 -I/usr/include/x86_64-linux-gnu/qt6/QtCharts -I/usr/include/x86_64-linux-gnu/qt6/QtOpenGLWidgets -I/usr/include/x86_64-linux-gnu/qt6/QtWidgets -I/usr/include/x86_64-linux-gnu/qt6/QtSvg -I/usr/include/x86_64-linux-gnu/qt6/QtOpenGL -I/usr/include/x86_64-linux-gnu/qt6/QtGui -I/usr/include/x86_64-linux-gnu/qt6/QtCore -I/usr/include/c++/14 -I/usr/include/x86_64-linux-gnu/c++/14 -I/usr/include/c++/14/backward -I/usr/lib/gcc/x86_64-linux-gnu/14/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include parser_driver.h -o obj/moc_parser_driver.cpp
 
-obj/moc_theme_manager.cpp: theme_manager.h \
+obj/moc_theme_manager.cpp: ../../../libs/showbox-ui/include/theme_manager.h \
 		obj/moc_predefs.h \
 		/usr/lib/qt6/libexec/moc
-	/usr/lib/qt6/libexec/moc $(DEFINES) --include /app/src/code/showbox/obj/moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt6/mkspecs/linux-g++ -I/app/src/code/showbox -I/app/libs/showbox-ui/include -I/usr/include/x86_64-linux-gnu/qt6 -I/usr/include/x86_64-linux-gnu/qt6/QtCharts -I/usr/include/x86_64-linux-gnu/qt6/QtOpenGLWidgets -I/usr/include/x86_64-linux-gnu/qt6/QtWidgets -I/usr/include/x86_64-linux-gnu/qt6/QtSvg -I/usr/include/x86_64-linux-gnu/qt6/QtOpenGL -I/usr/include/x86_64-linux-gnu/qt6/QtGui -I/usr/include/x86_64-linux-gnu/qt6/QtCore -I/usr/include/c++/14 -I/usr/include/x86_64-linux-gnu/c++/14 -I/usr/include/c++/14/backward -I/usr/lib/gcc/x86_64-linux-gnu/14/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include theme_manager.h -o obj/moc_theme_manager.cpp
+	/usr/lib/qt6/libexec/moc $(DEFINES) --include /app/src/code/showbox/obj/moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt6/mkspecs/linux-g++ -I/app/src/code/showbox -I/app/libs/showbox-ui/include -I/usr/include/x86_64-linux-gnu/qt6 -I/usr/include/x86_64-linux-gnu/qt6/QtCharts -I/usr/include/x86_64-linux-gnu/qt6/QtOpenGLWidgets -I/usr/include/x86_64-linux-gnu/qt6/QtWidgets -I/usr/include/x86_64-linux-gnu/qt6/QtSvg -I/usr/include/x86_64-linux-gnu/qt6/QtOpenGL -I/usr/include/x86_64-linux-gnu/qt6/QtGui -I/usr/include/x86_64-linux-gnu/qt6/QtCore -I/usr/include/c++/14 -I/usr/include/x86_64-linux-gnu/c++/14 -I/usr/include/c++/14/backward -I/usr/lib/gcc/x86_64-linux-gnu/14/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include ../../../libs/showbox-ui/include/theme_manager.h -o obj/moc_theme_manager.cpp
 
-obj/moc_custom_table_widget.cpp: custom_table_widget.h \
+obj/moc_custom_table_widget.cpp: ../../../libs/showbox-ui/include/custom_table_widget.h \
 		obj/moc_predefs.h \
 		/usr/lib/qt6/libexec/moc
-	/usr/lib/qt6/libexec/moc $(DEFINES) --include /app/src/code/showbox/obj/moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt6/mkspecs/linux-g++ -I/app/src/code/showbox -I/app/libs/showbox-ui/include -I/usr/include/x86_64-linux-gnu/qt6 -I/usr/include/x86_64-linux-gnu/qt6/QtCharts -I/usr/include/x86_64-linux-gnu/qt6/QtOpenGLWidgets -I/usr/include/x86_64-linux-gnu/qt6/QtWidgets -I/usr/include/x86_64-linux-gnu/qt6/QtSvg -I/usr/include/x86_64-linux-gnu/qt6/QtOpenGL -I/usr/include/x86_64-linux-gnu/qt6/QtGui -I/usr/include/x86_64-linux-gnu/qt6/QtCore -I/usr/include/c++/14 -I/usr/include/x86_64-linux-gnu/c++/14 -I/usr/include/c++/14/backward -I/usr/lib/gcc/x86_64-linux-gnu/14/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include custom_table_widget.h -o obj/moc_custom_table_widget.cpp
+	/usr/lib/qt6/libexec/moc $(DEFINES) --include /app/src/code/showbox/obj/moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt6/mkspecs/linux-g++ -I/app/src/code/showbox -I/app/libs/showbox-ui/include -I/usr/include/x86_64-linux-gnu/qt6 -I/usr/include/x86_64-linux-gnu/qt6/QtCharts -I/usr/include/x86_64-linux-gnu/qt6/QtOpenGLWidgets -I/usr/include/x86_64-linux-gnu/qt6/QtWidgets -I/usr/include/x86_64-linux-gnu/qt6/QtSvg -I/usr/include/x86_64-linux-gnu/qt6/QtOpenGL -I/usr/include/x86_64-linux-gnu/qt6/QtGui -I/usr/include/x86_64-linux-gnu/qt6/QtCore -I/usr/include/c++/14 -I/usr/include/x86_64-linux-gnu/c++/14 -I/usr/include/c++/14/backward -I/usr/lib/gcc/x86_64-linux-gnu/14/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include ../../../libs/showbox-ui/include/custom_table_widget.h -o obj/moc_custom_table_widget.cpp
 
-obj/moc_custom_chart_widget.cpp: custom_chart_widget.h \
+obj/moc_custom_chart_widget.cpp: ../../../libs/showbox-ui/include/custom_chart_widget.h \
 		obj/moc_predefs.h \
 		/usr/lib/qt6/libexec/moc
-	/usr/lib/qt6/libexec/moc $(DEFINES) --include /app/src/code/showbox/obj/moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt6/mkspecs/linux-g++ -I/app/src/code/showbox -I/app/libs/showbox-ui/include -I/usr/include/x86_64-linux-gnu/qt6 -I/usr/include/x86_64-linux-gnu/qt6/QtCharts -I/usr/include/x86_64-linux-gnu/qt6/QtOpenGLWidgets -I/usr/include/x86_64-linux-gnu/qt6/QtWidgets -I/usr/include/x86_64-linux-gnu/qt6/QtSvg -I/usr/include/x86_64-linux-gnu/qt6/QtOpenGL -I/usr/include/x86_64-linux-gnu/qt6/QtGui -I/usr/include/x86_64-linux-gnu/qt6/QtCore -I/usr/include/c++/14 -I/usr/include/x86_64-linux-gnu/c++/14 -I/usr/include/c++/14/backward -I/usr/lib/gcc/x86_64-linux-gnu/14/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include custom_chart_widget.h -o obj/moc_custom_chart_widget.cpp
+	/usr/lib/qt6/libexec/moc $(DEFINES) --include /app/src/code/showbox/obj/moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt6/mkspecs/linux-g++ -I/app/src/code/showbox -I/app/libs/showbox-ui/include -I/usr/include/x86_64-linux-gnu/qt6 -I/usr/include/x86_64-linux-gnu/qt6/QtCharts -I/usr/include/x86_64-linux-gnu/qt6/QtOpenGLWidgets -I/usr/include/x86_64-linux-gnu/qt6/QtWidgets -I/usr/include/x86_64-linux-gnu/qt6/QtSvg -I/usr/include/x86_64-linux-gnu/qt6/QtOpenGL -I/usr/include/x86_64-linux-gnu/qt6/QtGui -I/usr/include/x86_64-linux-gnu/qt6/QtCore -I/usr/include/c++/14 -I/usr/include/x86_64-linux-gnu/c++/14 -I/usr/include/c++/14/backward -I/usr/lib/gcc/x86_64-linux-gnu/14/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include ../../../libs/showbox-ui/include/custom_chart_widget.h -o obj/moc_custom_chart_widget.cpp
 
 compiler_moc_objc_header_make_all:
 compiler_moc_objc_header_clean:
@@ -488,18 +488,18 @@ compiler_clean: compiler_moc_predefs_clean compiler_moc_header_clean
 ####### Compile
 
 obj/showbox.o: showbox.cc showbox.h \
-		theme_manager.h \
+		../../../libs/showbox-ui/include/theme_manager.h \
 		../../../libs/showbox-ui/include/icon_helper.h \
-		custom_table_widget.h \
-		custom_chart_widget.h
+		../../../libs/showbox-ui/include/custom_table_widget.h \
+		../../../libs/showbox-ui/include/custom_chart_widget.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/showbox.o showbox.cc
 
 obj/dialog_parser.o: dialog_parser.cc showbox.h \
-		theme_manager.h
+		../../../libs/showbox-ui/include/theme_manager.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/dialog_parser.o dialog_parser.cc
 
 obj/dialog_main.o: dialog_main.cc showbox.h \
-		theme_manager.h \
+		../../../libs/showbox-ui/include/theme_manager.h \
 		command_registry.h \
 		command.h \
 		parser_driver.h \
@@ -514,20 +514,20 @@ obj/dialog_main.o: dialog_main.cc showbox.h \
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/dialog_main.o dialog_main.cc
 
 obj/dialog_set_options.o: dialog_set_options.cc showbox.h \
-		theme_manager.h \
-		custom_table_widget.h \
-		custom_chart_widget.h \
+		../../../libs/showbox-ui/include/theme_manager.h \
+		../../../libs/showbox-ui/include/custom_table_widget.h \
+		../../../libs/showbox-ui/include/custom_chart_widget.h \
 		../../../libs/showbox-ui/include/icon_helper.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/dialog_set_options.o dialog_set_options.cc
 
 obj/dialog_slots.o: dialog_slots.cc showbox.h \
-		theme_manager.h
+		../../../libs/showbox-ui/include/theme_manager.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/dialog_slots.o dialog_slots.cc
 
 obj/dialog_private.o: dialog_private.cc showbox.h \
-		theme_manager.h \
-		custom_table_widget.h \
-		custom_chart_widget.h
+		../../../libs/showbox-ui/include/theme_manager.h \
+		../../../libs/showbox-ui/include/custom_table_widget.h \
+		../../../libs/showbox-ui/include/custom_chart_widget.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/dialog_private.o dialog_private.cc
 
 obj/tokenizer.o: tokenizer.cpp tokenizer.h
@@ -554,36 +554,36 @@ obj/parser_driver.o: parser_driver.cpp parser_driver.h \
 
 obj/execution_context.o: execution_context.cpp execution_context.h \
 		showbox.h \
-		theme_manager.h
+		../../../libs/showbox-ui/include/theme_manager.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/execution_context.o execution_context.cpp
 
 obj/icon_helper.o: ../../../libs/showbox-ui/src/icon_helper.cpp ../../../libs/showbox-ui/include/icon_helper.h \
 		../../../libs/showbox-ui/include/logger.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/icon_helper.o ../../../libs/showbox-ui/src/icon_helper.cpp
 
-obj/theme_manager.o: theme_manager.cpp theme_manager.h \
+obj/theme_manager.o: ../../../libs/showbox-ui/src/theme_manager.cpp ../../../libs/showbox-ui/include/theme_manager.h \
 		../../../libs/showbox-ui/include/logger.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/theme_manager.o theme_manager.cpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/theme_manager.o ../../../libs/showbox-ui/src/theme_manager.cpp
 
 obj/logger.o: ../../../libs/showbox-ui/src/logger.cpp ../../../libs/showbox-ui/include/logger.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/logger.o ../../../libs/showbox-ui/src/logger.cpp
 
-obj/custom_chart_widget.o: custom_chart_widget.cpp custom_chart_widget.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/custom_chart_widget.o custom_chart_widget.cpp
+obj/custom_chart_widget.o: ../../../libs/showbox-ui/src/custom_chart_widget.cpp ../../../libs/showbox-ui/include/custom_chart_widget.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/custom_chart_widget.o ../../../libs/showbox-ui/src/custom_chart_widget.cpp
 
 obj/add_command.o: commands/add_command.cpp commands/add_command.h \
 		command.h \
 		../../../libs/showbox-ui/include/logger.h \
 		execution_context.h \
 		showbox.h \
-		theme_manager.h
+		../../../libs/showbox-ui/include/theme_manager.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/add_command.o commands/add_command.cpp
 
 obj/set_command.o: commands/set_command.cpp commands/set_command.h \
 		command.h \
 		commands/command_utils.h \
 		showbox.h \
-		theme_manager.h \
+		../../../libs/showbox-ui/include/theme_manager.h \
 		../../../libs/showbox-ui/include/logger.h \
 		execution_context.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/set_command.o commands/set_command.cpp
@@ -593,33 +593,33 @@ obj/query_command.o: commands/query_command.cpp commands/query_command.h \
 		../../../libs/showbox-ui/include/logger.h \
 		execution_context.h \
 		showbox.h \
-		theme_manager.h
+		../../../libs/showbox-ui/include/theme_manager.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/query_command.o commands/query_command.cpp
 
 obj/simple_commands.o: commands/simple_commands.cpp commands/simple_commands.h \
 		command.h \
 		showbox.h \
-		theme_manager.h \
+		../../../libs/showbox-ui/include/theme_manager.h \
 		execution_context.h \
 		commands/command_utils.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/simple_commands.o commands/simple_commands.cpp
 
 obj/command_utils.o: commands/command_utils.cpp commands/command_utils.h \
 		showbox.h \
-		theme_manager.h
+		../../../libs/showbox-ui/include/theme_manager.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/command_utils.o commands/command_utils.cpp
 
 obj/position_command.o: commands/position_command.cpp commands/position_command.h \
 		command.h \
 		showbox.h \
-		theme_manager.h \
+		../../../libs/showbox-ui/include/theme_manager.h \
 		execution_context.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/position_command.o commands/position_command.cpp
 
 obj/unset_command.o: commands/unset_command.cpp commands/unset_command.h \
 		command.h \
 		showbox.h \
-		theme_manager.h \
+		../../../libs/showbox-ui/include/theme_manager.h \
 		execution_context.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/unset_command.o commands/unset_command.cpp
 

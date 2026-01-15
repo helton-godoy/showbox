@@ -2,9 +2,20 @@ cmake_minimum_required(VERSION 3.16)
 
 project(libshowbox-ui)
 
+# Habilitar MOC para processar Q_OBJECT nos widgets da lib
+set(CMAKE_AUTOMOC ON)
+
+# Incluir Headers explicitamente para que o AUTOMOC os encontre
 add_library(showbox-ui STATIC
     src/icon_helper.cpp
+    include/icon_helper.h
     src/logger.cpp
+    include/logger.h
+    src/custom_chart_widget.cpp
+    include/custom_chart_widget.h
+    include/custom_table_widget.h
+    src/theme_manager.cpp
+    include/theme_manager.h
 )
 
 target_include_directories(showbox-ui PUBLIC 
