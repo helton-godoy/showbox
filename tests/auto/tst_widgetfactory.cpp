@@ -1,6 +1,7 @@
 #include <QtTest>
 #include "widget_factory.h"
 #include <QPushButton>
+#include <QLabel>
 
 class TestWidgetFactory : public QObject
 {
@@ -8,6 +9,7 @@ class TestWidgetFactory : public QObject
 
 private slots:
     void testCreateButton();
+    void testCreateLabel();
 };
 
 void TestWidgetFactory::testCreateButton()
@@ -20,6 +22,16 @@ void TestWidgetFactory::testCreateButton()
     if (btn) {
         QCOMPARE(QString(btn->metaObject()->className()), QString("QPushButton"));
         delete btn;
+    }
+}
+
+void TestWidgetFactory::testCreateLabel()
+{
+    QWidget* lbl = WidgetFactory::create("label");
+    QVERIFY(lbl != nullptr);
+    if (lbl) {
+        QCOMPARE(QString(lbl->metaObject()->className()), QString("QLabel"));
+        delete lbl;
     }
 }
 
