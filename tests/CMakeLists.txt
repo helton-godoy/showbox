@@ -59,3 +59,15 @@ target_include_directories(tst_parser PRIVATE
 )
 
 add_test(NAME tst_parser COMMAND tst_parser)
+
+add_executable(tst_widget_configs
+    auto/tst_widget_configs.cpp
+)
+
+target_link_libraries(tst_widget_configs PRIVATE
+    Qt6::Widgets
+    Qt6::Test
+    showbox-ui
+)
+
+add_test(NAME tst_widget_configs COMMAND tst_widget_configs)

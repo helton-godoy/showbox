@@ -14,13 +14,12 @@ private slots:
 
 void TestWidgetFactory::testCreateButton()
 {
-    // This should fail because currently it returns nullptr
     QWidget* btn = WidgetFactory::create("button");
     QVERIFY(btn != nullptr);
     
-    // If it were not null, we would check type
     if (btn) {
-        QCOMPARE(QString(btn->metaObject()->className()), QString("QPushButton"));
+        // Updated to expect the refactored PushButtonWidget
+        QCOMPARE(QString(btn->metaObject()->className()), QString("PushButtonWidget"));
         delete btn;
     }
 }
