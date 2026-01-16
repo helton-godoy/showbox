@@ -4,6 +4,9 @@
 
 CLIBuilder::CLIBuilder(QObject *parent) : QObject(parent)
 {
+    m_window = new QDialog();
+    m_window->setWindowTitle("Showbox Target Architecture");
+    m_layout = new QVBoxLayout(m_window);
 }
 
 PushButtonWidget* CLIBuilder::buildPushButton(const QString &title, const QString &name)
@@ -13,6 +16,8 @@ PushButtonWidget* CLIBuilder::buildPushButton(const QString &title, const QStrin
     if (btn) {
         btn->setText(title);
         btn->setObjectName(name);
+        m_layout->addWidget(btn);
+        m_window->show();
     }
     return btn;
 }
