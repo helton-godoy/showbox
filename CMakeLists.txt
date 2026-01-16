@@ -20,3 +20,12 @@ add_subdirectory(src/code/showbox)
 
 enable_testing()
 add_subdirectory(tests)
+
+add_executable(poc_modern_cli
+    src/poc_modern_cli.cpp
+)
+
+target_link_libraries(poc_modern_cli PRIVATE
+    Qt6::Widgets
+    showbox-ui
+)
