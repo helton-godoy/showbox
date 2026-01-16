@@ -40,6 +40,13 @@ struct LabelConfig : public BaseConfig {
     bool wordWrap = false;
 };
 
+struct LayoutConfig : public BaseConfig {
+    enum Type { VBox, HBox, Grid };
+    Type type = VBox;
+    int spacing = 5;
+    int margin = 5;
+};
+
 } // namespace Models
 } // namespace Showbox
 

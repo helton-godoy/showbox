@@ -20,6 +20,8 @@ add_library(showbox-ui STATIC
     include/widget_factory.h
     src/push_button_widget.cpp
     include/push_button_widget.h
+    src/ShowboxBuilder.cpp
+    include/ShowboxBuilder.h
     include/WidgetConfigs.h
 )
 

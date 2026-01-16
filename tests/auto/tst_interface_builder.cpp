@@ -21,6 +21,11 @@ public:
         return nullptr;
     }
 
+    QLayout* buildLayout(const Showbox::Models::LayoutConfig& config) override {
+        Q_UNUSED(config);
+        return nullptr;
+    }
+
     // Legacy support
     PushButtonWidget* buildPushButton(const QString &title, const QString &name) override {
         Q_UNUSED(title);

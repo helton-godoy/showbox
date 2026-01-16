@@ -33,6 +33,19 @@ QWidget* CLIBuilder::buildButton(const Showbox::Models::ButtonConfig& config) {
 }
 
 QWidget* CLIBuilder::buildLabel(const Showbox::Models::LabelConfig& config) {
+
     Q_UNUSED(config);
+
     return nullptr;
+
+}
+
+
+
+QLayout* CLIBuilder::buildLayout(const Showbox::Models::LayoutConfig& config) {
+
+    Q_UNUSED(config);
+
+    return nullptr;
+
 }

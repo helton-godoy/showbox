@@ -83,3 +83,15 @@ target_link_libraries(tst_interface_builder PRIVATE
 )
 
 add_test(NAME tst_interface_builder COMMAND tst_interface_builder)
+
+add_executable(tst_showbox_builder
+    auto/tst_showbox_builder.cpp
+)
+
+target_link_libraries(tst_showbox_builder PRIVATE
+    Qt6::Widgets
+    Qt6::Test
+    showbox-ui
+)
+
+add_test(NAME tst_showbox_builder COMMAND tst_showbox_builder)

@@ -19,6 +19,7 @@ public:
     QWidget* buildWindow(const Showbox::Models::WindowConfig& config) override;
     QWidget* buildButton(const Showbox::Models::ButtonConfig& config) override;
     QWidget* buildLabel(const Showbox::Models::LabelConfig& config) override;
+    QLayout* buildLayout(const Showbox::Models::LayoutConfig& config) override;
 
 private:
     QDialog *m_window;
