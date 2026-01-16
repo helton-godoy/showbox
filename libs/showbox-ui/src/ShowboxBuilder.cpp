@@ -2,6 +2,7 @@
 #include <QDialog>
 #include <QPushButton>
 #include <QLabel>
+#include <QLineEdit>
 #include <QVBoxLayout>
 #include "push_button_widget.h"
 
@@ -39,6 +40,17 @@ QWidget* ShowboxBuilder::buildLabel(const Showbox::Models::LabelConfig& config)
     lbl->setObjectName(config.name);
     lbl->setWordWrap(config.wordWrap);
     return lbl;
+}
+
+QWidget* ShowboxBuilder::buildLineEdit(const Showbox::Models::LineEditConfig& config)
+{
+    auto *le = new QLineEdit(config.text);
+    le->setObjectName(config.name);
+    le->setPlaceholderText(config.placeholder);
+    if (config.passwordMode) {
+        le->setEchoMode(QLineEdit::Password);
+    }
+    return le;
 }
 
 QLayout* ShowboxBuilder::buildLayout(const Showbox::Models::LayoutConfig& config)

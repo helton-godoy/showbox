@@ -17,6 +17,7 @@ public:
     QWidget* buildWindow(const Showbox::Models::WindowConfig& config) override { Q_UNUSED(config); return nullptr; }
     QWidget* buildButton(const Showbox::Models::ButtonConfig& config) override { Q_UNUSED(config); return nullptr; }
     QWidget* buildLabel(const Showbox::Models::LabelConfig& config) override { Q_UNUSED(config); return nullptr; }
+    QWidget* buildLineEdit(const Showbox::Models::LineEditConfig& config) override { Q_UNUSED(config); return nullptr; }
     QLayout* buildLayout(const Showbox::Models::LayoutConfig& config) override { Q_UNUSED(config); return nullptr; }
 
     QString lastTitle;

@@ -40,6 +40,12 @@ struct LabelConfig : public BaseConfig {
     bool wordWrap = false;
 };
 
+struct LineEditConfig : public BaseConfig {
+    QString text;
+    QString placeholder;
+    bool passwordMode = false;
+};
+
 struct LayoutConfig : public BaseConfig {
     enum Type { VBox, HBox, Grid };
     Type type = VBox;

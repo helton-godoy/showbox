@@ -2,6 +2,9 @@
 #include <ShowboxBuilder.h>
 #include <WidgetConfigs.h>
 #include <QDialog>
+#include <QPushButton>
+#include <QLabel>
+#include <QLineEdit>
 
 class TestShowboxBuilder : public QObject
 {
@@ -10,6 +13,7 @@ class TestShowboxBuilder : public QObject
 private slots:
     void testCreateWindow();
     void testBuildLayout();
+    void testBuildControls();
     void testPerformance();
 };
 
@@ -49,6 +53,38 @@ void TestShowboxBuilder::testBuildLayout()
     QVERIFY(qobject_cast<QHBoxLayout*>(layout) != nullptr);
     
     delete layout;
+}
+
+void TestShowboxBuilder::testBuildControls()
+{
+    ShowboxBuilder builder;
+    
+    // Test Button
+    Showbox::Models::ButtonConfig btnConfig;
+    btnConfig.name = "btn1";
+    btnConfig.text = "Click Me";
+    QWidget* btn = builder.buildButton(btnConfig);
+    QVERIFY(btn != nullptr);
+    QCOMPARE(qobject_cast<QPushButton*>(btn)->text(), QString("Click Me"));
+    delete btn;
+    
+    // Test Label
+    Showbox::Models::LabelConfig lblConfig;
+    lblConfig.name = "lbl1";
+    lblConfig.text = "Hello World";
+    QWidget* lbl = builder.buildLabel(lblConfig);
+    QVERIFY(lbl != nullptr);
+    QCOMPARE(qobject_cast<QLabel*>(lbl)->text(), QString("Hello World"));
+    delete lbl;
+    
+    // Test LineEdit
+    Showbox::Models::LineEditConfig leConfig;
+    leConfig.name = "le1";
+    leConfig.placeholder = "Enter name";
+    QWidget* le = builder.buildLineEdit(leConfig);
+    QVERIFY(le != nullptr);
+    QCOMPARE(qobject_cast<QLineEdit*>(le)->placeholderText(), QString("Enter name"));
+    delete le;
 }
 
 void TestShowboxBuilder::testPerformance()

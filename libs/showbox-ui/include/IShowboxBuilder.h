@@ -18,6 +18,7 @@ public:
     virtual QWidget* buildWindow(const Showbox::Models::WindowConfig& config) = 0;
     virtual QWidget* buildButton(const Showbox::Models::ButtonConfig& config) = 0;
     virtual QWidget* buildLabel(const Showbox::Models::LabelConfig& config) = 0;
+    virtual QWidget* buildLineEdit(const Showbox::Models::LineEditConfig& config) = 0;
     virtual QLayout* buildLayout(const Showbox::Models::LayoutConfig& config) = 0;
 
     // --- Legacy Methods (To be deprecated/removed) ---

@@ -42,7 +42,19 @@ QWidget* CLIBuilder::buildLabel(const Showbox::Models::LabelConfig& config) {
 
 
 
+QWidget* CLIBuilder::buildLineEdit(const Showbox::Models::LineEditConfig& config) {
+
+    Q_UNUSED(config);
+
+    return nullptr;
+
+}
+
+
+
 QLayout* CLIBuilder::buildLayout(const Showbox::Models::LayoutConfig& config) {
+
+
 
     Q_UNUSED(config);
 

@@ -21,6 +21,11 @@ public:
         return nullptr;
     }
 
+    QWidget* buildLineEdit(const Showbox::Models::LineEditConfig& config) override {
+        Q_UNUSED(config);
+        return nullptr;
+    }
+
     QLayout* buildLayout(const Showbox::Models::LayoutConfig& config) override {
         Q_UNUSED(config);
         return nullptr;
