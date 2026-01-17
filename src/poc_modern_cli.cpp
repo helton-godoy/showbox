@@ -1,57 +1,44 @@
 #include <QApplication>
 #include <QTimer>
 #include <ShowboxBuilder.h>
-#include <WidgetConfigs.h>
-#include <QLayout>
-#include <QWidget>
+#include <CLIBuilder.h>
+#include <ParserMain.h>
+#include <QThread>
 
-using namespace Showbox::Models;
+class InputThread : public QThread {
+    ParserMain *parser;
+public:
+    InputThread(ParserMain *p) : parser(p) {}
+    void run() override {
+        parser->run();
+        QMetaObject::invokeMethod(qApp, "quit");
+    }
+};
 
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
 
-    ShowboxBuilder builder;
-
-    // 1. Criar a Janela Principal
-    WindowConfig winConfig;
-    winConfig.title = "Showbox Modern CLI PoC";
-    winConfig.width = 600;
-    winConfig.height = 400;
-    QWidget *window = builder.buildWindow(winConfig);
-
-    // 2. Configurar o Layout Vertical Principal
-    // buildWindow já cria um QVBoxLayout padrão.
-    QLayout *layout = window->layout();
-    if (layout) {
-        layout->setSpacing(10);
-        layout->setContentsMargins(20, 20, 20, 20);
-    }
-
-    // 3. Adicionar Widgets
-    LabelConfig lblConfig;
-    lblConfig.text = "<b>Bem-vindo à Nova Arquitetura Showbox</b>";
-    layout->addWidget(builder.buildLabel(lblConfig));
-
-    LineEditConfig leConfig;
-    leConfig.placeholder = "Digite algo aqui...";
-    layout->addWidget(builder.buildLineEdit(leConfig));
-
-    ButtonConfig btnConfig;
-    btnConfig.text = "Executar Ação";
-    btnConfig.name = "btn_action";
-    layout->addWidget(builder.buildButton(btnConfig));
+    // Use CLIBuilder which implements the IShowboxBuilder interface
+    // but wraps the logic. Or use ShowboxBuilder directly if it's sufficient.
+    // ParserMain expects IShowboxBuilder.
+    // However, ShowboxBuilder returns QWidget*, ParserMain needs to manage them.
+    // Wait, ParserMain logic assumes IShowboxBuilder returns QWidgets and handles parenting itself.
+    // ShowboxBuilder is perfect for this.
     
-    ProgressBarConfig pbConfig;
-    pbConfig.value = 75;
-    layout->addWidget(builder.buildProgressBar(pbConfig));
+    ShowboxBuilder builder;
+    ParserMain parser(&builder);
 
-    // O PoC deve fechar após 2 segundos se em modo CI para não travar o build
-    if (qEnvironmentVariableIsSet("CI")) {
-        QObject::connect(&app, &QApplication::aboutToQuit, [](){});
-        QTimer::singleShot(2000, &app, &QApplication::quit);
-    }
+    // Connect signals if needed, e.g. showRequested
+    // But ParserMain handles show internally or emits it?
+    // Current ParserMain implementation emits showRequested(), 
+    // but usually in V1 'show' makes a specific widget visible.
+    // Let's just run it.
 
-    window->show();
+    // Run parser in a separate thread to not block the GUI event loop
+    // reading from stdin is blocking.
+    InputThread thread(&parser);
+    thread.start();
+
     return app.exec();
 }

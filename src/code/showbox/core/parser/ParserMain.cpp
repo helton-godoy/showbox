@@ -179,6 +179,9 @@ void ParserMain::handleQuery(const QStringList &args)
     // ... add more as needed
 }
 
+// Force MOC inclusion if AUTOMOC fails to link it
+//#include "moc_ParserMain.cpp"
+
 void ParserMain::handleAdd(const QStringList &args)
 {
     if (args.size() < 3) return;

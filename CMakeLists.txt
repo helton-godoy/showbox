@@ -23,12 +23,24 @@ add_subdirectory(tests)
 
 add_executable(poc_modern_cli
     src/poc_modern_cli.cpp
+    src/code/showbox/core/parser/ParserMain.cpp
+    src/code/showbox/core/parser/ParserMain.h
+    src/code/showbox/core/parser/CommandParser.cpp
+    src/code/showbox/core/parser/Tokenizer.cpp
+    src/code/showbox/core/parser/WidgetParserUtils.cpp
 )
 
 target_link_libraries(poc_modern_cli PRIVATE
     Qt6::Widgets
     showbox-ui
 )
+
+target_include_directories(poc_modern_cli PRIVATE
+    src/code/showbox/core/parser
+    src/code/showbox/core/builder
+)
+
+set_property(TARGET poc_modern_cli PROPERTY AUTOMOC ON)
 
 add_executable(visual_verifier
     src/visual_verifier.cpp
