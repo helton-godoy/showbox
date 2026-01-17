@@ -97,4 +97,38 @@ void ParserMain::handleAdd(const QStringList &args)
         config.height = WidgetParserUtils::findIntValue(options, "height", 600);
         m_builder->buildWindow(config);
     }
+    else if (type == "spinbox") {
+        Showbox::Models::SpinBoxConfig config;
+        config.name = name;
+        config.value = WidgetParserUtils::findIntValue(options, "value", 0);
+        config.min = WidgetParserUtils::findIntValue(options, "minimum", 0);
+        config.max = WidgetParserUtils::findIntValue(options, "maximum", 100);
+        config.step = WidgetParserUtils::findIntValue(options, "step", 1);
+        m_builder->buildSpinBox(config);
+    }
+    else if (type == "slider") {
+        Showbox::Models::SliderConfig config;
+        config.name = name;
+        config.value = WidgetParserUtils::findIntValue(options, "value", 0);
+        config.min = WidgetParserUtils::findIntValue(options, "minimum", 0);
+        config.max = WidgetParserUtils::findIntValue(options, "maximum", 100);
+        if (WidgetParserUtils::hasFlag(options, "horizontal")) config.orientation = 1;
+        if (WidgetParserUtils::hasFlag(options, "vertical")) config.orientation = 2;
+        m_builder->buildSlider(config);
+    }
+    else if (type == "textbox" || type == "lineedit") {
+        Showbox::Models::LineEditConfig config;
+        config.name = name;
+        config.text = title; // In V1 textbox title is often initial value
+        config.passwordMode = WidgetParserUtils::hasFlag(options, "password");
+        config.placeholder = WidgetParserUtils::findValue(options, "placeholder");
+        m_builder->buildLineEdit(config);
+    }
+    else if (type == "textview" || type == "textedit") {
+        Showbox::Models::TextEditConfig config;
+        config.name = name;
+        config.text = title;
+        config.readOnly = WidgetParserUtils::hasFlag(options, "readonly");
+        m_builder->buildTextEdit(config);
+    }
 }

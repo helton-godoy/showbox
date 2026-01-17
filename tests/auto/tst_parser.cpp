@@ -53,21 +53,42 @@ public:
         return nullptr;
     }
 
-    // Stubs for remaining methods
+    QWidget* buildSpinBox(const Showbox::Models::SpinBoxConfig& config) override {
+        lastSpinBox = config;
+        called = true;
+        return nullptr;
+    }
+
+    QWidget* buildSlider(const Showbox::Models::SliderConfig& config) override {
+        lastSlider = config;
+        called = true;
+        return nullptr;
+    }
+
+    QWidget* buildLineEdit(const Showbox::Models::LineEditConfig& config) override {
+        lastLineEdit = config;
+        called = true;
+        return nullptr;
+    }
+
+    QWidget* buildTextEdit(const Showbox::Models::TextEditConfig& config) override {
+        lastTextEdit = config;
+        called = true;
+        return nullptr;
+    }
+
+    // Stubs for remaining methods to satisfy pure virtual interface
     QWidget* buildTable(const Showbox::Models::TableConfig& config) override { Q_UNUSED(config); return nullptr; }
     QWidget* buildProgressBar(const Showbox::Models::ProgressBarConfig& config) override { Q_UNUSED(config); return nullptr; }
     QWidget* buildChart(const Showbox::Models::ChartConfig& config) override { Q_UNUSED(config); return nullptr; }
     QWidget* buildCalendar(const Showbox::Models::CalendarConfig& config) override { Q_UNUSED(config); return nullptr; }
     QWidget* buildSeparator(const Showbox::Models::SeparatorConfig& config) override { Q_UNUSED(config); return nullptr; }
-    QWidget* buildSpinBox(const Showbox::Models::SpinBoxConfig& config) override { Q_UNUSED(config); return nullptr; }
-    QWidget* buildSlider(const Showbox::Models::SliderConfig& config) override { Q_UNUSED(config); return nullptr; }
-    QWidget* buildLineEdit(const Showbox::Models::LineEditConfig& config) override { Q_UNUSED(config); return nullptr; }
-    QWidget* buildTextEdit(const Showbox::Models::TextEditConfig& config) override { Q_UNUSED(config); return nullptr; }
     QWidget* buildGroupBox(const Showbox::Models::GroupBoxConfig& config) override { Q_UNUSED(config); return nullptr; }
     QWidget* buildFrame(const Showbox::Models::FrameConfig& config) override { Q_UNUSED(config); return nullptr; }
     QWidget* buildTabWidget(const Showbox::Models::TabWidgetConfig& config) override { Q_UNUSED(config); return nullptr; }
     QLayout* buildLayout(const Showbox::Models::LayoutConfig& config) override { Q_UNUSED(config); return nullptr; }
 
+    // State capture for verification
     Showbox::Models::ButtonConfig lastButton;
     Showbox::Models::LabelConfig lastLabel;
     Showbox::Models::CheckBoxConfig lastCheckBox;
@@ -75,6 +96,10 @@ public:
     Showbox::Models::ComboBoxConfig lastComboBox;
     Showbox::Models::ListConfig lastList;
     Showbox::Models::WindowConfig lastWindow;
+    Showbox::Models::SpinBoxConfig lastSpinBox;
+    Showbox::Models::SliderConfig lastSlider;
+    Showbox::Models::LineEditConfig lastLineEdit;
+    Showbox::Models::TextEditConfig lastTextEdit;
     bool called = false;
 };
 
@@ -90,6 +115,10 @@ private slots:
     void testParseAddComboBox();
     void testParseAddListBox();
     void testParseAddWindow();
+    void testParseAddSpinBox();
+    void testParseAddSlider();
+    void testParseAddTextBox();
+    void testParseAddTextView();
 };
 
 void TestParser::testParseAddButton()
@@ -163,6 +192,51 @@ void TestParser::testParseAddWindow()
     QCOMPARE(builder.lastWindow.title, QString("My App"));
     QCOMPARE(builder.lastWindow.width, 1024);
     QCOMPARE(builder.lastWindow.height, 768);
+}
+
+void TestParser::testParseAddSpinBox()
+{
+    MockBuilder builder;
+    ParserMain parser(&builder);
+    parser.processLine("add spinbox \"Count\" sb1 minimum 10 maximum 50 value 20 step 5");
+    QVERIFY(builder.called);
+    QCOMPARE(builder.lastSpinBox.name, QString("sb1"));
+    QCOMPARE(builder.lastSpinBox.min, 10);
+    QCOMPARE(builder.lastSpinBox.max, 50);
+    QCOMPARE(builder.lastSpinBox.value, 20);
+    QCOMPARE(builder.lastSpinBox.step, 5);
+}
+
+void TestParser::testParseAddSlider()
+{
+    MockBuilder builder;
+    ParserMain parser(&builder);
+    parser.processLine("add slider \"Volume\" sl1 vertical value 75");
+    QVERIFY(builder.called);
+    QCOMPARE(builder.lastSlider.name, QString("sl1"));
+    QCOMPARE(builder.lastSlider.orientation, 2); // Vertical
+    QCOMPARE(builder.lastSlider.value, 75);
+}
+
+void TestParser::testParseAddTextBox()
+{
+    MockBuilder builder;
+    ParserMain parser(&builder);
+    parser.processLine("add textbox \"Initial Value\" tb1 password placeholder \"Enter secret\"");
+    QVERIFY(builder.called);
+    QCOMPARE(builder.lastLineEdit.text, QString("Initial Value"));
+    QCOMPARE(builder.lastLineEdit.passwordMode, true);
+    QCOMPARE(builder.lastLineEdit.placeholder, QString("Enter secret"));
+}
+
+void TestParser::testParseAddTextView()
+{
+    MockBuilder builder;
+    ParserMain parser(&builder);
+    parser.processLine("add textview \"Long content...\" tv1 readonly");
+    QVERIFY(builder.called);
+    QCOMPARE(builder.lastTextEdit.text, QString("Long content..."));
+    QCOMPARE(builder.lastTextEdit.readOnly, true);
 }
 
 QTEST_MAIN(TestParser)
