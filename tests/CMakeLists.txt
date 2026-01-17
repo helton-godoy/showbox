@@ -48,6 +48,7 @@ add_executable(tst_parser
     ../src/code/showbox/core/parser/ParserMain.cpp
     ../src/code/showbox/core/parser/CommandParser.cpp
     ../src/code/showbox/core/parser/Tokenizer.cpp
+    ../src/code/showbox/core/parser/WidgetParserUtils.cpp
 )
 
 target_link_libraries(tst_parser PRIVATE
