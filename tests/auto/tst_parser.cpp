@@ -2,90 +2,143 @@
 #include <ParserMain.h>
 #include <IShowboxBuilder.h>
 #include <QWidget>
+#include <QTabWidget>
+#include <QVBoxLayout>
+#include <QCheckBox>
+#include <QRadioButton>
+#include <QSpinBox>
+#include <QSlider>
+#include <QLineEdit>
+#include <QTextEdit>
+#include <QLabel>
+#include <QPushButton>
+#include <QPointer>
 
-// Mock Builder
+// Mock Builder returning real widgets for runtime interaction tests
 class MockBuilder : public IShowboxBuilder {
 public:
+    QList<QPointer<QWidget>> createdWidgets;
+
+    ~MockBuilder() {
+        for (auto w : createdWidgets) {
+            if (w && !w->parentWidget()) {
+                delete w;
+            }
+        }
+    }
+
+    template<typename T>
+    T* createReal(const QString& name) {
+        T* w = new T();
+        w->setObjectName(name);
+        createdWidgets.append(w);
+        return w;
+    }
+
     PushButtonWidget* buildPushButton(const QString &title, const QString &name) override {
         Q_UNUSED(title); Q_UNUSED(name);
         return nullptr;
     }
     
-    QWidget* buildWindow(const Showbox::Models::WindowConfig& config) override {
+    QWidget* buildWindow(const Showbox::Models::WindowConfig& config) override { 
         lastWindow = config;
         called = true;
-        return nullptr; 
+        auto* w = createReal<QWidget>(config.name); 
+        w->setLayout(new QVBoxLayout());
+        return w;
     }
     
-    QWidget* buildButton(const Showbox::Models::ButtonConfig& config) override {
+    QWidget* buildButton(const Showbox::Models::ButtonConfig& config) override { 
         lastButton = config;
         called = true;
-        return nullptr; 
+        return createReal<QPushButton>(config.name); 
     }
     
-    QWidget* buildLabel(const Showbox::Models::LabelConfig& config) override {
+    QWidget* buildLabel(const Showbox::Models::LabelConfig& config) override { 
         lastLabel = config;
         called = true;
-        return nullptr; 
+        return createReal<QLabel>(config.name); 
     }
 
     QWidget* buildCheckBox(const Showbox::Models::CheckBoxConfig& config) override {
         lastCheckBox = config;
         called = true;
-        return nullptr;
+        return createReal<QCheckBox>(config.name);
     }
 
     QWidget* buildRadioButton(const Showbox::Models::RadioButtonConfig& config) override {
         lastRadioButton = config;
         called = true;
-        return nullptr;
+        return createReal<QRadioButton>(config.name);
     }
 
     QWidget* buildComboBox(const Showbox::Models::ComboBoxConfig& config) override {
         lastComboBox = config;
         called = true;
-        return nullptr;
+        return createReal<QWidget>(config.name); // Simplified
     }
 
     QWidget* buildList(const Showbox::Models::ListConfig& config) override {
         lastList = config;
         called = true;
-        return nullptr;
+        return createReal<QWidget>(config.name); // Simplified
     }
 
     QWidget* buildSpinBox(const Showbox::Models::SpinBoxConfig& config) override {
         lastSpinBox = config;
         called = true;
-        return nullptr;
+        return createReal<QSpinBox>(config.name);
     }
 
     QWidget* buildSlider(const Showbox::Models::SliderConfig& config) override {
         lastSlider = config;
         called = true;
-        return nullptr;
+        return createReal<QSlider>(config.name);
     }
 
     QWidget* buildLineEdit(const Showbox::Models::LineEditConfig& config) override {
         lastLineEdit = config;
         called = true;
-        return nullptr;
+        return createReal<QLineEdit>(config.name);
     }
 
     QWidget* buildTextEdit(const Showbox::Models::TextEditConfig& config) override {
         lastTextEdit = config;
         called = true;
-        return nullptr;
+        return createReal<QTextEdit>(config.name);
     }
 
-    // Stubs for remaining methods to satisfy pure virtual interface
+    QWidget* buildGroupBox(const Showbox::Models::GroupBoxConfig& config) override {
+        lastGroupBox = config;
+        called = true;
+        auto* w = createReal<QWidget>(config.name);
+        w->setLayout(new QVBoxLayout());
+        return w;
+    }
+
+    QWidget* buildFrame(const Showbox::Models::FrameConfig& config) override {
+        lastFrame = config;
+        called = true;
+        auto* w = createReal<QWidget>(config.name);
+        w->setLayout(new QVBoxLayout());
+        return w;
+    }
+
+    QWidget* buildTabWidget(const Showbox::Models::TabWidgetConfig& config) override {
+        lastTabWidget = config;
+        called = true;
+        auto* w = new QTabWidget();
+        w->setObjectName(config.name);
+        createdWidgets.append(w);
+        return w;
+    }
+
+    // Stubs for remaining methods
     QWidget* buildTable(const Showbox::Models::TableConfig& config) override { Q_UNUSED(config); return nullptr; }
     QWidget* buildProgressBar(const Showbox::Models::ProgressBarConfig& config) override { Q_UNUSED(config); return nullptr; }
     QWidget* buildChart(const Showbox::Models::ChartConfig& config) override { Q_UNUSED(config); return nullptr; }
     QWidget* buildCalendar(const Showbox::Models::CalendarConfig& config) override { Q_UNUSED(config); return nullptr; }
     QWidget* buildSeparator(const Showbox::Models::SeparatorConfig& config) override { Q_UNUSED(config); return nullptr; }
-    QWidget* buildGroupBox(const Showbox::Models::GroupBoxConfig& config) override { Q_UNUSED(config); return nullptr; }
-    QWidget* buildFrame(const Showbox::Models::FrameConfig& config) override { Q_UNUSED(config); return nullptr; }
-    QWidget* buildTabWidget(const Showbox::Models::TabWidgetConfig& config) override { Q_UNUSED(config); return nullptr; }
     QLayout* buildLayout(const Showbox::Models::LayoutConfig& config) override { Q_UNUSED(config); return nullptr; }
 
     // State capture for verification
@@ -100,6 +153,9 @@ public:
     Showbox::Models::SliderConfig lastSlider;
     Showbox::Models::LineEditConfig lastLineEdit;
     Showbox::Models::TextEditConfig lastTextEdit;
+    Showbox::Models::GroupBoxConfig lastGroupBox;
+    Showbox::Models::FrameConfig lastFrame;
+    Showbox::Models::TabWidgetConfig lastTabWidget;
     bool called = false;
 };
 
@@ -119,7 +175,35 @@ private slots:
     void testParseAddSlider();
     void testParseAddTextBox();
     void testParseAddTextView();
+    void testParseHierarchicalLayout();
+    void testRuntimeInteraction();
 };
+
+void TestParser::testRuntimeInteraction()
+{
+    MockBuilder builder;
+    ParserMain parser(&builder);
+    
+    // 1. Create a checkbox
+    parser.processLine("add checkbox \"Turbo\" chk1");
+    QCheckBox* cb = qobject_cast<QCheckBox*>(builder.createdWidgets.last());
+    QVERIFY(cb != nullptr);
+    QCOMPARE(cb->isChecked(), false);
+    
+    // 2. Set it
+    parser.processLine("set checked chk1");
+    QCOMPARE(cb->isChecked(), true);
+    
+    // 3. Unset it
+    parser.processLine("unset checked chk1");
+    QCOMPARE(cb->isChecked(), false);
+    
+    // 4. Create spinbox and set value
+    parser.processLine("add spinbox \"Count\" sb1");
+    QSpinBox* sb = qobject_cast<QSpinBox*>(builder.createdWidgets.last());
+    parser.processLine("set value sb1 42");
+    QCOMPARE(sb->value(), 42);
+}
 
 void TestParser::testParseAddButton()
 {
@@ -237,6 +321,31 @@ void TestParser::testParseAddTextView()
     QVERIFY(builder.called);
     QCOMPARE(builder.lastTextEdit.text, QString("Long content..."));
     QCOMPARE(builder.lastTextEdit.readOnly, true);
+}
+
+void TestParser::testParseHierarchicalLayout()
+{
+    MockBuilder builder;
+    ParserMain parser(&builder);
+    
+    // 1. Create Window (Root)
+    parser.processLine("add window \"Main\" win");
+    QVERIFY(builder.called);
+    
+    // 2. Add GroupBox (should be added to Window)
+    parser.processLine("add groupbox \"Group\" grp1");
+    QCOMPARE(builder.lastGroupBox.title, QString("Group"));
+    
+    // 3. Add Button (should be added to GroupBox)
+    parser.processLine("add button \"Inside\" btn1");
+    QCOMPARE(builder.lastButton.text, QString("Inside"));
+    
+    // 4. End GroupBox context
+    parser.processLine("end");
+    
+    // 5. Add Button (should be added to Window now)
+    parser.processLine("add button \"Outside\" btn2");
+    QCOMPARE(builder.lastButton.text, QString("Outside"));
 }
 
 QTEST_MAIN(TestParser)
