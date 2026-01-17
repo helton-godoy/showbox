@@ -29,3 +29,12 @@ target_link_libraries(poc_modern_cli PRIVATE
     Qt6::Widgets
     showbox-ui
 )
+
+add_executable(visual_verifier
+    src/visual_verifier.cpp
+)
+
+target_link_libraries(visual_verifier PRIVATE
+    Qt6::Widgets
+    showbox-ui
+)
