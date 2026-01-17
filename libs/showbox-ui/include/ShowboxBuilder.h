@@ -19,6 +19,10 @@ public:
     QWidget* buildTable(const Showbox::Models::TableConfig& config) override;
     QWidget* buildProgressBar(const Showbox::Models::ProgressBarConfig& config) override;
     QWidget* buildChart(const Showbox::Models::ChartConfig& config) override;
+    QWidget* buildCheckBox(const Showbox::Models::CheckBoxConfig& config) override;
+    QWidget* buildRadioButton(const Showbox::Models::RadioButtonConfig& config) override;
+    QWidget* buildCalendar(const Showbox::Models::CalendarConfig& config) override;
+    QWidget* buildSeparator(const Showbox::Models::SeparatorConfig& config) override;
     QLayout* buildLayout(const Showbox::Models::LayoutConfig& config) override;
 
     // Legacy support

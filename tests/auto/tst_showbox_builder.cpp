@@ -9,6 +9,10 @@
 #include <QListWidget>
 #include <QTableWidget>
 #include <QProgressBar>
+#include <QCheckBox>
+#include <QRadioButton>
+#include <QCalendarWidget>
+#include <QFrame>
 #include <custom_chart_widget.h>
 
 class TestShowboxBuilder : public QObject
@@ -20,6 +24,8 @@ private slots:
     void testBuildLayout();
     void testBuildControls();
     void testBuildItemBasedWidgets();
+    void testBuildSelectionWidgets();
+    void testBuildUtilityWidgets();
     void testBuildAdvancedVisuals();
     void testPerformance();
 };
@@ -129,6 +135,62 @@ void TestShowboxBuilder::testBuildItemBasedWidgets()
     QCOMPARE(qobject_cast<QTableWidget*>(table)->rowCount(), 1);
     QCOMPARE(qobject_cast<QTableWidget*>(table)->item(0, 0)->text(), QString("R1C1"));
     delete table;
+}
+
+void TestShowboxBuilder::testBuildSelectionWidgets()
+{
+    ShowboxBuilder builder;
+
+    // Test CheckBox
+    Showbox::Models::CheckBoxConfig checkConfig;
+    checkConfig.name = "check1";
+    checkConfig.text = "Check Me";
+    checkConfig.checked = true;
+    QWidget* checkBox = builder.buildCheckBox(checkConfig);
+    QVERIFY(checkBox != nullptr);
+    QCheckBox* cb = qobject_cast<QCheckBox*>(checkBox);
+    QVERIFY(cb != nullptr);
+    QCOMPARE(cb->text(), QString("Check Me"));
+    QCOMPARE(cb->isChecked(), true);
+    delete checkBox;
+
+    // Test RadioButton
+    Showbox::Models::RadioButtonConfig radioConfig;
+    radioConfig.name = "radio1";
+    radioConfig.text = "Select Me";
+    radioConfig.checked = true;
+    QWidget* radio = builder.buildRadioButton(radioConfig);
+    QVERIFY(radio != nullptr);
+    QRadioButton* rb = qobject_cast<QRadioButton*>(radio);
+    QVERIFY(rb != nullptr);
+    QCOMPARE(rb->text(), QString("Select Me"));
+    QCOMPARE(rb->isChecked(), true);
+    delete radio;
+}
+
+void TestShowboxBuilder::testBuildUtilityWidgets()
+{
+    ShowboxBuilder builder;
+
+    // Test Calendar
+    Showbox::Models::CalendarConfig calConfig;
+    calConfig.name = "calendar1";
+    QWidget* calendar = builder.buildCalendar(calConfig);
+    QVERIFY(calendar != nullptr);
+    QCalendarWidget* cw = qobject_cast<QCalendarWidget*>(calendar);
+    QVERIFY(cw != nullptr);
+    delete calendar;
+
+    // Test Separator
+    Showbox::Models::SeparatorConfig sepConfig;
+    sepConfig.name = "sep1";
+    sepConfig.orientation = Qt::Horizontal;
+    QWidget* separator = builder.buildSeparator(sepConfig);
+    QVERIFY(separator != nullptr);
+    QFrame* frame = qobject_cast<QFrame*>(separator);
+    QVERIFY(frame != nullptr);
+    QCOMPARE(frame->frameShape(), QFrame::HLine);
+    delete separator;
 }
 
 void TestShowboxBuilder::testBuildAdvancedVisuals()

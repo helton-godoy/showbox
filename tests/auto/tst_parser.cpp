@@ -23,6 +23,10 @@ public:
     QWidget* buildTable(const Showbox::Models::TableConfig& config) override { Q_UNUSED(config); return nullptr; }
     QWidget* buildProgressBar(const Showbox::Models::ProgressBarConfig& config) override { Q_UNUSED(config); return nullptr; }
     QWidget* buildChart(const Showbox::Models::ChartConfig& config) override { Q_UNUSED(config); return nullptr; }
+    QWidget* buildCheckBox(const Showbox::Models::CheckBoxConfig& config) override { Q_UNUSED(config); return nullptr; }
+    QWidget* buildRadioButton(const Showbox::Models::RadioButtonConfig& config) override { Q_UNUSED(config); return nullptr; }
+    QWidget* buildCalendar(const Showbox::Models::CalendarConfig& config) override { Q_UNUSED(config); return nullptr; }
+    QWidget* buildSeparator(const Showbox::Models::SeparatorConfig& config) override { Q_UNUSED(config); return nullptr; }
     QLayout* buildLayout(const Showbox::Models::LayoutConfig& config) override { Q_UNUSED(config); return nullptr; }
 
     QString lastTitle;

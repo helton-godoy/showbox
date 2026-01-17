@@ -24,6 +24,10 @@ public:
     virtual QWidget* buildTable(const Showbox::Models::TableConfig& config) = 0;
     virtual QWidget* buildProgressBar(const Showbox::Models::ProgressBarConfig& config) = 0;
     virtual QWidget* buildChart(const Showbox::Models::ChartConfig& config) = 0;
+    virtual QWidget* buildCheckBox(const Showbox::Models::CheckBoxConfig& config) = 0;
+    virtual QWidget* buildRadioButton(const Showbox::Models::RadioButtonConfig& config) = 0;
+    virtual QWidget* buildCalendar(const Showbox::Models::CalendarConfig& config) = 0;
+    virtual QWidget* buildSeparator(const Showbox::Models::SeparatorConfig& config) = 0;
     virtual QLayout* buildLayout(const Showbox::Models::LayoutConfig& config) = 0;
 
     // --- Legacy Methods (To be deprecated/removed) ---

@@ -51,6 +51,26 @@ public:
         return nullptr;
     }
 
+    QWidget* buildCheckBox(const Showbox::Models::CheckBoxConfig& config) override {
+        Q_UNUSED(config);
+        return nullptr;
+    }
+
+    QWidget* buildRadioButton(const Showbox::Models::RadioButtonConfig& config) override {
+        Q_UNUSED(config);
+        return nullptr;
+    }
+
+    QWidget* buildCalendar(const Showbox::Models::CalendarConfig& config) override {
+        Q_UNUSED(config);
+        return nullptr;
+    }
+
+    QWidget* buildSeparator(const Showbox::Models::SeparatorConfig& config) override {
+        Q_UNUSED(config);
+        return nullptr;
+    }
+
     QLayout* buildLayout(const Showbox::Models::LayoutConfig& config) override {
         Q_UNUSED(config);
         return nullptr;

@@ -8,6 +8,10 @@
 #include <QTableWidget>
 #include <QProgressBar>
 #include <QVBoxLayout>
+#include <QCheckBox>
+#include <QRadioButton>
+#include <QCalendarWidget>
+#include <QFrame>
 #include "push_button_widget.h"
 #include "custom_chart_widget.h"
 
@@ -118,6 +122,42 @@ QWidget* ShowboxBuilder::buildChart(const Showbox::Models::ChartConfig& config)
     }
     
     return chart;
+}
+
+QWidget* ShowboxBuilder::buildCheckBox(const Showbox::Models::CheckBoxConfig& config)
+{
+    auto *cb = new QCheckBox(config.text);
+    cb->setObjectName(config.name);
+    cb->setChecked(config.checked);
+    return cb;
+}
+
+QWidget* ShowboxBuilder::buildRadioButton(const Showbox::Models::RadioButtonConfig& config)
+{
+    auto *rb = new QRadioButton(config.text);
+    rb->setObjectName(config.name);
+    rb->setChecked(config.checked);
+    return rb;
+}
+
+QWidget* ShowboxBuilder::buildCalendar(const Showbox::Models::CalendarConfig& config)
+{
+    auto *cw = new QCalendarWidget();
+    cw->setObjectName(config.name);
+    return cw;
+}
+
+QWidget* ShowboxBuilder::buildSeparator(const Showbox::Models::SeparatorConfig& config)
+{
+    auto *line = new QFrame();
+    line->setObjectName(config.name);
+    if (config.orientation == Qt::Horizontal) {
+        line->setFrameShape(QFrame::HLine);
+    } else {
+        line->setFrameShape(QFrame::VLine);
+    }
+    line->setFrameShadow(QFrame::Sunken);
+    return line;
 }
 
 QLayout* ShowboxBuilder::buildLayout(const Showbox::Models::LayoutConfig& config)
