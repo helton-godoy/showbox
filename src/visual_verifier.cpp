@@ -4,6 +4,9 @@
 #include <QGroupBox>
 #include <QScrollArea>
 #include <QWidget>
+#include <QLabel>
+#include <QPushButton>
+#include <QTabWidget>
 #include "ShowboxBuilder.h"
 #include "WidgetConfigs.h"
 
