@@ -6,13 +6,13 @@ Tutoriais práticos passo a passo para aprender Showbox.
 
 ## Índice
 
-| Nível | Tutorial | Descrição |
-|-------|----------|-----------|
-| 🟢 Básico | [01. Hello World](01-hello-world.md) | Primeiro diálogo simples |
-| 🟢 Básico | [02. Formulário de Login](02-formulario-login.md) | Campos de entrada e validação |
-| 🟡 Intermediário | [03. Painel de Controle](03-painel-controle.md) | Sidebar + Tabs |
-| 🟡 Intermediário | [04. Tabela de Dados](04-tabela-dados.md) | Tabela com busca e edição |
-| 🔴 Avançado | [05. Gráfico Dinâmico](05-grafico-dinamico.md) | Gráficos interativos |
+| Nível            | Tutorial                                          | Descrição                     |
+| ---------------- | ------------------------------------------------- | ----------------------------- |
+| 🟢 Básico        | [01. Hello World](01-hello-world.md)              | Primeiro diálogo simples      |
+| 🟢 Básico        | [02. Formulário de Login](02-formulario-login.md) | Campos de entrada e validação |
+| 🟡 Intermediário | [03. Painel de Controle](03-painel-controle.md)   | Sidebar + Tabs                |
+| 🟡 Intermediário | [04. Tabela de Dados](04-tabela-dados.md)         | Tabela com busca e edição     |
+| 🔴 Avançado      | [05. Gráfico Dinâmico](05-grafico-dinamico.md)    | Gráficos interativos          |
 
 ---
 
@@ -28,4 +28,5 @@ Tutoriais práticos passo a passo para aprender Showbox.
 ## Arquivos Prontos
 
 Os exemplos também estão disponíveis em:
+
 - `examples/` - Scripts prontos para executar

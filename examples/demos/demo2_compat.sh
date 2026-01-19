@@ -6,29 +6,28 @@
 
 SHOWBOX_BIN="${SHOWBOX_BIN:-./src/code/showbox/bin/showbox}"
 
-while IFS=$'=' read key value
-do
-    case $key in
-        cb1)
-            if [ "$value" == "1" ]; then
-                echo "Option 1 is checked"
-            else
-                echo "Option 1 is unchecked"
-            fi
-            ;;
-        txt1)
-            echo "Text entered: $value"
-            ;;
-        okay)
-            echo "User clicked Ok pushbutton"
-            ;;
-        cancel)
-            echo "User clicked Cancel pushbutton"
-            ;;
-    esac
+while IFS=$'=' read key value; do
+	case ${key} in
+	cb1)
+		if [[ "${value}" == "1" ]]; then
+			echo "Option 1 is checked"
+		else
+			echo "Option 1 is unchecked"
+		fi
+		;;
+	txt1)
+		echo "Text entered: ${value}"
+		;;
+	okay)
+		echo "User clicked Ok pushbutton"
+		;;
+	cancel)
+		echo "User clicked Cancel pushbutton"
+		;;
+	esac
 done < <(
 
-$SHOWBOX_BIN <<EODEMO
+	${SHOWBOX_BIN} <<EODEMO
 add checkbox "&Option 1" cb1
 add textbox "&Text field" txt1 "text to edit"
 add frame horizontal

@@ -19,6 +19,60 @@ struct BaseConfig {
     }
 };
 
+/**
+ * @brief Configuração de uma ação individual
+ * 
+ * Tipos suportados:
+ * - "shell": Executa comando shell inline
+ * - "script": Executa arquivo .sh externo
+ * - "set": Modifica propriedade de outro widget
+ * - "query": Obtém valor de widget e armazena em variável
+ * - "callback": Echo para stdout (capturado pelo script pai)
+ */
+struct ActionConfig {
+    enum Type { Shell, Script, Set, Query, Callback };
+    
+    Type type = Shell;
+    QString command;        // Para Shell/Script: o comando ou caminho
+    QString targetWidget;   // Para Set/Query: nome do widget alvo
+    QString property;       // Para Set: propriedade a modificar
+    QString value;          // Para Set: novo valor
+    QString variable;       // Para Query: nome da variável de destino
+    
+    bool isValid() const {
+        switch (type) {
+            case Shell:
+            case Script:
+            case Callback:
+                return !command.isEmpty();
+            case Set:
+                return !targetWidget.isEmpty() && !property.isEmpty();
+            case Query:
+                return !targetWidget.isEmpty() && !variable.isEmpty();
+        }
+        return false;
+    }
+};
+
+/**
+ * @brief Configuração de eventos/ações para um widget
+ * 
+ * Mapeia eventos (clicked, changed, etc.) para listas de ações
+ */
+struct EventActionsConfig {
+    QMap<QString, QList<ActionConfig>> events; // "clicked" -> [action1, action2, ...]
+    
+    bool hasActions() const { return !events.isEmpty(); }
+    
+    QList<ActionConfig> actionsFor(const QString &event) const {
+        return events.value(event);
+    }
+    
+    void addAction(const QString &event, const ActionConfig &action) {
+        events[event].append(action);
+    }
+};
+
 struct WindowConfig : public BaseConfig {
     QString title;
     int width = 800;
@@ -36,11 +90,14 @@ struct ButtonConfig : public BaseConfig {
     QString text = "Button";
     bool checkable = false;
     bool checked = false;
+    QString iconPath;
+    EventActionsConfig actions;  // Ações associadas ao botão
 };
 
 struct LabelConfig : public BaseConfig {
     QString text = "Label";
     bool wordWrap = false;
+    QString iconPath;
 };
 
 struct LineEditConfig : public BaseConfig {

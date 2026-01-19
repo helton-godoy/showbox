@@ -1,18 +1,17 @@
 #ifndef TOKENIZER_H
 #define TOKENIZER_H
 
-#include <QString>
 #include <QList>
+#include <QString>
 
 struct Token {
-    QString text;
-    // We can add Type later if needed
+  QString text;
+  // We can add Type later if needed
 };
 
-class Tokenizer
-{
+class Tokenizer {
 public:
-    QList<Token> tokenize(const QString &input);
+  QList<Token> tokenize(const QString &input);
 };
 
 #endif // TOKENIZER_H

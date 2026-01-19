@@ -6,7 +6,7 @@
 
 SHOWBOX_BIN="${SHOWBOX_BIN:-./src/code/showbox/bin/showbox}"
 
-$SHOWBOX_BIN <<EODEMO
+${SHOWBOX_BIN} <<EODEMO
 add label "<small>This script demonstrates the showbox application exit codes usage." note
 set note stylesheet "qproperty-textInteractionFlags: NoTextInteraction;"
 add separator
@@ -23,11 +23,10 @@ set title "ShowBox Demo 1"
 show
 EODEMO
 
-if [ "$?" == "0" ]
-then
-  echo "User rejected dialog (exit code 0)"
+if [[ "$?" == "0" ]]; then
+	echo "User rejected dialog (exit code 0)"
 else
-  echo "User accepted dialog (exit code 1)"
+	echo "User accepted dialog (exit code 1)"
 fi
 
 exit 0

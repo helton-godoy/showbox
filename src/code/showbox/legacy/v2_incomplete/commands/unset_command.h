@@ -10,12 +10,14 @@
 
 class UnsetCommand : public Command {
 public:
-    void execute(ExecutionContext &context, const QList<QString> &args) override;
+  void execute(ExecutionContext &context, const QList<QString> &args) override;
 };
 
 class UnsetCommandFactory : public CommandFactory {
 public:
-    std::unique_ptr<Command> create() const override { return std::make_unique<UnsetCommand>(); }
+  std::unique_ptr<Command> create() const override {
+    return std::make_unique<UnsetCommand>();
+  }
 };
 
 #endif // UNSET_COMMAND_H

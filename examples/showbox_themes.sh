@@ -6,7 +6,7 @@
 
 SHOWBOX_BIN="${SHOWBOX_BIN:-./src/code/showbox/bin/showbox}"
 
-$SHOWBOX_BIN <<EODEMO
+${SHOWBOX_BIN} <<EODEMO
 add label "<h2>ShowBox Theme Demo</h2>" title
 set title stylesheet "qproperty-textInteractionFlags: NoTextInteraction;"
 

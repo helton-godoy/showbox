@@ -6,16 +6,15 @@
 
 SHOWBOX_BIN="${SHOWBOX_BIN:-./src/code/showbox/bin/showbox}"
 
-while IFS=$'=' read key value
-do
-    # Chart slice clicks are reported as chart1.slice["label"]=value
-    if [[ "$key" =~ ^chart1\.slice\[\"(.+)\"\]$ ]]; then
-        label="${BASH_REMATCH[1]}"
-        echo "Slice '$label' clicked with value: $value"
-    fi
+while IFS=$'=' read key value; do
+	# Chart slice clicks are reported as chart1.slice["label"]=value
+	if [[ ${key} =~ ^chart1\.slice\[\"(.+)\"\]$ ]]; then
+		label="${BASH_REMATCH[1]}"
+		echo "Slice '${label}' clicked with value: ${value}"
+	fi
 done < <(
 
-$SHOWBOX_BIN <<EODEMO
+	${SHOWBOX_BIN} <<EODEMO
 add label "<b>Sales Distribution</b>" title
 set title stylesheet "qproperty-textInteractionFlags: NoTextInteraction;"
 

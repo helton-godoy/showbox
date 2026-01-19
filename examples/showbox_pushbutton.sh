@@ -6,29 +6,28 @@
 
 SHOWBOX_BIN="${SHOWBOX_BIN:-./src/code/showbox/bin/showbox}"
 
-while IFS=$'=' read key value
-do
-    case $key in
-        btn_apply)
-            echo "Apply button clicked: $value"
-            ;;
-        btn_toggle)
-            if [ "$value" == "pressed" ]; then
-                echo "Toggle button pressed"
-            else
-                echo "Toggle button released"
-            fi
-            ;;
-        btn_ok)
-            echo "OK button clicked"
-            ;;
-        btn_cancel)
-            echo "Cancel button clicked"
-            ;;
-    esac
+while IFS=$'=' read key value; do
+	case ${key} in
+	btn_apply)
+		echo "Apply button clicked: ${value}"
+		;;
+	btn_toggle)
+		if [[ "${value}" == "pressed" ]]; then
+			echo "Toggle button pressed"
+		else
+			echo "Toggle button released"
+		fi
+		;;
+	btn_ok)
+		echo "OK button clicked"
+		;;
+	btn_cancel)
+		echo "Cancel button clicked"
+		;;
+	esac
 done < <(
 
-$SHOWBOX_BIN <<EODEMO
+	${SHOWBOX_BIN} <<EODEMO
 add label "<b>PushButton Demo</b>" title
 set title stylesheet "qproperty-textInteractionFlags: NoTextInteraction;"
 

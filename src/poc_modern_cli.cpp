@@ -1,44 +1,79 @@
-#include <QApplication>
-#include <QTimer>
-#include <ShowboxBuilder.h>
 #include <CLIBuilder.h>
 #include <ParserMain.h>
+#include <QApplication>
 #include <QThread>
+#include <QTimer>
+#include <QWidget>
+#include <ShowboxBuilder.h>
+#include <iostream>
+#include <string>
 
-class InputThread : public QThread {
-    ParserMain *parser;
+// Thread dedicada apenas para ler do STDIN sem bloquear a GUI
+class StdinReader : public QThread {
+  Q_OBJECT
+signals:
+  void lineRead(const QString &line);
+  void finishedReading();
+
 public:
-    InputThread(ParserMain *p) : parser(p) {}
-    void run() override {
-        parser->run();
-        QMetaObject::invokeMethod(qApp, "quit");
+  void run() override {
+    std::string line;
+    while (std::getline(std::cin, line)) {
+      emit lineRead(QString::fromStdString(line));
     }
+    emit finishedReading();
+  }
 };
 
-int main(int argc, char *argv[])
-{
-    QApplication app(argc, argv);
+int main(int argc, char *argv[]) {
+  QApplication app(argc, argv);
 
-    // Use CLIBuilder which implements the IShowboxBuilder interface
-    // but wraps the logic. Or use ShowboxBuilder directly if it's sufficient.
-    // ParserMain expects IShowboxBuilder.
-    // However, ShowboxBuilder returns QWidget*, ParserMain needs to manage them.
-    // Wait, ParserMain logic assumes IShowboxBuilder returns QWidgets and handles parenting itself.
-    // ShowboxBuilder is perfect for this.
-    
-    ShowboxBuilder builder;
-    ParserMain parser(&builder);
+  bool keepOpen = false;
+  for (int i = 1; i < argc; ++i) {
+    if (QString(argv[i]) == "--keep-open") {
+      keepOpen = true;
+    }
+  }
 
-    // Connect signals if needed, e.g. showRequested
-    // But ParserMain handles show internally or emits it?
-    // Current ParserMain implementation emits showRequested(), 
-    // but usually in V1 'show' makes a specific widget visible.
-    // Let's just run it.
+  ShowboxBuilder builder;
+  ParserMain parser(&builder);
 
-    // Run parser in a separate thread to not block the GUI event loop
-    // reading from stdin is blocking.
-    InputThread thread(&parser);
-    thread.start();
+  // Conectar showRequested para mostrar janelas
+  QObject::connect(&parser, &ParserMain::showRequested, [&]() {
+    for (QWidget *widget : QApplication::topLevelWidgets()) {
+      if (!widget->isHidden()) {
+        widget->raise();
+        widget->activateWindow();
+      } else {
+        widget->show();
+      }
+    }
+  });
 
-    return app.exec();
+  StdinReader reader;
+
+  // Conectar leitura (Thread) -> Processamento (Main Thread)
+  // O Qt::QueuedConnection (padrão entre threads) garante que o lambda
+  // rode na thread principal, onde 'parser' vive.
+  QObject::connect(&reader, &StdinReader::lineRead, &parser,
+                   [&](const QString &line) {
+                     QString qline = line.trimmed();
+                     if (!qline.isEmpty() && !qline.startsWith("#")) {
+                       parser.processLine(qline);
+                     }
+                   });
+
+  QObject::connect(&reader, &StdinReader::finishedReading, [&]() {
+    if (!keepOpen) {
+      app.quit();
+    }
+  });
+
+  reader.start();
+
+  int ret = app.exec();
+  reader.wait(); // Join thread to avoid destructive crash
+  return ret;
 }
+
+#include "poc_modern_cli.moc"

@@ -2,10 +2,10 @@
 
 SHOWBOX_BIN="${SHOWBOX_BIN:-./src/code/showbox/bin/showbox}"
 
-coproc $SHOWBOX_BIN    # Note: bash supports only one co-process
+coproc ${SHOWBOX_BIN}
 INPUTFD=${COPROC[0]}  # file descriptor the showbox process writes to
-OUTPUTFD=${COPROC[1]}  # file descriptor the showbox process reads from
-DBPID=$COPROC_PID    # PID of the showbox, if you need it for any purpose... e.g. to kill it
+OUTPUTFD=${COPROC[1]} # file descriptor the showbox process reads from
+DBPID=${COPROC_PID}   # PID of the showbox, if you need it for any purpose... e.g. to kill it
 
 # If your script doesn't use standard input/output you may redirect them to the pipes
 # and don't bore with redirection for each input/output command.
@@ -21,10 +21,10 @@ E_CANCEL=1
 
 # The trap checks whether the showbox application was terminated and if so
 # kills the current job and exits the script
-trap "if ! kill -0 $DBPID &>/dev/null; then kill %; echo The script cancelled by user; exit $E_CANCEL; fi" CHLD
-set -o monitor  # Enable SIGCHLD
+trap "if ! kill -0 ${DBPID} &>/dev/null; then kill %; echo The script cancelled by user; exit ${E_CANCEL}; fi" CHLD
+set -o monitor # Enable SIGCHLD
 
-cat >&$OUTPUTFD <<EODEMO
+cat >&"${OUTPUTFD}" <<EODEMO
 add label "<small>This script demonstrates the showbox application monitoring technique during bidirectional communication with it using pipes." note
 set note stylesheet "qproperty-textInteractionFlags: NoTextInteraction;"
 add separator
@@ -40,17 +40,16 @@ set okay default
 set okay focus
 EODEMO
 
-while IFS=$'=' read key value
-do
-  case $key in
-    okay)
-      echo User initiated the long-run process
-      break
-      ;;
-  esac
-done <&$INPUTFD
+while IFS=$'=' read key value; do
+	case ${key} in
+	okay)
+		echo User initiated the long-run process
+		break
+		;;
+	esac
+done <&"${INPUTFD}"
 
-cat >&$OUTPUTFD <<EODEMO
+cat >&"${OUTPUTFD}" <<EODEMO
 set msg title "The long-run process is in progress.<br>Please wait..."
 remove okay
 set cancel default
@@ -59,18 +58,18 @@ EODEMO
 
 # The long-run process is run in background to return control to the shell
 # to allow it process signals immediately
-sleep 10&
+sleep 10 &
 wait %
 echo The long-run process completed
 
-cat >&$OUTPUTFD <<EODEMO
+cat >&"${OUTPUTFD}" <<EODEMO
 set msg title "The long-run process completed!"
 set cancel title &Ok
 EODEMO
 
 set +o monitor  # Disable SIGCHLD
-wait $DBPID    # Wait the user to complete the dialog
+wait "${DBPID}" # Wait the user to complete the dialog
 
 echo The script completed successfuly
 
-exit $E_SUCCESS
+exit "${E_SUCCESS}"

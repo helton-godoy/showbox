@@ -37,7 +37,7 @@ MOVE          = mv -f
 TAR           = tar -cf
 COMPRESS      = gzip -9f
 DISTNAME      = showbox-legacy1.0.0
-DISTDIR = /app/src/code/showbox/obj/showbox-legacy1.0.0
+DISTDIR = /workspace/showbox/src/code/showbox/obj/showbox-legacy1.0.0
 LINK          = g++
 LFLAGS        = -Wl,-O1 -Wl,-rpath-link,/usr/lib/x86_64-linux-gnu
 LIBS          = $(SUBLIBS) -lpthread /usr/lib/x86_64-linux-gnu/libQt6Charts.so /usr/lib/x86_64-linux-gnu/libQt6OpenGLWidgets.so /usr/lib/x86_64-linux-gnu/libQt6Widgets.so /usr/lib/x86_64-linux-gnu/libQt6Svg.so /usr/lib/x86_64-linux-gnu/libQt6OpenGL.so /usr/lib/x86_64-linux-gnu/libQt6Gui.so /usr/lib/x86_64-linux-gnu/libGLX.so /usr/lib/x86_64-linux-gnu/libOpenGL.so /usr/lib/x86_64-linux-gnu/libQt6Core.so -lGLX -lOpenGL   
@@ -445,31 +445,31 @@ obj/moc_showbox.cpp: showbox.h \
 		../../../libs/showbox-ui/include/theme_manager.h \
 		obj/moc_predefs.h \
 		/usr/lib/qt6/libexec/moc
-	/usr/lib/qt6/libexec/moc $(DEFINES) --include /app/src/code/showbox/obj/moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt6/mkspecs/linux-g++ -I/app/src/code/showbox -I/app/libs/showbox-ui/include -I/app/src/code/showbox/legacy/v2_incomplete -I/app/src/code/showbox/legacy/v1_monolith -I/usr/include/x86_64-linux-gnu/qt6 -I/usr/include/x86_64-linux-gnu/qt6/QtCharts -I/usr/include/x86_64-linux-gnu/qt6/QtOpenGLWidgets -I/usr/include/x86_64-linux-gnu/qt6/QtWidgets -I/usr/include/x86_64-linux-gnu/qt6/QtSvg -I/usr/include/x86_64-linux-gnu/qt6/QtOpenGL -I/usr/include/x86_64-linux-gnu/qt6/QtGui -I/usr/include/x86_64-linux-gnu/qt6/QtCore -I/usr/include/c++/14 -I/usr/include/x86_64-linux-gnu/c++/14 -I/usr/include/c++/14/backward -I/usr/lib/gcc/x86_64-linux-gnu/14/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include showbox.h -o obj/moc_showbox.cpp
+	/usr/lib/qt6/libexec/moc $(DEFINES) --include /workspace/showbox/src/code/showbox/obj/moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt6/mkspecs/linux-g++ -I/workspace/showbox/src/code/showbox -I/workspace/showbox/libs/showbox-ui/include -I/workspace/showbox/src/code/showbox/legacy/v2_incomplete -I/workspace/showbox/src/code/showbox/legacy/v1_monolith -I/usr/include/x86_64-linux-gnu/qt6 -I/usr/include/x86_64-linux-gnu/qt6/QtCharts -I/usr/include/x86_64-linux-gnu/qt6/QtOpenGLWidgets -I/usr/include/x86_64-linux-gnu/qt6/QtWidgets -I/usr/include/x86_64-linux-gnu/qt6/QtSvg -I/usr/include/x86_64-linux-gnu/qt6/QtOpenGL -I/usr/include/x86_64-linux-gnu/qt6/QtGui -I/usr/include/x86_64-linux-gnu/qt6/QtCore -I/usr/include/c++/14 -I/usr/include/x86_64-linux-gnu/c++/14 -I/usr/include/c++/14/backward -I/usr/lib/gcc/x86_64-linux-gnu/14/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include showbox.h -o obj/moc_showbox.cpp
 
 obj/moc_parser_driver.cpp: legacy/v2_incomplete/parser_driver.h \
+		legacy/v2_incomplete/execution_context.h \
 		legacy/v2_incomplete/parser.h \
 		legacy/v2_incomplete/command_registry.h \
 		legacy/v2_incomplete/command.h \
-		legacy/v2_incomplete/execution_context.h \
 		obj/moc_predefs.h \
 		/usr/lib/qt6/libexec/moc
-	/usr/lib/qt6/libexec/moc $(DEFINES) --include /app/src/code/showbox/obj/moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt6/mkspecs/linux-g++ -I/app/src/code/showbox -I/app/libs/showbox-ui/include -I/app/src/code/showbox/legacy/v2_incomplete -I/app/src/code/showbox/legacy/v1_monolith -I/usr/include/x86_64-linux-gnu/qt6 -I/usr/include/x86_64-linux-gnu/qt6/QtCharts -I/usr/include/x86_64-linux-gnu/qt6/QtOpenGLWidgets -I/usr/include/x86_64-linux-gnu/qt6/QtWidgets -I/usr/include/x86_64-linux-gnu/qt6/QtSvg -I/usr/include/x86_64-linux-gnu/qt6/QtOpenGL -I/usr/include/x86_64-linux-gnu/qt6/QtGui -I/usr/include/x86_64-linux-gnu/qt6/QtCore -I/usr/include/c++/14 -I/usr/include/x86_64-linux-gnu/c++/14 -I/usr/include/c++/14/backward -I/usr/lib/gcc/x86_64-linux-gnu/14/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include legacy/v2_incomplete/parser_driver.h -o obj/moc_parser_driver.cpp
+	/usr/lib/qt6/libexec/moc $(DEFINES) --include /workspace/showbox/src/code/showbox/obj/moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt6/mkspecs/linux-g++ -I/workspace/showbox/src/code/showbox -I/workspace/showbox/libs/showbox-ui/include -I/workspace/showbox/src/code/showbox/legacy/v2_incomplete -I/workspace/showbox/src/code/showbox/legacy/v1_monolith -I/usr/include/x86_64-linux-gnu/qt6 -I/usr/include/x86_64-linux-gnu/qt6/QtCharts -I/usr/include/x86_64-linux-gnu/qt6/QtOpenGLWidgets -I/usr/include/x86_64-linux-gnu/qt6/QtWidgets -I/usr/include/x86_64-linux-gnu/qt6/QtSvg -I/usr/include/x86_64-linux-gnu/qt6/QtOpenGL -I/usr/include/x86_64-linux-gnu/qt6/QtGui -I/usr/include/x86_64-linux-gnu/qt6/QtCore -I/usr/include/c++/14 -I/usr/include/x86_64-linux-gnu/c++/14 -I/usr/include/c++/14/backward -I/usr/lib/gcc/x86_64-linux-gnu/14/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include legacy/v2_incomplete/parser_driver.h -o obj/moc_parser_driver.cpp
 
 obj/moc_theme_manager.cpp: ../../../libs/showbox-ui/include/theme_manager.h \
 		obj/moc_predefs.h \
 		/usr/lib/qt6/libexec/moc
-	/usr/lib/qt6/libexec/moc $(DEFINES) --include /app/src/code/showbox/obj/moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt6/mkspecs/linux-g++ -I/app/src/code/showbox -I/app/libs/showbox-ui/include -I/app/src/code/showbox/legacy/v2_incomplete -I/app/src/code/showbox/legacy/v1_monolith -I/usr/include/x86_64-linux-gnu/qt6 -I/usr/include/x86_64-linux-gnu/qt6/QtCharts -I/usr/include/x86_64-linux-gnu/qt6/QtOpenGLWidgets -I/usr/include/x86_64-linux-gnu/qt6/QtWidgets -I/usr/include/x86_64-linux-gnu/qt6/QtSvg -I/usr/include/x86_64-linux-gnu/qt6/QtOpenGL -I/usr/include/x86_64-linux-gnu/qt6/QtGui -I/usr/include/x86_64-linux-gnu/qt6/QtCore -I/usr/include/c++/14 -I/usr/include/x86_64-linux-gnu/c++/14 -I/usr/include/c++/14/backward -I/usr/lib/gcc/x86_64-linux-gnu/14/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include ../../../libs/showbox-ui/include/theme_manager.h -o obj/moc_theme_manager.cpp
+	/usr/lib/qt6/libexec/moc $(DEFINES) --include /workspace/showbox/src/code/showbox/obj/moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt6/mkspecs/linux-g++ -I/workspace/showbox/src/code/showbox -I/workspace/showbox/libs/showbox-ui/include -I/workspace/showbox/src/code/showbox/legacy/v2_incomplete -I/workspace/showbox/src/code/showbox/legacy/v1_monolith -I/usr/include/x86_64-linux-gnu/qt6 -I/usr/include/x86_64-linux-gnu/qt6/QtCharts -I/usr/include/x86_64-linux-gnu/qt6/QtOpenGLWidgets -I/usr/include/x86_64-linux-gnu/qt6/QtWidgets -I/usr/include/x86_64-linux-gnu/qt6/QtSvg -I/usr/include/x86_64-linux-gnu/qt6/QtOpenGL -I/usr/include/x86_64-linux-gnu/qt6/QtGui -I/usr/include/x86_64-linux-gnu/qt6/QtCore -I/usr/include/c++/14 -I/usr/include/x86_64-linux-gnu/c++/14 -I/usr/include/c++/14/backward -I/usr/lib/gcc/x86_64-linux-gnu/14/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include ../../../libs/showbox-ui/include/theme_manager.h -o obj/moc_theme_manager.cpp
 
 obj/moc_custom_table_widget.cpp: ../../../libs/showbox-ui/include/custom_table_widget.h \
 		obj/moc_predefs.h \
 		/usr/lib/qt6/libexec/moc
-	/usr/lib/qt6/libexec/moc $(DEFINES) --include /app/src/code/showbox/obj/moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt6/mkspecs/linux-g++ -I/app/src/code/showbox -I/app/libs/showbox-ui/include -I/app/src/code/showbox/legacy/v2_incomplete -I/app/src/code/showbox/legacy/v1_monolith -I/usr/include/x86_64-linux-gnu/qt6 -I/usr/include/x86_64-linux-gnu/qt6/QtCharts -I/usr/include/x86_64-linux-gnu/qt6/QtOpenGLWidgets -I/usr/include/x86_64-linux-gnu/qt6/QtWidgets -I/usr/include/x86_64-linux-gnu/qt6/QtSvg -I/usr/include/x86_64-linux-gnu/qt6/QtOpenGL -I/usr/include/x86_64-linux-gnu/qt6/QtGui -I/usr/include/x86_64-linux-gnu/qt6/QtCore -I/usr/include/c++/14 -I/usr/include/x86_64-linux-gnu/c++/14 -I/usr/include/c++/14/backward -I/usr/lib/gcc/x86_64-linux-gnu/14/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include ../../../libs/showbox-ui/include/custom_table_widget.h -o obj/moc_custom_table_widget.cpp
+	/usr/lib/qt6/libexec/moc $(DEFINES) --include /workspace/showbox/src/code/showbox/obj/moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt6/mkspecs/linux-g++ -I/workspace/showbox/src/code/showbox -I/workspace/showbox/libs/showbox-ui/include -I/workspace/showbox/src/code/showbox/legacy/v2_incomplete -I/workspace/showbox/src/code/showbox/legacy/v1_monolith -I/usr/include/x86_64-linux-gnu/qt6 -I/usr/include/x86_64-linux-gnu/qt6/QtCharts -I/usr/include/x86_64-linux-gnu/qt6/QtOpenGLWidgets -I/usr/include/x86_64-linux-gnu/qt6/QtWidgets -I/usr/include/x86_64-linux-gnu/qt6/QtSvg -I/usr/include/x86_64-linux-gnu/qt6/QtOpenGL -I/usr/include/x86_64-linux-gnu/qt6/QtGui -I/usr/include/x86_64-linux-gnu/qt6/QtCore -I/usr/include/c++/14 -I/usr/include/x86_64-linux-gnu/c++/14 -I/usr/include/c++/14/backward -I/usr/lib/gcc/x86_64-linux-gnu/14/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include ../../../libs/showbox-ui/include/custom_table_widget.h -o obj/moc_custom_table_widget.cpp
 
 obj/moc_custom_chart_widget.cpp: ../../../libs/showbox-ui/include/custom_chart_widget.h \
 		obj/moc_predefs.h \
 		/usr/lib/qt6/libexec/moc
-	/usr/lib/qt6/libexec/moc $(DEFINES) --include /app/src/code/showbox/obj/moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt6/mkspecs/linux-g++ -I/app/src/code/showbox -I/app/libs/showbox-ui/include -I/app/src/code/showbox/legacy/v2_incomplete -I/app/src/code/showbox/legacy/v1_monolith -I/usr/include/x86_64-linux-gnu/qt6 -I/usr/include/x86_64-linux-gnu/qt6/QtCharts -I/usr/include/x86_64-linux-gnu/qt6/QtOpenGLWidgets -I/usr/include/x86_64-linux-gnu/qt6/QtWidgets -I/usr/include/x86_64-linux-gnu/qt6/QtSvg -I/usr/include/x86_64-linux-gnu/qt6/QtOpenGL -I/usr/include/x86_64-linux-gnu/qt6/QtGui -I/usr/include/x86_64-linux-gnu/qt6/QtCore -I/usr/include/c++/14 -I/usr/include/x86_64-linux-gnu/c++/14 -I/usr/include/c++/14/backward -I/usr/lib/gcc/x86_64-linux-gnu/14/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include ../../../libs/showbox-ui/include/custom_chart_widget.h -o obj/moc_custom_chart_widget.cpp
+	/usr/lib/qt6/libexec/moc $(DEFINES) --include /workspace/showbox/src/code/showbox/obj/moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt6/mkspecs/linux-g++ -I/workspace/showbox/src/code/showbox -I/workspace/showbox/libs/showbox-ui/include -I/workspace/showbox/src/code/showbox/legacy/v2_incomplete -I/workspace/showbox/src/code/showbox/legacy/v1_monolith -I/usr/include/x86_64-linux-gnu/qt6 -I/usr/include/x86_64-linux-gnu/qt6/QtCharts -I/usr/include/x86_64-linux-gnu/qt6/QtOpenGLWidgets -I/usr/include/x86_64-linux-gnu/qt6/QtWidgets -I/usr/include/x86_64-linux-gnu/qt6/QtSvg -I/usr/include/x86_64-linux-gnu/qt6/QtOpenGL -I/usr/include/x86_64-linux-gnu/qt6/QtGui -I/usr/include/x86_64-linux-gnu/qt6/QtCore -I/usr/include/c++/14 -I/usr/include/x86_64-linux-gnu/c++/14 -I/usr/include/c++/14/backward -I/usr/lib/gcc/x86_64-linux-gnu/14/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include ../../../libs/showbox-ui/include/custom_chart_widget.h -o obj/moc_custom_chart_widget.cpp
 
 compiler_moc_objc_header_make_all:
 compiler_moc_objc_header_clean:
@@ -503,8 +503,8 @@ obj/dialog_main.o: legacy/v1_monolith/dialog_main.cc showbox.h \
 		legacy/v2_incomplete/command_registry.h \
 		legacy/v2_incomplete/command.h \
 		legacy/v2_incomplete/parser_driver.h \
-		legacy/v2_incomplete/parser.h \
 		legacy/v2_incomplete/execution_context.h \
+		legacy/v2_incomplete/parser.h \
 		legacy/v2_incomplete/commands/add_command.h \
 		legacy/v2_incomplete/commands/set_command.h \
 		legacy/v2_incomplete/commands/query_command.h \
@@ -541,15 +541,15 @@ obj/parser.o: legacy/v2_incomplete/parser.cpp legacy/v2_incomplete/parser.h \
 		legacy/v2_incomplete/command_registry.h \
 		legacy/v2_incomplete/command.h \
 		legacy/v2_incomplete/execution_context.h \
-		legacy/v2_incomplete/tokenizer.h \
-		../../../libs/showbox-ui/include/logger.h
+		../../../libs/showbox-ui/include/logger.h \
+		legacy/v2_incomplete/tokenizer.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/parser.o legacy/v2_incomplete/parser.cpp
 
 obj/parser_driver.o: legacy/v2_incomplete/parser_driver.cpp legacy/v2_incomplete/parser_driver.h \
+		legacy/v2_incomplete/execution_context.h \
 		legacy/v2_incomplete/parser.h \
 		legacy/v2_incomplete/command_registry.h \
-		legacy/v2_incomplete/command.h \
-		legacy/v2_incomplete/execution_context.h
+		legacy/v2_incomplete/command.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/parser_driver.o legacy/v2_incomplete/parser_driver.cpp
 
 obj/execution_context.o: legacy/v2_incomplete/execution_context.cpp legacy/v2_incomplete/execution_context.h \
@@ -573,8 +573,8 @@ obj/custom_chart_widget.o: ../../../libs/showbox-ui/src/custom_chart_widget.cpp 
 
 obj/add_command.o: legacy/v2_incomplete/commands/add_command.cpp legacy/v2_incomplete/commands/add_command.h \
 		legacy/v2_incomplete/command.h \
-		../../../libs/showbox-ui/include/logger.h \
 		legacy/v2_incomplete/execution_context.h \
+		../../../libs/showbox-ui/include/logger.h \
 		showbox.h \
 		../../../libs/showbox-ui/include/theme_manager.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/add_command.o legacy/v2_incomplete/commands/add_command.cpp
@@ -584,24 +584,24 @@ obj/set_command.o: legacy/v2_incomplete/commands/set_command.cpp legacy/v2_incom
 		legacy/v2_incomplete/commands/command_utils.h \
 		showbox.h \
 		../../../libs/showbox-ui/include/theme_manager.h \
-		../../../libs/showbox-ui/include/logger.h \
-		legacy/v2_incomplete/execution_context.h
+		legacy/v2_incomplete/execution_context.h \
+		../../../libs/showbox-ui/include/logger.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/set_command.o legacy/v2_incomplete/commands/set_command.cpp
 
 obj/query_command.o: legacy/v2_incomplete/commands/query_command.cpp legacy/v2_incomplete/commands/query_command.h \
 		legacy/v2_incomplete/command.h \
-		../../../libs/showbox-ui/include/logger.h \
 		legacy/v2_incomplete/execution_context.h \
+		../../../libs/showbox-ui/include/logger.h \
 		showbox.h \
 		../../../libs/showbox-ui/include/theme_manager.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/query_command.o legacy/v2_incomplete/commands/query_command.cpp
 
 obj/simple_commands.o: legacy/v2_incomplete/commands/simple_commands.cpp legacy/v2_incomplete/commands/simple_commands.h \
 		legacy/v2_incomplete/command.h \
+		legacy/v2_incomplete/commands/command_utils.h \
 		showbox.h \
 		../../../libs/showbox-ui/include/theme_manager.h \
-		legacy/v2_incomplete/execution_context.h \
-		legacy/v2_incomplete/commands/command_utils.h
+		legacy/v2_incomplete/execution_context.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/simple_commands.o legacy/v2_incomplete/commands/simple_commands.cpp
 
 obj/command_utils.o: legacy/v2_incomplete/commands/command_utils.cpp legacy/v2_incomplete/commands/command_utils.h \
@@ -611,16 +611,16 @@ obj/command_utils.o: legacy/v2_incomplete/commands/command_utils.cpp legacy/v2_i
 
 obj/position_command.o: legacy/v2_incomplete/commands/position_command.cpp legacy/v2_incomplete/commands/position_command.h \
 		legacy/v2_incomplete/command.h \
+		legacy/v2_incomplete/execution_context.h \
 		showbox.h \
-		../../../libs/showbox-ui/include/theme_manager.h \
-		legacy/v2_incomplete/execution_context.h
+		../../../libs/showbox-ui/include/theme_manager.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/position_command.o legacy/v2_incomplete/commands/position_command.cpp
 
 obj/unset_command.o: legacy/v2_incomplete/commands/unset_command.cpp legacy/v2_incomplete/commands/unset_command.h \
 		legacy/v2_incomplete/command.h \
+		legacy/v2_incomplete/execution_context.h \
 		showbox.h \
-		../../../libs/showbox-ui/include/theme_manager.h \
-		legacy/v2_incomplete/execution_context.h
+		../../../libs/showbox-ui/include/theme_manager.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/unset_command.o legacy/v2_incomplete/commands/unset_command.cpp
 
 obj/moc_showbox.o: obj/moc_showbox.cpp 

@@ -10,6 +10,7 @@ Trabalhando com tabelas editáveis e busca.
 ## Objetivo
 
 Criar uma interface de gerenciamento de dados com:
+
 - Tabela editável
 - Campo de busca
 - Importação/exportação CSV
@@ -146,6 +147,7 @@ Salva todo o conteúdo da tabela em formato CSV.
 ### Eventos de Edição
 
 Quando o usuário edita uma célula:
+
 ```
 tbl_contatos[2][1]=novo_email@email.com
 ```

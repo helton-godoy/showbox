@@ -6,19 +6,18 @@
 
 SHOWBOX_BIN="${SHOWBOX_BIN:-./src/code/showbox/bin/showbox}"
 
-while IFS=$'=' read key value
-do
-    case $key in
-        slider1)
-            echo "Slider value changed: $value"
-            ;;
-        slider2)
-            echo "Volume: $value%"
-            ;;
-    esac
+while IFS=$'=' read key value; do
+	case ${key} in
+	slider1)
+		echo "Slider value changed: ${value}"
+		;;
+	slider2)
+		echo "Volume: ${value}%"
+		;;
+	esac
 done < <(
 
-$SHOWBOX_BIN <<EODEMO
+	${SHOWBOX_BIN} <<EODEMO
 add label "<b>Slider Demo</b>" title
 set title stylesheet "qproperty-textInteractionFlags: NoTextInteraction;"
 

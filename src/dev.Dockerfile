@@ -42,6 +42,8 @@ RUN apt-get update -qq && apt-get install -qqy \
     curl \
     wget \
     pandoc \
+    clang-format \
+    doxygen \
     debhelper \
     && rm -rf /var/lib/apt/lists/*
 

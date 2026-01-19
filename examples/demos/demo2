@@ -4,32 +4,30 @@ SHOWBOX_BIN="${SHOWBOX_BIN:-./src/code/showbox/bin/showbox}"
 
 flag=0
 
-while IFS=$'=' read key value
-do
-  case $key in
-    cb1)
-      if [ "$value" == "1" ]
-      then
-        echo Option 1 is checked
-      else
-        echo Option 1 is unchecked
-      fi
-      ;;
-    txt1)
-      echo Text entered: $value
-      ;;
-    okay)
-      flag=1
-      echo User clicked Ok pushbutton
-      ;;
-    cancel)
-      flag=1
-      echo User clicked Cancel pushbutton
-      ;;
-  esac
+while IFS=$'=' read key value; do
+	case ${key} in
+	cb1)
+		if [[ ${value} == "1" ]]; then
+			echo Option 1 is checked
+		else
+			echo Option 1 is unchecked
+		fi
+		;;
+	txt1)
+		echo Text entered: "${value}"
+		;;
+	okay)
+		flag=1
+		echo User clicked Ok pushbutton
+		;;
+	cancel)
+		flag=1
+		echo User clicked Cancel pushbutton
+		;;
+	esac
 done < <(
 
-$SHOWBOX_BIN <<EODEMO
+	${SHOWBOX_BIN} <<EODEMO
 add label "<small>This script demonstrates unidirectional communication with the showbox application." note
 set note stylesheet "qproperty-textInteractionFlags: NoTextInteraction;"
 add separator
@@ -47,9 +45,8 @@ EODEMO
 
 )
 
-if [ "$flag" == "0" ]
-then
-  echo User closed the window
+if [[ ${flag} == "0" ]]; then
+	echo User closed the window
 fi
 
 exit 0

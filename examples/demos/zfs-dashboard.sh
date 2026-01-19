@@ -2,19 +2,19 @@ j#!/bin/bash
 SHOWBOX_BIN="${SHOWBOX_BIN:-./src/code/showbox/bin/showbox}"
 DIALOGBOX=${1:-./dist_qt6/dialogbox}
 
-if [ ! -x "$SHOWBOX_BIN" ]; then
-	echo "Error: $SHOWBOX_BIN not found or not executable."
+if [[ ! -x ${SHOWBOX_BIN} ]]; then
+	echo "Error: ${SHOWBOX_BIN} not found or not executable."
 	exit 1
 fi
 
 FIFO=$(mktemp -u)
-mkfifo $FIFO
-trap "rm -f $FIFO" EXIT
+mkfifo "${FIFO}"
+trap "rm -f ${FIFO}" EXIT
 
-$SHOWBOX_BIN <$FIFO &
+${SHOWBOX_BIN} <"${FIFO}" &
 DIALOG_PID=$!
 
-exec 3>$FIFO
+exec 3>"${FIFO}"
 
 # Setup UI
 echo "add label 'ZFS Dashboard' header" >&3
@@ -46,4 +46,4 @@ echo "show" >&3
 # Let's verify export works by command
 # echo "set iops_chart export 'iops.png'" >&3
 
-wait $DIALOG_PID
+wait "${DIALOG_PID}"

@@ -7,7 +7,7 @@
 SHOWBOX_BIN="${SHOWBOX_BIN:-./src/code/showbox/bin/showbox}"
 
 # Demo with static progress bar
-$SHOWBOX_BIN <<EODEMO
+${SHOWBOX_BIN} <<EODEMO
 add label "<b>Download Progress</b>" title
 set title stylesheet "qproperty-textInteractionFlags: NoTextInteraction;"
 

@@ -5,17 +5,16 @@
 
 class ShowBox;
 
-class ExecutionContext
-{
+class ExecutionContext {
 public:
-    explicit ExecutionContext(ShowBox *dialogBox);
-    ShowBox *dialogBox() const;
-    
-    // Execute function on the GUI thread (blocking)
-    void executeOnGui(std::function<void()> func);
+  explicit ExecutionContext(ShowBox *dialogBox);
+  ShowBox *dialogBox() const;
+
+  // Execute function on the GUI thread (blocking)
+  void executeOnGui(std::function<void()> func);
 
 private:
-    ShowBox *m_dialogBox;
+  ShowBox *m_dialogBox;
 };
 
 #endif // EXECUTION_CONTEXT_H

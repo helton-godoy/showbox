@@ -6,7 +6,7 @@
 
 SHOWBOX_BIN="${SHOWBOX_BIN:-./src/code/showbox/bin/showbox}"
 
-$SHOWBOX_BIN <<EODEMO
+${SHOWBOX_BIN} <<EODEMO
 add label "<b>Icons Demo</b>" title
 set title stylesheet "qproperty-textInteractionFlags: NoTextInteraction;"
 

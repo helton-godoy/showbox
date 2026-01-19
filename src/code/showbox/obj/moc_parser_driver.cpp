@@ -6,7 +6,7 @@
 ** WARNING! All changes made in this file will be lost!
 *****************************************************************************/
 
-#include "../parser_driver.h"
+#include "../legacy/v2_incomplete/parser_driver.h"
 #include <QtCore/qmetatype.h>
 
 #include <QtCore/qtmochelpers.h>

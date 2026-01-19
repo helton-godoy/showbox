@@ -6,7 +6,7 @@
 ** WARNING! All changes made in this file will be lost!
 *****************************************************************************/
 
-#include "../custom_table_widget.h"
+#include "../../../../libs/showbox-ui/include/custom_table_widget.h"
 #include <QtGui/qtextcursor.h>
 #include <QtCore/qmetatype.h>
 

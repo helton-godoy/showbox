@@ -4,15 +4,14 @@
 #include <QString>
 #include <QStringList>
 
-class Tokenizer
-{
+class Tokenizer {
 public:
-    explicit Tokenizer(const QString &input);
-    
-    QStringList tokenize();
+  explicit Tokenizer(const QString &input);
+
+  QStringList tokenize();
 
 private:
-    QString m_input;
+  QString m_input;
 };
 
 #endif // TOKENIZER_H

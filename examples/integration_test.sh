@@ -16,29 +16,29 @@ echo "=== Running Integration Test (V1 Parser -> Modern Architecture) ==="
 OUTPUT=$(./src/start-dev.sh "cd ../showbox && ./build/bin/poc_modern_cli < test_script.sbx")
 
 echo "--- CLI Output ---"
-echo "$OUTPUT"
+echo "${OUTPUT}"
 echo "------------------"
 
 # Verification
-if echo "$OUTPUT" | grep -q "John Doe"; then
-    echo "[PASS] Query username matches"
+if echo "${OUTPUT}" | grep -q "John Doe"; then
+	echo "[PASS] Query username matches"
 else
-    echo "[FAIL] Query username failed"
-    exit 1
+	echo "[FAIL] Query username failed"
+	exit 1
 fi
 
-if echo "$OUTPUT" | grep -q "40"; then
-    echo "[PASS] Query age matches (set value worked)"
+if echo "${OUTPUT}" | grep -q "40"; then
+	echo "[PASS] Query age matches (set value worked)"
 else
-    echo "[FAIL] Query age failed"
-    exit 1
+	echo "[FAIL] Query age failed"
+	exit 1
 fi
 
-if echo "$OUTPUT" | grep -q "0"; then
-    echo "[PASS] Query newsletter matches (unset checked worked)"
+if echo "${OUTPUT}" | grep -q "0"; then
+	echo "[PASS] Query newsletter matches (unset checked worked)"
 else
-    echo "[FAIL] Query newsletter failed"
-    exit 1
+	echo "[FAIL] Query newsletter failed"
+	exit 1
 fi
 
 echo "Integration Test Passed!"
