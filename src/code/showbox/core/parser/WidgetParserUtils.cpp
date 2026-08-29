@@ -54,4 +54,7 @@ void WidgetParserUtils::populateBaseConfig(Showbox::Models::BaseConfig &config,
   // Common mappings if they appear as key-value pairs or flags
   // In V1, 'name' is usually positional but could be explicitly set if we want
   // to be flexible. However, the base config just has 'name'.
+  const QString explicitName = findValue(tokens, "name");
+  if (!explicitName.isEmpty())
+    config.name = explicitName;
 }

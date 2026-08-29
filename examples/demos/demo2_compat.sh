@@ -4,7 +4,7 @@
 # Teste de compatibilidade - widgets de entrada
 #
 
-SHOWBOX_BIN="${SHOWBOX_BIN:-./src/code/showbox/bin/showbox}"
+# SHOWBOX_BIN="${SHOWBOX_BIN:-./src/code/showbox/bin/showbox}"
 
 while IFS=$'=' read key value; do
 	case ${key} in
@@ -27,7 +27,8 @@ while IFS=$'=' read key value; do
 	esac
 done < <(
 
-	${SHOWBOX_BIN} <<EODEMO
+#	${SHOWBOX_BIN} <<EODEMO
+showbox <<EODEMO
 add checkbox "&Option 1" cb1
 add textbox "&Text field" txt1 "text to edit"
 add frame horizontal

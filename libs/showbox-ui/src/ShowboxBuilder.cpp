@@ -2,19 +2,26 @@
 #include <QDialog>
 #include <QPushButton>
 #include <QLabel>
+#include <QFile>
 #include <QLineEdit>
 #include <QComboBox>
 #include <QListWidget>
 #include <QTableWidget>
+#include <custom_table_widget.h>
+#include <QMovie>
 #include <QProgressBar>
 #include <QVBoxLayout>
+#include <QHBoxLayout>
 #include <QCheckBox>
 #include <QRadioButton>
 #include <QCalendarWidget>
+#include <QDate>
 #include <QFrame>
+#include <QIcon>
 #include <QSpinBox>
 #include <QSlider>
 #include <QTextEdit>
+#include <QTextStream>
 #include <QGroupBox>
 #include <QTabWidget>
 #include "push_button_widget.h"
@@ -45,6 +52,9 @@ QWidget* ShowboxBuilder::buildButton(const Showbox::Models::ButtonConfig& config
     btn->setObjectName(config.name);
     btn->setCheckable(config.checkable);
     btn->setChecked(config.checked);
+    btn->setDefault(config.isDefault);
+    if (!config.iconPath.isEmpty())
+        btn->setIcon(QIcon::fromTheme(config.iconPath, QIcon(config.iconPath)));
     return btn;
 }
 
@@ -53,55 +63,106 @@ QWidget* ShowboxBuilder::buildLabel(const Showbox::Models::LabelConfig& config)
     auto *lbl = new QLabel(config.text);
     lbl->setObjectName(config.name);
     lbl->setWordWrap(config.wordWrap);
+    if (config.animation && !config.iconPath.isEmpty()) {
+        auto *movie = new QMovie(config.iconPath, QByteArray(), lbl);
+        lbl->setMovie(movie);
+        movie->start();
+    } else if (!config.iconPath.isEmpty()) {
+        const QPixmap picture(config.iconPath);
+        if (!picture.isNull()) lbl->setPixmap(picture);
+    }
     return lbl;
 }
 
 QWidget* ShowboxBuilder::buildLineEdit(const Showbox::Models::LineEditConfig& config)
 {
+    auto *container = new QWidget();
+    container->setObjectName(config.name);
+    container->setProperty("showboxTextBox", true);
+    auto *layout = new QHBoxLayout(container);
+    layout->setContentsMargins(0, 0, 0, 0);
+    auto *label = new QLabel(config.title, container);
+    label->setProperty("showboxTitleLabel", true);
     auto *le = new QLineEdit(config.text);
-    le->setObjectName(config.name);
+    le->setObjectName(config.name + "_input");
     le->setPlaceholderText(config.placeholder);
     if (config.passwordMode) {
         le->setEchoMode(QLineEdit::Password);
     }
-    return le;
+    label->setBuddy(le);
+    container->setFocusProxy(le);
+    layout->addWidget(label);
+    layout->addWidget(le);
+    return container;
 }
 
 QWidget* ShowboxBuilder::buildComboBox(const Showbox::Models::ComboBoxConfig& config)
 {
-    auto *cb = new QComboBox();
-    cb->setObjectName(config.name);
+    auto *container = new QWidget();
+    container->setObjectName(config.name);
+    container->setProperty("showboxComboBox", true);
+    auto *layout = new QHBoxLayout(container);
+    layout->setContentsMargins(0, 0, 0, 0);
+    auto *label = new QLabel(config.title, container);
+    label->setProperty("showboxTitleLabel", true);
+    auto *cb = new QComboBox(container);
+    cb->setObjectName(config.name + "_input");
     cb->addItems(config.items);
+    cb->setEditable(config.editable);
     if (config.currentIndex >= 0 && config.currentIndex < cb->count()) {
         cb->setCurrentIndex(config.currentIndex);
     }
-    return cb;
+    label->setBuddy(cb);
+    container->setFocusProxy(cb);
+    layout->addWidget(label);
+    layout->addWidget(cb);
+    return container;
 }
 
 QWidget* ShowboxBuilder::buildList(const Showbox::Models::ListConfig& config)
 {
-    auto *lw = new QListWidget();
-    lw->setObjectName(config.name);
+    auto *container = new QWidget();
+    container->setObjectName(config.name);
+    container->setProperty("showboxListBox", true);
+    auto *layout = new QVBoxLayout(container);
+    layout->setContentsMargins(0, 0, 0, 0);
+    auto *label = new QLabel(config.title, container);
+    label->setProperty("showboxTitleLabel", true);
+    auto *lw = new QListWidget(container);
+    lw->setObjectName(config.name + "_input");
     lw->addItems(config.items);
     if (config.multipleSelection) {
         lw->setSelectionMode(QAbstractItemView::MultiSelection);
     }
-    return lw;
+    label->setBuddy(lw);
+    container->setFocusProxy(lw);
+    layout->addWidget(label);
+    layout->addWidget(lw);
+    return container;
 }
 
 QWidget* ShowboxBuilder::buildTable(const Showbox::Models::TableConfig& config)
 {
-    auto *tw = new QTableWidget();
+    auto *widget = new CustomTableWidget();
+    auto *tw = widget->table();
+    widget->setObjectName(config.name);
     tw->setObjectName(config.name);
     tw->setColumnCount(config.headers.size());
     tw->setHorizontalHeaderLabels(config.headers);
     tw->setRowCount(config.rows.size());
+    if (config.readOnly)
+        tw->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    if (config.selection)
+        tw->setSelectionBehavior(QAbstractItemView::SelectRows);
     for (int r = 0; r < config.rows.size(); ++r) {
         for (int c = 0; c < config.rows[r].size() && c < config.headers.size(); ++c) {
             tw->setItem(r, c, new QTableWidgetItem(config.rows[r][c]));
         }
     }
-    return tw;
+    widget->setSearchVisible(config.search);
+    if (!config.file.isEmpty())
+        widget->loadFromFile(config.file);
+    return widget;
 }
 
 QWidget* ShowboxBuilder::buildProgressBar(const Showbox::Models::ProgressBarConfig& config)
@@ -109,9 +170,10 @@ QWidget* ShowboxBuilder::buildProgressBar(const Showbox::Models::ProgressBarConf
     auto *pb = new QProgressBar();
     pb->setObjectName(config.name);
     pb->setMinimum(config.minimum);
-    pb->setMaximum(config.maximum);
+    pb->setMaximum(config.busy ? 0 : config.maximum);
     pb->setValue(config.value);
     pb->setFormat(config.format);
+    pb->setOrientation(static_cast<Qt::Orientation>(config.orientation));
     return pb;
 }
 
@@ -149,6 +211,14 @@ QWidget* ShowboxBuilder::buildCalendar(const Showbox::Models::CalendarConfig& co
 {
     auto *cw = new QCalendarWidget();
     cw->setObjectName(config.name);
+    const QDate selected = QDate::fromString(config.date, Qt::ISODate);
+    const QDate minimum = QDate::fromString(config.minimum, Qt::ISODate);
+    const QDate maximum = QDate::fromString(config.maximum, Qt::ISODate);
+    if (selected.isValid()) cw->setSelectedDate(selected);
+    if (minimum.isValid()) cw->setMinimumDate(minimum);
+    if (maximum.isValid()) cw->setMaximumDate(maximum);
+    cw->setNavigationBarVisible(config.navigation);
+    cw->setProperty("showboxDateFormat", config.format);
     return cw;
 }
 
@@ -161,7 +231,7 @@ QWidget* ShowboxBuilder::buildSeparator(const Showbox::Models::SeparatorConfig& 
     } else {
         line->setFrameShape(QFrame::VLine);
     }
-    line->setFrameShadow(QFrame::Sunken);
+    line->setFrameShadow(static_cast<QFrame::Shadow>(config.shadow));
     return line;
 }
 
@@ -198,6 +268,11 @@ QWidget* ShowboxBuilder::buildTextEdit(const Showbox::Models::TextEditConfig& co
     } else {
         te->setPlainText(config.text);
     }
+    if (!config.file.isEmpty()) {
+        QFile file(config.file);
+        if (file.open(QIODevice::ReadOnly | QIODevice::Text))
+            te->setPlainText(QTextStream(&file).readAll());
+    }
     te->setReadOnly(config.readOnly);
     return te;
 }
@@ -206,6 +281,8 @@ QWidget* ShowboxBuilder::buildGroupBox(const Showbox::Models::GroupBoxConfig& co
 {
     auto *gb = new QGroupBox(config.title);
     gb->setObjectName(config.name);
+    gb->setCheckable(config.checkable);
+    gb->setChecked(config.checked);
     
     // Build and set layout if valid
     QLayout* layout = buildLayout(config.layout);
@@ -220,8 +297,8 @@ QWidget* ShowboxBuilder::buildFrame(const Showbox::Models::FrameConfig& config)
 {
     auto *frame = new QFrame();
     frame->setObjectName(config.name);
-    frame->setFrameShape(QFrame::StyledPanel);
-    frame->setFrameShadow(QFrame::Raised);
+    frame->setFrameShape(static_cast<QFrame::Shape>(config.shape));
+    frame->setFrameShadow(static_cast<QFrame::Shadow>(config.shadow));
     
     // Build and set layout if valid
     QLayout* layout = buildLayout(config.layout);
@@ -236,6 +313,7 @@ QWidget* ShowboxBuilder::buildTabWidget(const Showbox::Models::TabWidgetConfig& 
 {
     auto *tabWidget = new QTabWidget();
     tabWidget->setObjectName(config.name);
+    tabWidget->setTabPosition(static_cast<QTabWidget::TabPosition>(config.position));
     
     for (const auto& pageConfig : config.pages) {
         auto *page = new QWidget();
@@ -277,13 +355,7 @@ QLayout* ShowboxBuilder::buildLayout(const Showbox::Models::LayoutConfig& config
 
 PushButtonWidget* ShowboxBuilder::buildPushButton(const QString &title, const QString &name)
 {
-    // Implementation for legacy support using the new config-based methods
-    Showbox::Models::ButtonConfig config;
-    config.text = title;
-    config.name = name;
-    
-    // Note: buildButton currently returns QPushButton, but legacy expects PushButtonWidget.
-    // This highlights that we might need to migrate the implementation details later.
-    // For now, this stub exists to satisfy the interface.
-    return nullptr; 
+    auto *button = new PushButtonWidget(title);
+    button->setObjectName(name);
+    return button;
 }

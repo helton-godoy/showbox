@@ -1,6 +1,7 @@
 #!/bin/bash
-SHOWBOX_BIN="${SHOWBOX_BIN:-./src/code/showbox/bin/showbox}"
-coproc ${SHOWBOX_BIN}
+#SHOWBOX_BIN="${SHOWBOX_BIN:-./src/code/showbox/bin/showbox}"
+#coproc ${SHOWBOX_BIN}
+coproc showbox
 INPUTFD=${COPROC[0]}  # file descriptor the showbox process writes to
 OUTPUTFD=${COPROC[1]} # file descriptor the showbox process reads from
 DBPID=${COPROC_PID}   # PID of the showbox, if you need it for any purpose... e.g. to kill it

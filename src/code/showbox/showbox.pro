@@ -3,9 +3,9 @@ CONFIG += qt thread release c++17
 QT += widgets svg charts
 
 TARGET = showbox-legacy
-DESTDIR = $$PWD/bin
-OBJECTS_DIR = $$PWD/obj
-MOC_DIR = $$OBJECTS_DIR
+isEmpty(DESTDIR): DESTDIR = $$PWD/bin
+isEmpty(OBJECTS_DIR): OBJECTS_DIR = $$PWD/obj
+isEmpty(MOC_DIR): MOC_DIR = $$OBJECTS_DIR
 
 # Input
 INCLUDEPATH += $$PWD/../../../libs/showbox-ui/include

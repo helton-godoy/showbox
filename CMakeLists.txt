@@ -4,9 +4,14 @@ project(showbox-suite LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+option(SHOWBOX_WARNINGS_AS_ERRORS "Treat compiler warnings as errors" ON)
+set(SHOWBOX_LEGACY_ORACLE "" CACHE FILEPATH
+    "Optional showbox-legacy executable used by the golden compatibility test")
 
 # Configuração Global do Qt
-find_package(Qt6 REQUIRED COMPONENTS Widgets Charts PrintSupport Network Svg)
+find_package(Qt6 6.4 REQUIRED COMPONENTS Widgets Charts Svg)
 
 # Diretórios de Saída
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
@@ -16,37 +21,5 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 # Subprojetos
 add_subdirectory(libs/showbox-ui)
 add_subdirectory(src/code/showbox)
-# add_subdirectory(apps/studio) # Habilitaremos quando iniciarmos o Studio
-
 enable_testing()
 add_subdirectory(tests)
-
-add_executable(poc_modern_cli
-    src/poc_modern_cli.cpp
-    src/code/showbox/core/parser/ParserMain.cpp
-    src/code/showbox/core/parser/ParserMain.h
-    src/code/showbox/core/parser/CommandParser.cpp
-    src/code/showbox/core/parser/Tokenizer.cpp
-    src/code/showbox/core/parser/WidgetParserUtils.cpp
-)
-
-target_link_libraries(poc_modern_cli PRIVATE
-    Qt6::Widgets
-    showbox-ui
-)
-
-target_include_directories(poc_modern_cli PRIVATE
-    src/code/showbox/core/parser
-    src/code/showbox/core/builder
-)
-
-set_property(TARGET poc_modern_cli PROPERTY AUTOMOC ON)
-
-add_executable(visual_verifier
-    src/visual_verifier.cpp
-)
-
-target_link_libraries(visual_verifier PRIVATE
-    Qt6::Widgets
-    showbox-ui
-)

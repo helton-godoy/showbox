@@ -5,9 +5,10 @@
 # Simula um painel de configuração avançada do Samba com opções realistas
 #
 
-SHOWBOX_BIN="${SHOWBOX_BIN:-./src/code/showbox/bin/showbox}"
+# SHOWBOX_BIN="${SHOWBOX_BIN:-./src/code/showbox/bin/showbox}"
 
-${SHOWBOX_BIN} <<EODEMO
+# ${SHOWBOX_BIN} <<EODEMO
+showbox <<EODEMO
 # Layout principal: frame horizontal
 add frame horizontal main_frame
 

@@ -1,39 +1,34 @@
-cmake_minimum_required(VERSION 3.16)
-
-project(showbox-cli)
-
-# Configuração Automática do Qt (MOC, UIC, RCC)
 set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTOUIC ON)
-set(CMAKE_AUTORCC ON)
 
-# Encontrar fontes
-file(GLOB_RECURSE SRCS 
-    "*.cpp" 
-    "*.cc" 
-    "*.h"
-)
-list(FILTER SRCS EXCLUDE REGEX ".*/obj/.*")
-list(FILTER SRCS EXCLUDE REGEX ".*/legacy/v1_monolith/dialog_main.cc")
-
-add_executable(showbox 
-    ${SRCS}
+add_library(showbox-core STATIC
+    core/builder/CLIBuilder.cpp
+    core/builder/CLIBuilder.h
+    core/parser/CommandParser.cpp
+    core/parser/CommandParser.h
+    core/parser/ParserMain.cpp
+    core/parser/ParserMain.h
+    core/parser/Tokenizer.cpp
+    core/parser/Tokenizer.h
+    core/parser/WidgetParserUtils.cpp
+    core/parser/WidgetParserUtils.h
 )
 
-# Dependências
-target_link_libraries(showbox PRIVATE 
-    Qt6::Widgets 
-    Qt6::Charts
-    Qt6::PrintSupport
-    Qt6::Network
-    showbox-ui
-)
-
-# Includes
-target_include_directories(showbox PRIVATE 
-    ${CMAKE_CURRENT_SOURCE_DIR}
+target_include_directories(showbox-core PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/core/builder
     ${CMAKE_CURRENT_SOURCE_DIR}/core/parser
-    ${CMAKE_CURRENT_SOURCE_DIR}/legacy/v2_incomplete
-    ${CMAKE_CURRENT_SOURCE_DIR}/legacy/v1_monolith
 )
+
+target_link_libraries(showbox-core PUBLIC Qt6::Widgets showbox-ui)
+target_compile_options(showbox-core PRIVATE -Wall -Wextra -Wpedantic)
+if(SHOWBOX_WARNINGS_AS_ERRORS)
+    target_compile_options(showbox-core PRIVATE -Werror)
+endif()
+
+add_executable(showbox main.cpp)
+target_link_libraries(showbox PRIVATE showbox-core)
+target_compile_options(showbox PRIVATE -Wall -Wextra -Wpedantic)
+if(SHOWBOX_WARNINGS_AS_ERRORS)
+    target_compile_options(showbox PRIVATE -Werror)
+endif()
+
+install(TARGETS showbox RUNTIME DESTINATION bin)

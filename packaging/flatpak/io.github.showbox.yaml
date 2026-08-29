@@ -13,14 +13,10 @@ finish-args:
 
 modules:
   - name: showbox
-    buildsystem: qmake
+    buildsystem: cmake-ninja
     sources:
       - type: dir
         path: ../..
-    build-commands:
-      - cd src/code/showbox && qmake6 showbox.pro
-      - make -C src/code/showbox
     post-install:
-      - install -D -m 755 src/code/showbox/bin/showbox /app/bin/showbox
       - install -D -m 644 packaging/flatpak/io.github.showbox.desktop /app/share/applications/io.github.showbox.desktop
       - install -D -m 644 packaging/flatpak/io.github.showbox.metainfo.xml /app/share/metainfo/io.github.showbox.metainfo.xml

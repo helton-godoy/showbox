@@ -4,9 +4,10 @@
 # Demonstrates the tabs widget with multiple pages
 #
 
-SHOWBOX_BIN="${SHOWBOX_BIN:-./src/code/showbox/bin/showbox}"
+# SHOWBOX_BIN="${SHOWBOX_BIN:-./src/code/showbox/bin/showbox}"
 
-${SHOWBOX_BIN} <<EODEMO
+# ${SHOWBOX_BIN} <<EODEMO
+showbox <<EODEMO
 add label "<b>Settings</b>" title
 set title stylesheet "qproperty-textInteractionFlags: NoTextInteraction;"
 

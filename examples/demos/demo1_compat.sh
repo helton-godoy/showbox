@@ -4,9 +4,10 @@
 # Teste de compatibilidade - exit codes
 #
 
-SHOWBOX_BIN="${SHOWBOX_BIN:-./src/code/showbox/bin/showbox}"
+# SHOWBOX_BIN="${SHOWBOX_BIN:-./src/code/showbox/bin/showbox}"
 
-${SHOWBOX_BIN} <<EODEMO
+# ${SHOWBOX_BIN} <<EODEMO
+showbox <<EODEMO
 add label "<small>This script demonstrates the showbox application exit codes usage." note
 set note stylesheet "qproperty-textInteractionFlags: NoTextInteraction;"
 add separator

@@ -400,7 +400,7 @@ add table "col1;col2;col3" nome [file "arquivo.csv"] [readonly] [selection] [sea
 
 ```bash
 nome[linha][coluna]=valor    # Célula editada
-nome.row=numero              # Linha selecionada
+nome_selection=numero        # Linha selecionada
 ```
 
 **Exemplo:**

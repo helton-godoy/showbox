@@ -19,60 +19,6 @@ struct BaseConfig {
     }
 };
 
-/**
- * @brief Configuração de uma ação individual
- * 
- * Tipos suportados:
- * - "shell": Executa comando shell inline
- * - "script": Executa arquivo .sh externo
- * - "set": Modifica propriedade de outro widget
- * - "query": Obtém valor de widget e armazena em variável
- * - "callback": Echo para stdout (capturado pelo script pai)
- */
-struct ActionConfig {
-    enum Type { Shell, Script, Set, Query, Callback };
-    
-    Type type = Shell;
-    QString command;        // Para Shell/Script: o comando ou caminho
-    QString targetWidget;   // Para Set/Query: nome do widget alvo
-    QString property;       // Para Set: propriedade a modificar
-    QString value;          // Para Set: novo valor
-    QString variable;       // Para Query: nome da variável de destino
-    
-    bool isValid() const {
-        switch (type) {
-            case Shell:
-            case Script:
-            case Callback:
-                return !command.isEmpty();
-            case Set:
-                return !targetWidget.isEmpty() && !property.isEmpty();
-            case Query:
-                return !targetWidget.isEmpty() && !variable.isEmpty();
-        }
-        return false;
-    }
-};
-
-/**
- * @brief Configuração de eventos/ações para um widget
- * 
- * Mapeia eventos (clicked, changed, etc.) para listas de ações
- */
-struct EventActionsConfig {
-    QMap<QString, QList<ActionConfig>> events; // "clicked" -> [action1, action2, ...]
-    
-    bool hasActions() const { return !events.isEmpty(); }
-    
-    QList<ActionConfig> actionsFor(const QString &event) const {
-        return events.value(event);
-    }
-    
-    void addAction(const QString &event, const ActionConfig &action) {
-        events[event].append(action);
-    }
-};
-
 struct WindowConfig : public BaseConfig {
     QString title;
     int width = 800;
@@ -91,34 +37,48 @@ struct ButtonConfig : public BaseConfig {
     bool checkable = false;
     bool checked = false;
     QString iconPath;
-    EventActionsConfig actions;  // Ações associadas ao botão
+    bool apply = false;
+    bool exit = false;
+    bool isDefault = false;
 };
 
 struct LabelConfig : public BaseConfig {
     QString text = "Label";
     bool wordWrap = false;
     QString iconPath;
+    bool animation = false;
 };
 
 struct LineEditConfig : public BaseConfig {
+    QString title;
     QString text;
     QString placeholder;
     bool passwordMode = false;
 };
 
 struct ComboBoxConfig : public BaseConfig {
+    QString title;
     QStringList items;
     int currentIndex = -1;
+    bool editable = false;
+    bool selection = false;
 };
 
 struct ListConfig : public BaseConfig {
+    QString title;
     QStringList items;
     bool multipleSelection = false;
+    bool activation = false;
+    bool selection = false;
 };
 
 struct TableConfig : public BaseConfig {
     QStringList headers;
     QList<QStringList> rows;
+    QString file;
+    bool readOnly = false;
+    bool selection = false;
+    bool search = false;
 };
 
 struct ProgressBarConfig : public BaseConfig {
@@ -126,6 +86,8 @@ struct ProgressBarConfig : public BaseConfig {
     int minimum = 0;
     int maximum = 100;
     QString format = "%p%";
+    bool busy = false;
+    int orientation = 1;
 };
 
 struct ChartConfig : public BaseConfig {
@@ -171,27 +133,38 @@ struct SliderConfig : public BaseConfig {
 
 
 struct CalendarConfig : public BaseConfig {
-    // Data atual ou selecionada pode ser adicionada aqui se necessário via QString ISO
+    QString date;
+    QString minimum;
+    QString maximum;
+    bool navigation = true;
+    bool selection = false;
+    QString format = "yyyy-MM-dd";
 };
 
 struct TextEditConfig : public BaseConfig {
     QString text;
+    QString file;
     bool readOnly = false;
     bool richText = false;
 };
 
 struct SeparatorConfig : public BaseConfig {
     int orientation = 1; // Qt::Horizontal
+    int shadow = 48; // QFrame::Sunken
 };
 
 
 struct GroupBoxConfig : public BaseConfig {
     QString title = "Group";
     LayoutConfig layout;
+    bool checkable = false;
+    bool checked = false;
 };
 
 struct FrameConfig : public BaseConfig {
     LayoutConfig layout;
+    int shape = 0;  // QFrame::NoFrame
+    int shadow = 16; // QFrame::Plain
 };
 
 struct PageConfig : public BaseConfig {
@@ -201,6 +174,7 @@ struct PageConfig : public BaseConfig {
 
 struct TabWidgetConfig : public BaseConfig {
     QList<PageConfig> pages;
+    int position = 0;
 };
 
 } // namespace Models

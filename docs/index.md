@@ -49,7 +49,7 @@ echo 'add label "Olá, Showbox!" | add pushbutton "Fechar" exit' | showbox
 
 | Característica               | Showbox        | zenity      | kdialog        |
 | ---------------------------- | -------------- | ----------- | -------------- |
-| **Widgets Avançados**        | ✅ 20 tipos    | ⚠️ Limitado | ⚠️ Limitado    |
+| **Widgets Avançados**        | ✅ 22 tipos    | ⚠️ Limitado | ⚠️ Limitado    |
 | **Layouts Flexíveis**        | ✅ 3 níveis    | ❌          | ❌             |
 | **Abas e Páginas**           | ✅             | ❌          | ❌             |
 | **Tabelas Editáveis**        | ✅             | ❌          | ❌             |
@@ -78,7 +78,7 @@ echo 'add label "Olá, Showbox!" | add pushbutton "Fechar" exit' | showbox
 
 ## 🔗 Links Úteis
 
-- **Código-fonte**: [GitHub](https://github.com/seu-usuario/showbox)
+- **Código-fonte**: [GitHub](https://github.com/helton-godoy/showbox)
 - **Exemplos**: [examples/](../examples/)
 - **Man page**: `man showbox`
 

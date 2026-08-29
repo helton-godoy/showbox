@@ -5,12 +5,13 @@
 #
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-SHOWBOX_BIN="${SHOWBOX_BIN:-./src/code/showbox/bin/showbox}"
+# SHOWBOX_BIN="${SHOWBOX_BIN:-./src/code/showbox/bin/showbox}"
 
 # Use Adwaita icons (available on most Linux systems)
 # Or replace with your own SVG/PNG files
 
-${SHOWBOX_BIN} <<'EODEMO'
+# ${SHOWBOX_BIN} <<'EODEMO'
+showbox <<EODEMO
 set title "ShowBox - Painel de Widgets"
 
 add label "<h2>Selecione um Tipo de Campo</h2>" header

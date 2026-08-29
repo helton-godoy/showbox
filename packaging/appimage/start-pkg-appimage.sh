@@ -9,6 +9,7 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 DIST_DIR="${PROJECT_ROOT}/dist"
+CONTAINER_ENGINE="${CONTAINER_ENGINE:-podman}"
 
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -20,13 +21,15 @@ log_warn() { echo -e "${YELLOW}[WARN]${NC} $1"; }
 mkdir -p "${DIST_DIR}"
 
 log_info "Building Docker image for AppImage..."
-docker build -f "${SCRIPT_DIR}/appimage.Dockerfile" -t "showbox-appimage" "${SCRIPT_DIR}"
+"${CONTAINER_ENGINE}" build -f "${SCRIPT_DIR}/appimage.Dockerfile" \
+	-t "showbox-appimage" "${SCRIPT_DIR}"
 
 log_info "Building AppImage inside Docker container..."
-docker run --rm \
+"${CONTAINER_ENGINE}" run --rm \
 	--privileged \
-	-v "${PROJECT_ROOT}:/build:rw" \
+	-v "${PROJECT_ROOT}:/build:rw,Z" \
 	-e APPIMAGE_EXTRACT_AND_RUN=1 \
+	-e LINUXDEPLOY_TOOLS_DIR=/tools \
 	-w /build \
 	"showbox-appimage" \
 	bash -c "./packaging/appimage/build.sh"

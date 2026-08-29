@@ -3,14 +3,12 @@ Section: x11
 Priority: optional
 Maintainer: Helton Godoy <helton@example.com>
 Build-Depends: debhelper-compat (= 13),
-               qmake6,
+               cmake,
                qt6-base-dev,
                qt6-charts-dev,
                libqt6charts6-dev,
                libqt6svg6-dev,
-               libqt6opengl6-dev,
-               libgl-dev,
-               libopengl-dev
+               libqt6opengl6-dev
 Standards-Version: 4.6.2
 Homepage: https://github.com/helton-godoy/showbox
 Rules-Requires-Root: no

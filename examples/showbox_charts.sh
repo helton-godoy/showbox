@@ -4,7 +4,7 @@
 # Demonstrates the chart widget with pie chart and data visualization
 #
 
-SHOWBOX_BIN="${SHOWBOX_BIN:-./src/code/showbox/bin/showbox}"
+# SHOWBOX_BIN="${SHOWBOX_BIN:-./src/code/showbox/bin/showbox}"
 
 while IFS=$'=' read key value; do
 	# Chart slice clicks are reported as chart1.slice["label"]=value
@@ -14,7 +14,8 @@ while IFS=$'=' read key value; do
 	fi
 done < <(
 
-	${SHOWBOX_BIN} <<EODEMO
+#	${SHOWBOX_BIN} <<EODEMO
+ showbox <<EODEMO
 add label "<b>Sales Distribution</b>" title
 set title stylesheet "qproperty-textInteractionFlags: NoTextInteraction;"
 

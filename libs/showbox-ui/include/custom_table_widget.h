@@ -46,7 +46,8 @@ public:
         
         // Relay table signals
         connect(m_table, &QTableWidget::cellChanged, this, [this](int row, int col) {
-            emit cellEdited(row, col, m_table->item(row, col)->text());
+            const QTableWidgetItem *item = m_table->item(row, col);
+            emit cellEdited(row, col, item ? item->text() : QString());
         });
         
         connect(m_table, &QTableWidget::itemSelectionChanged, this, [this]() {

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SHOWBOX_BIN="${SHOWBOX_BIN:-./src/code/showbox/bin/showbox}"
+# SHOWBOX_BIN="${SHOWBOX_BIN:-./src/code/showbox/bin/showbox}"
 
 flag=0
 
@@ -27,7 +27,8 @@ while IFS=$'=' read key value; do
 	esac
 done < <(
 
-	${SHOWBOX_BIN} <<EODEMO
+#	${SHOWBOX_BIN} <<EODEMO
+showbox <<EODEMO
 add label "<small>This script demonstrates unidirectional communication with the showbox application." note
 set note stylesheet "qproperty-textInteractionFlags: NoTextInteraction;"
 add separator

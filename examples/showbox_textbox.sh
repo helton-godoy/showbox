@@ -4,7 +4,7 @@
 # Demonstrates the textbox widget with normal, password and placeholder modes
 #
 
-SHOWBOX_BIN="${SHOWBOX_BIN:-./src/code/showbox/bin/showbox}"
+#SHOWBOX_BIN="${SHOWBOX_BIN:-./src/code/showbox/bin/showbox}"
 
 while IFS=$'=' read key value; do
 	case ${key} in
@@ -20,7 +20,8 @@ while IFS=$'=' read key value; do
 	esac
 done < <(
 
-	${SHOWBOX_BIN} <<EODEMO
+#	${SHOWBOX_BIN} <<EODEMO
+showbox <<EODEMO
 add label "<b>Login Form</b>" title
 set title stylesheet "qproperty-textInteractionFlags: NoTextInteraction;"
 

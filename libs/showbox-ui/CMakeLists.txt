@@ -34,3 +34,8 @@ target_link_libraries(showbox-ui PUBLIC
     Qt6::Charts
     Qt6::Svg
 )
+
+target_compile_options(showbox-ui PRIVATE -Wall -Wextra -Wpedantic)
+if(SHOWBOX_WARNINGS_AS_ERRORS)
+    target_compile_options(showbox-ui PRIVATE -Werror)
+endif()

@@ -1,11 +1,12 @@
 #!/bin/bash
-BINARY=./build/bin/showbox
+#BINARY=./build/bin/showbox
 FIFO=/tmp/showbox_test_all.fifo
 
 rm -f "${FIFO}"
 mkfifo "${FIFO}"
 
-${BINARY} <"${FIFO}" &
+#${BINARY} <"${FIFO}" &
+showbox <"${FIFO}" &
 PID=$!
 
 # Aguarda iniciar

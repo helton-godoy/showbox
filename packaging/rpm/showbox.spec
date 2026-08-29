@@ -9,7 +9,7 @@ Source0:        %{name}-%{version}.tar.gz
 
 # Build dependencies
 BuildRequires:  gcc-c++
-BuildRequires:  make
+BuildRequires:  cmake
 BuildRequires:  qt6-qtbase-devel
 BuildRequires:  qt6-qtcharts-devel
 BuildRequires:  qt6-qtsvg-devel
@@ -38,22 +38,21 @@ Features:
 %autosetup
 
 %build
-cd src/code/showbox
-qmake6 showbox.pro
-%make_build
+%cmake
+%cmake_build
 
 %install
-install -D -m 755 src/code/showbox/bin/showbox %{buildroot}%{_bindir}/showbox
+%cmake_install
 install -D -m 644 packaging/rpm/showbox.desktop %{buildroot}%{_datadir}/applications/showbox.desktop
 
 %files
-%license LICENSE
+%license packaging/deb/debian/copyright
 %doc README.md
 %{_bindir}/showbox
 %{_datadir}/applications/showbox.desktop
 
 %changelog
-* Sun Jan 12 2026 Helton Godoy <helton@example.com> - 1.0.0-1
+* Mon Jan 12 2026 Helton Godoy <helton@example.com> - 1.0.0-1
 - Initial release
 - Qt6-based GUI widgets for shell scripts
 - Standard and extended widgets support

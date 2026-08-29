@@ -4,7 +4,7 @@
 # Usa FIFO para capturar callbacks continuamente
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SHOWBOX="${SCRIPT_DIR}/../../build/bin/showbox"
+#SHOWBOX="${SCRIPT_DIR}/../../build/bin/showbox"
 
 # Verificar se o showbox foi compilado
 if [[ ! -x ${SHOWBOX} ]]; then
@@ -55,7 +55,8 @@ echo ""
 ) &
 
 # Executar showbox com output redirecionado para o FIFO
-cat <<'EOF' | "${SHOWBOX}" >"${FIFO}" 2>&1
+# cat <<'EOF' | "${SHOWBOX}" >"${FIFO}" 2>&1
+cat <<'EOF' | showbox >"${FIFO}" 2>&1
 add window "Teste de Actions" main width=400 height=300
 add button "Testar Callback" btn_test action="btn_test_clicked"
 add button "Disparar Alerta" btn_alert action="btn_alert_clicked"

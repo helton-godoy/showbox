@@ -11,6 +11,7 @@ private slots:
     void testEscapedCharacters();
     void testEmptyAndWhitespace();
     void testComplexCommands();
+    void testSingleQuotesAndNewline();
 };
 
 void TestTokenizer::testBasicSplitting()
@@ -65,6 +66,14 @@ void TestTokenizer::testComplexCommands()
     QCOMPARE(tokens.size(), 6);
     QCOMPARE(tokens[2], QString("Turbo \"Extreme\""));
     QCOMPARE(tokens[5], QString("enabled"));
+}
+
+void TestTokenizer::testSingleQuotesAndNewline()
+{
+    Tokenizer tokenizer("add label 'first\\nsecond' note");
+    const QStringList tokens = tokenizer.tokenize();
+    QCOMPARE(tokens.size(), 4);
+    QCOMPARE(tokens[2], QString("first\nsecond"));
 }
 
 QTEST_MAIN(TestTokenizer)

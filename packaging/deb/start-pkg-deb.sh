@@ -16,6 +16,7 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 DIST_DIR="${PROJECT_ROOT}/dist"
 DISTRO="${1:-ubuntu}"
+CONTAINER_ENGINE="${CONTAINER_ENGINE:-podman}"
 
 # Colors
 GREEN='\033[0;32m'
@@ -38,11 +39,11 @@ build_deb() {
 	fi
 
 	log_info "Building Docker image for ${distro}..."
-	docker build -f "${dockerfile}" -t "${image_name}" "${SCRIPT_DIR}"
+	"${CONTAINER_ENGINE}" build -f "${dockerfile}" -t "${image_name}" "${SCRIPT_DIR}"
 
 	log_info "Building .deb package inside Docker container..."
-	docker run --rm \
-		-v "${PROJECT_ROOT}:/build:rw" \
+	"${CONTAINER_ENGINE}" run --rm \
+		-v "${PROJECT_ROOT}:/build:rw,Z" \
 		-w /build \
 		"${image_name}" \
 		bash -c "./packaging/deb/build.sh"

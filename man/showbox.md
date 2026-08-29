@@ -110,8 +110,9 @@ Este script cria uma janela com um rótulo e um botão de "Sair".
 
 showbox << EOF
 set title "Exemplo Simples"
-add label "Olá, Mundo! Bem-vindo ao dishowbox
+add label "Olá, Mundo! Bem-vindo ao Showbox" greeting
 add pushbutton "Sair" btn_sair exit
+show
 EOF
 ```
 
@@ -148,9 +149,10 @@ add frame "" btn_frame horizontal
 end
 EOM
 
-# Executa o dishowbox captura a saída
-OUTPUT=$(echo "$UI_SCRIPT" | dialshowbox Verifica se o usuário pressionou "Login"
-if [ $? -eq 0 ]; then
+# Executa o Showbox e captura a saída
+OUTPUT=$(printf '%s\n' "$UI_SCRIPT" | showbox)
+# O botão apply+exit encerra com código 1, como no Dialogbox.
+if [ $? -eq 1 ]; then
   # Extrai os valores usando o comando 'query'
   eval "$OUTPUT"
   echo "Usuário: $user_input"
@@ -163,8 +165,8 @@ _Neste exemplo, assumimos que `add textbox` é um widget válido para entrada de
 
 ## VALORES DE SAÍDA
 
-- **0**: Sucesso (geralmente quando um botão com a opção `apply` é pressionado).
-- **1**: Cancelado pelo usuário (geralmente quando um botão com a opção `exit` é pressionado, a janela é fechada ou `ESC` é pressionado).
+- **0**: Diálogo rejeitado ou fechado sem `apply`.
+- **1**: Diálogo aceito por um botão com `apply exit`.
 - **Outros valores**: Indicam erros de parsing ou outros problemas.
 
 ## ARQUIVOS

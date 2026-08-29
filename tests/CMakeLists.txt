@@ -28,13 +28,12 @@ add_test(NAME tst_pushbutton COMMAND tst_pushbutton)
 
 add_executable(tst_clibuilder
     auto/tst_clibuilder.cpp
-    ../src/code/showbox/core/builder/CLIBuilder.cpp
 )
 
 target_link_libraries(tst_clibuilder PRIVATE
     Qt6::Widgets
     Qt6::Test
-    showbox-ui
+    showbox-core
 )
 
 target_include_directories(tst_clibuilder PRIVATE
@@ -45,16 +44,12 @@ add_test(NAME tst_clibuilder COMMAND tst_clibuilder)
 
 add_executable(tst_parser
     auto/tst_parser.cpp
-    ../src/code/showbox/core/parser/ParserMain.cpp
-    ../src/code/showbox/core/parser/CommandParser.cpp
-    ../src/code/showbox/core/parser/Tokenizer.cpp
-    ../src/code/showbox/core/parser/WidgetParserUtils.cpp
 )
 
 target_link_libraries(tst_parser PRIVATE
     Qt6::Widgets
     Qt6::Test
-    showbox-ui
+    showbox-core
 )
 
 target_include_directories(tst_parser PRIVATE
@@ -101,13 +96,12 @@ add_test(NAME tst_showbox_builder COMMAND tst_showbox_builder)
 
 add_executable(tst_tokenizer
     auto/tst_tokenizer.cpp
-    ../src/code/showbox/core/parser/Tokenizer.cpp
 )
 
 target_link_libraries(tst_tokenizer PRIVATE
     Qt6::Widgets
     Qt6::Test
-    showbox-ui
+    showbox-core
 )
 
 target_include_directories(tst_tokenizer PRIVATE
@@ -118,14 +112,12 @@ add_test(NAME tst_tokenizer COMMAND tst_tokenizer)
 
 add_executable(tst_command_parser
     auto/tst_command_parser.cpp
-    ../src/code/showbox/core/parser/CommandParser.cpp
-    ../src/code/showbox/core/parser/Tokenizer.cpp
 )
 
 target_link_libraries(tst_command_parser PRIVATE
     Qt6::Widgets
     Qt6::Test
-    showbox-ui
+    showbox-core
 )
 
 target_include_directories(tst_command_parser PRIVATE
@@ -133,3 +125,47 @@ target_include_directories(tst_command_parser PRIVATE
 )
 
 add_test(NAME tst_command_parser COMMAND tst_command_parser)
+
+add_test(
+    NAME cli_contract
+    COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/integration/cli_contract.sh
+            $<TARGET_FILE:showbox>
+)
+set_tests_properties(cli_contract PROPERTIES
+    TIMEOUT 5
+)
+
+if(SHOWBOX_LEGACY_ORACLE)
+    if(NOT EXISTS "${SHOWBOX_LEGACY_ORACLE}")
+        message(FATAL_ERROR
+            "SHOWBOX_LEGACY_ORACLE does not exist: ${SHOWBOX_LEGACY_ORACLE}")
+    endif()
+
+    add_test(
+        NAME legacy_golden_contract
+        COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/compatibility/golden_contract.sh
+                ${SHOWBOX_LEGACY_ORACLE}
+                $<TARGET_FILE:showbox>
+    )
+    set_tests_properties(legacy_golden_contract PROPERTIES
+        TIMEOUT 5
+        ENVIRONMENT "QT_QPA_PLATFORM=offscreen"
+    )
+endif()
+
+# Every Qt test must be runnable on CI and inside package builders, where no
+# display server is available.  Keeping this here also covers tests launched
+# indirectly by debhelper's dh_auto_test.
+set_tests_properties(
+    tst_widgetfactory
+    tst_pushbutton
+    tst_clibuilder
+    tst_parser
+    tst_widget_configs
+    tst_interface_builder
+    tst_showbox_builder
+    tst_tokenizer
+    tst_command_parser
+    cli_contract
+    PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen"
+)

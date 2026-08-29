@@ -10,6 +10,11 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 DIST_DIR="${PROJECT_ROOT}/dist"
 
+cleanup() {
+    rm -rf "${PROJECT_ROOT}/debian"
+}
+trap cleanup EXIT
+
 echo "=== ShowBox DEB Package Builder ==="
 echo "Project root: ${PROJECT_ROOT}"
 
@@ -36,9 +41,6 @@ dpkg-buildpackage -us -uc -b
 mv ../*.deb "${DIST_DIR}/" 2>/dev/null || true
 mv ../*.changes "${DIST_DIR}/" 2>/dev/null || true
 mv ../*.buildinfo "${DIST_DIR}/" 2>/dev/null || true
-
-# Cleanup
-rm -rf "${PROJECT_ROOT}/debian"
 
 echo ""
 echo "=== Build Complete ==="

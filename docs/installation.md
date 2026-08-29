@@ -26,7 +26,7 @@ A forma mais fácil para sistemas baseados em Debian.
 
 ```bash
 # Baixar o pacote mais recente
-wget https://github.com/seu-usuario/showbox/releases/latest/download/showbox_1.0_amd64.deb
+wget https://github.com/helton-godoy/showbox/releases/latest/download/showbox_1.0.0_amd64.deb
 
 # Instalar
 sudo dpkg -i showbox_1.0_amd64.deb
@@ -50,7 +50,7 @@ Executável portátil que funciona em qualquer distribuição Linux moderna.
 
 ```bash
 # Baixar
-wget https://github.com/seu-usuario/showbox/releases/latest/download/showbox-1.0-x86_64.AppImage
+wget https://github.com/helton-godoy/showbox/releases/latest/download/showbox-1.0.0-x86_64.AppImage
 
 # Tornar executável
 chmod +x showbox-1.0-x86_64.AppImage
@@ -95,16 +95,15 @@ sudo pacman -S qt6-base qt6-charts base-devel cmake
 
 ```bash
 # Clonar repositório
-git clone https://github.com/seu-usuario/showbox.git
+git clone https://github.com/helton-godoy/showbox.git
 cd showbox
 
 # Compilar
-cd src/code/showbox
-qmake6 showbox.pro
-make -j$(nproc)
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --parallel
 
 # O binário estará em:
-# ./bin/showbox
+# ./build/bin/showbox
 ```
 
 #### 3.3 Instalar (opcional)
@@ -114,7 +113,7 @@ make -j$(nproc)
 sudo make install
 
 # Ou adicionar ao PATH manualmente
-echo 'export PATH="$PATH:/caminho/para/showbox/src/code/showbox/bin"' >> ~/.bashrc
+echo 'export PATH="$PATH:/caminho/para/showbox/build/bin"' >> ~/.bashrc
 source ~/.bashrc
 ```
 

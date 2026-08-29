@@ -4,9 +4,10 @@
 # Demonstrates pages within tabs with icons and customization
 #
 
-SHOWBOX_BIN="${SHOWBOX_BIN:-./src/code/showbox/bin/showbox}"
+# SHOWBOX_BIN="${SHOWBOX_BIN:-./src/code/showbox/bin/showbox}"
 
-${SHOWBOX_BIN} <<EODEMO
+# ${SHOWBOX_BIN} <<EODEMO
+showbox <<EODEMO
 add label "<b>Wizard Example</b>" title
 set title stylesheet "qproperty-textInteractionFlags: NoTextInteraction;"
 

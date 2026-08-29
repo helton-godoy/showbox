@@ -308,8 +308,8 @@ set tbl_dados add_line "João;joao@email.com;TI"
 # Remover linha selecionada
 set tbl_dados del_line
 
-# Exportar para CSV
-set tbl_dados file "/tmp/export.csv"
+# Recarregar dados de um CSV
+set tbl_dados file "/tmp/dados-atualizados.csv"
 ```
 
 ---

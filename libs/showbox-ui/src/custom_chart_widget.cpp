@@ -12,6 +12,7 @@
 #include <QCursor>
 #include <QGraphicsSimpleTextItem>
 #include <QPixmap>
+#include <utility>
 
 CustomChartWidget::CustomChartWidget(QWidget *parent)
     : QChartView(parent)
@@ -39,64 +40,105 @@ void CustomChartWidget::setChartTitle(const QString &title)
 
 void CustomChartWidget::clearSeries()
 {
+    m_data.clear();
     m_chart->removeAllSeries();
+    for (QAbstractAxis *axis : m_chart->axes()) {
+        m_chart->removeAxis(axis);
+        delete axis;
+    }
 }
 
 void CustomChartWidget::addPoint(const QString &label, double value)
 {
-    QPieSeries *series = nullptr;
-    if (m_chart->series().isEmpty()) {
-        series = new QPieSeries();
-        connect(series, &QPieSeries::hovered, this, &CustomChartWidget::onPieSeriesHovered);
-        connect(series, &QPieSeries::clicked, this, [this](QPieSlice *slice) {
-            emit itemClicked(slice->label());
-        });
-        m_chart->addSeries(series);
-    } else {
-        series = qobject_cast<QPieSeries *>(m_chart->series().first());
-    }
-
-    if (series) {
-        series->append(label, value);
-    }
+    m_data.append(qMakePair(label, value));
+    rebuildSeries();
 }
 
 void CustomChartWidget::setData(const QString &data)
 {
-    m_chart->removeAllSeries();
+    m_data.clear();
     appendData(data);
 }
 
 void CustomChartWidget::appendData(const QString &data)
 {
-    QPieSeries *series = nullptr;
-    if (m_chart->series().isEmpty()) {
-        series = new QPieSeries();
-        connect(series, &QPieSeries::hovered, this, &CustomChartWidget::onPieSeriesHovered);
+    for (const QString &pair : data.split(';', Qt::SkipEmptyParts)) {
+        const qsizetype separator = pair.lastIndexOf(':');
+        bool valid = false;
+        const double value = pair.mid(separator + 1).toDouble(&valid);
+        if (separator > 0 && valid)
+            m_data.append(qMakePair(pair.left(separator), value));
+    }
+    rebuildSeries();
+}
+
+void CustomChartWidget::rebuildSeries()
+{
+    m_chart->removeAllSeries();
+    for (QAbstractAxis *axis : m_chart->axes()) {
+        m_chart->removeAxis(axis);
+        delete axis;
+    }
+    if (m_data.isEmpty()) return;
+
+    if (m_presentation == Presentation::Pie) {
+        auto *series = new QPieSeries();
+        for (const auto &entry : std::as_const(m_data))
+            series->append(entry.first, entry.second);
+        connect(series, &QPieSeries::hovered, this,
+                &CustomChartWidget::onPieSeriesHovered);
         connect(series, &QPieSeries::clicked, this, [this](QPieSlice *slice) {
-            emit itemClicked(slice->label());
+            emit itemClicked(slice->label(), slice->value());
         });
         m_chart->addSeries(series);
+        const auto markers = m_chart->legend()->markers(series);
+        for (QLegendMarker *marker : markers)
+            connect(marker, &QLegendMarker::clicked, this,
+                    &CustomChartWidget::handleMarkerClicked);
+        return;
+    }
+
+    QStringList categories;
+    qreal maximum = 0;
+    for (const auto &entry : std::as_const(m_data)) {
+        categories.append(entry.first);
+        maximum = qMax(maximum, entry.second);
+    }
+    auto *valueAxis = new QValueAxis();
+    valueAxis->setRange(0, maximum > 0 ? maximum * 1.1 : 1);
+    auto *categoryAxis = new QBarCategoryAxis();
+    categoryAxis->append(categories);
+
+    if (m_presentation == Presentation::HorizontalBars) {
+        auto *set = new QBarSet(tr("Value"));
+        for (const auto &entry : std::as_const(m_data)) *set << entry.second;
+        auto *series = new QHorizontalBarSeries();
+        series->append(set);
+        connect(series, &QHorizontalBarSeries::clicked, this,
+                [this](int index, QBarSet *) {
+                    if (index >= 0 && index < m_data.size())
+                        emit itemClicked(m_data[index].first,
+                                         m_data[index].second);
+                });
+        m_chart->addSeries(series);
+        m_chart->addAxis(valueAxis, Qt::AlignBottom);
+        m_chart->addAxis(categoryAxis, Qt::AlignLeft);
+        series->attachAxis(valueAxis);
+        series->attachAxis(categoryAxis);
     } else {
-        series = qobject_cast<QPieSeries *>(m_chart->series().first());
-    }
-
-    if (!series) return;
-
-    // Simple parsing for now: label:value;label:value
-    QStringList pairs = data.split(';');
-    
-    for (const QString &pair : pairs) {
-        QStringList parts = pair.split(':');
-        if (parts.size() == 2) {
-            series->append(parts[0], parts[1].toDouble());
-        }
-    }
-
-    const auto markers = m_chart->legend()->markers(series);
-    for (QLegendMarker *marker : markers) {
-        disconnect(marker, &QLegendMarker::clicked, this, &CustomChartWidget::handleMarkerClicked);
-        connect(marker, &QLegendMarker::clicked, this, &CustomChartWidget::handleMarkerClicked);
+        auto *series = new QLineSeries();
+        for (qsizetype index = 0; index < m_data.size(); ++index)
+            series->append(index, m_data[index].second);
+        connect(series, &QLineSeries::clicked, this, [this](const QPointF &point) {
+            const int index = qRound(point.x());
+            if (index >= 0 && index < m_data.size())
+                emit itemClicked(m_data[index].first, m_data[index].second);
+        });
+        m_chart->addSeries(series);
+        m_chart->addAxis(categoryAxis, Qt::AlignBottom);
+        m_chart->addAxis(valueAxis, Qt::AlignLeft);
+        series->attachAxis(categoryAxis);
+        series->attachAxis(valueAxis);
     }
 }
 
@@ -155,6 +197,19 @@ void CustomChartWidget::setAxis(const QString &config)
     if (parts.isEmpty()) return;
 
     QString type = parts[0].toLower();
+    if (type == "horizontal") {
+        m_presentation = Presentation::HorizontalBars;
+        rebuildSeries();
+        return;
+    }
+    if (type == "vertical") {
+        m_presentation = Presentation::VerticalLine;
+        rebuildSeries();
+        return;
+    }
+
+    m_presentation = Presentation::VerticalLine;
+    rebuildSeries();
     qreal min = 0;
     qreal max = 10;
     if (parts.size() > 1) min = parts[1].toDouble();
@@ -175,7 +230,7 @@ void CustomChartWidget::setAxis(const QString &config)
         axisY = valueAxis;
     }
 
-    // Remove existing Y axes
+    // Replace the generated value axis for the legacy linear/log grammar.
     auto axes = m_chart->axes(Qt::Vertical);
     for (auto *ax : axes) {
         m_chart->removeAxis(ax);

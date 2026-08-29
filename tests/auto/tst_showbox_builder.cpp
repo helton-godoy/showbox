@@ -1,6 +1,7 @@
 #include <QtTest>
 #include <ShowboxBuilder.h>
 #include <WidgetConfigs.h>
+#include <custom_table_widget.h>
 #include <QDialog>
 #include <QPushButton>
 #include <QLabel>
@@ -105,7 +106,9 @@ void TestShowboxBuilder::testBuildControls()
     leConfig.placeholder = "Enter name";
     QWidget* le = builder.buildLineEdit(leConfig);
     QVERIFY(le != nullptr);
-    QCOMPARE(qobject_cast<QLineEdit*>(le)->placeholderText(), QString("Enter name"));
+    auto *lineEdit = qobject_cast<QLineEdit *>(le->focusProxy());
+    QVERIFY(lineEdit != nullptr);
+    QCOMPARE(lineEdit->placeholderText(), QString("Enter name"));
     delete le;
 }
 
@@ -120,8 +123,10 @@ void TestShowboxBuilder::testBuildItemBasedWidgets()
     cbConfig.currentIndex = 1;
     QWidget* cb = builder.buildComboBox(cbConfig);
     QVERIFY(cb != nullptr);
-    QCOMPARE(qobject_cast<QComboBox*>(cb)->count(), 3);
-    QCOMPARE(qobject_cast<QComboBox*>(cb)->currentIndex(), 1);
+    auto *combo = qobject_cast<QComboBox *>(cb->focusProxy());
+    QVERIFY(combo != nullptr);
+    QCOMPARE(combo->count(), 3);
+    QCOMPARE(combo->currentIndex(), 1);
     delete cb;
     
     // Test List
@@ -130,7 +135,9 @@ void TestShowboxBuilder::testBuildItemBasedWidgets()
     listConfig.items << "Option A" << "Option B";
     QWidget* list = builder.buildList(listConfig);
     QVERIFY(list != nullptr);
-    QCOMPARE(qobject_cast<QListWidget*>(list)->count(), 2);
+    auto *listWidget = qobject_cast<QListWidget *>(list->focusProxy());
+    QVERIFY(listWidget != nullptr);
+    QCOMPARE(listWidget->count(), 2);
     delete list;
     
     // Test Table
@@ -140,9 +147,11 @@ void TestShowboxBuilder::testBuildItemBasedWidgets()
     tableConfig.rows << (QStringList() << "R1C1" << "R1C2");
     QWidget* table = builder.buildTable(tableConfig);
     QVERIFY(table != nullptr);
-    QCOMPARE(qobject_cast<QTableWidget*>(table)->columnCount(), 2);
-    QCOMPARE(qobject_cast<QTableWidget*>(table)->rowCount(), 1);
-    QCOMPARE(qobject_cast<QTableWidget*>(table)->item(0, 0)->text(), QString("R1C1"));
+    auto *customTable = qobject_cast<CustomTableWidget*>(table);
+    QVERIFY(customTable != nullptr);
+    QCOMPARE(customTable->table()->columnCount(), 2);
+    QCOMPARE(customTable->table()->rowCount(), 1);
+    QCOMPARE(customTable->table()->item(0, 0)->text(), QString("R1C1"));
     delete table;
 }
 

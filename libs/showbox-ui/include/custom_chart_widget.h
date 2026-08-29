@@ -8,6 +8,8 @@
 #include <QtCharts/QPieSlice>
 #include <QGraphicsSimpleTextItem>
 #include <QMouseEvent>
+#include <QPair>
+#include <QVector>
 
 class CustomChartWidget : public QChartView
 {
@@ -26,9 +28,10 @@ public:
     void loadFromFile(const QString &filePath);
     void setAxis(const QString &config);
     void exportChart(const QString &path);
+    const QVector<QPair<QString, double>> &dataPoints() const { return m_data; }
 
 signals:
-    void itemClicked(const QString &label);
+    void itemClicked(const QString &label, double value);
 
 protected:
     void mousePressEvent(QMouseEvent *event) override;
@@ -39,8 +42,13 @@ private slots:
     void onSeriesHovered(const QPointF &point, bool state);
 
 private:
+    enum class Presentation { Pie, HorizontalBars, VerticalLine };
+    void rebuildSeries();
+
     QChart *m_chart;
     QGraphicsSimpleTextItem *m_tooltip;
+    QVector<QPair<QString, double>> m_data;
+    Presentation m_presentation = Presentation::Pie;
 };
 
 #endif // CUSTOM_CHART_WIDGET_H

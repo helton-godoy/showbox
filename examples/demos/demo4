@@ -1,5 +1,5 @@
 #!/bin/bash
-SHOWBOX_BIN="${SHOWBOX_BIN:-./src/code/showbox/bin/showbox}"
+# SHOWBOX_BIN="${SHOWBOX_BIN:-./src/code/showbox/bin/showbox}"
 
 FIFOIN="./pipe-in"   # FIFO the showbox process writes to
 FIFOOUT="./pipe-out" # FIFO the showbox process reads from
@@ -8,7 +8,8 @@ rm -rf "${FIFOIN}" "${FIFOOUT}" # sanity removal
 
 mkfifo "${FIFOIN}" "${FIFOOUT}"
 
-${SHOWBOX_BIN} <"${FIFOOUT}" >"${FIFOIN}" &
+#${SHOWBOX_BIN} <"${FIFOOUT}" >"${FIFOIN}" &
+showbox <"${FIFOOUT}" >"${FIFOIN}" &
 DBPID=$! # PID of the showbox, if you need it for any purpose... e.g. to kill it
 
 trap "kill ${DBPID} &>/dev/null; wait ${DBPID}; rm -rf \"${FIFOIN}\" \"${FIFOOUT}\"" EXIT
