@@ -23,6 +23,7 @@ add_subdirectory(libs/ui)
 add_subdirectory(apps/runtime)
 enable_testing()
 add_subdirectory(tests)
+add_subdirectory(libs/project)
 
 option(SHOWBOX_BUILD_STUDIO "Compilar o editor visual experimental" ON)
 if(SHOWBOX_BUILD_STUDIO)
