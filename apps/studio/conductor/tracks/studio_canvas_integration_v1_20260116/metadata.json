@@ -1,0 +1,9 @@
+{
+  "id": "studio_canvas_integration_v1_20260116",
+  "name": "Studio Canvas & Palette Integration",
+  "description": "Transforms the Studio into a functional UI designer by integrating the ShowboxBuilder into the Canvas and implementing the widget palette.",
+  "status": "in-progress",
+  "created": "2026-01-16",
+  "priority": "high",
+  "dependencies": ["parser_modernization_v1_20260116"]
+}

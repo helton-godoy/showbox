@@ -1,0 +1,1 @@
+Create a C++17 class 'StringUtils' using Qt6. Include static methods for 'toCamelCase' and 'toSnakeCase'. Provide a main function running basic unit tests with QTest.
