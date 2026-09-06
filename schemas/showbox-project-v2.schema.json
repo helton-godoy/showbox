@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "showbox-project-v2.schema.json",
+  "title": "Showbox project",
+  "description": "Formato v2 de projeto do Showbox Studio (.sbxproj).",
+  "type": "object",
+  "required": ["format", "version", "widgets"],
+  "properties": {
+    "format": {
+      "const": "showbox"
+    },
+    "version": {
+      "const": 2
+    },
+    "widgets": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/node"
+      }
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "node": {
+      "type": "object",
+      "required": ["type", "name"],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Tipo CLI do componente (mostrar a lista em isKnownType)."
+        },
+        "name": {
+          "type": "string",
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+        },
+        "properties": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "actions": {
+          "type": "string",
+          "description": "Texto JSON exato das ações por evento (ex.: {\"clicked\": [...]})."
+        },
+        "items": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "headers": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "rows": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        },
+        "layout": {
+          "type": "object",
+          "required": ["type"],
+          "additionalProperties": false,
+          "properties": {
+            "type": {
+              "enum": ["box", "grid", "form", "tabs", "scroll-area"]
+            },
+            "orientation": {
+              "enum": ["vertical", "horizontal"]
+            }
+          }
+        },
+        "position": {
+          "type": "object",
+          "additionalProperties": false,
+          "oneOf": [
+            {
+              "required": ["role"],
+              "properties": {
+                "row": { "type": "integer", "minimum": 0 },
+                "role": { "enum": ["label", "field"] }
+              }
+            },
+            {
+              "properties": {
+                "row": { "type": "integer", "minimum": 0 },
+                "column": { "type": "integer", "minimum": 0 },
+                "rowSpan": { "type": "integer", "minimum": 1 },
+                "columnSpan": { "type": "integer", "minimum": 1 }
+              }
+            }
+          ]
+        },
+        "children": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/node" }
+        }
+      }
+    }
+  }
+}
