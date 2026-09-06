@@ -1,8 +1,0 @@
-{
-  "track_id": "arch_modernization_builder_20260116",
-  "type": "refactor",
-  "status": "new",
-  "created_at": "2026-01-16T15:00:00Z",
-  "updated_at": "2026-01-16T15:00:00Z",
-  "description": "Refatoração completa da arquitetura do Showbox Core, implementando o padrão Builder e estruturas de dados modernas para suportar o Showbox Studio e um novo protocolo de comunicação estruturado."
-}

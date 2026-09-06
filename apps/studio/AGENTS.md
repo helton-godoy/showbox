@@ -1,39 +1,8 @@
-# AGENTS.md
+# Showbox Studio
 
-## Dev environment tips
+Aplicam-se as regras do `AGENTS.md` da raiz. Compilar pela raiz do monorepo com
+CMake/just; este diretório não possui um build independente.
 
-- Install dependencies with `npm install` before running scaffolds.
-- Use `npm run dev` for the interactive TypeScript session that powers local experimentation.
-- Run `npm run build` to refresh the CommonJS bundle in `dist/` before shipping changes.
-- Store generated artefacts in `.context/` so reruns stay deterministic.
-
-## Testing instructions
-
-- Execute `npm run test` to run the Jest suite.
-- Append `-- --watch` while iterating on a failing spec.
-- Trigger `npm run build && npm run test` before opening a PR to mimic CI.
-- Add or update tests alongside any generator or CLI changes.
-
-## PR instructions
-
-- Follow Conventional Commits (for example, `feat(scaffolding): add doc links`).
-- Cross-link new scaffolds in `docs/README.md` and `agents/README.md` so future agents can find them.
-- Attach sample CLI output or generated markdown when behaviour shifts.
-- Confirm the built artefacts in `dist/` match the new source changes.
-
-## Repository map
-
-- `AGENT_GUIDE.md/` — explain what lives here and when agents should edit it.
-- `build-pkg/` — explain what lives here and when agents should edit it.
-- `CMakeLists.txt/` — explain what lives here and when agents should edit it.
-- `conductor/` — explain what lives here and when agents should edit it.
-- `core.1/` — explain what lives here and when agents should edit it.
-- `docs/` — explain what lives here and when agents should edit it.
-- `GEMINI.md/` — explain what lives here and when agents should edit it.
-- `packaging/` — explain what lives here and when agents should edit it.
-
-## AI Context References
-
-- Documentation index: `.context/docs/README.md`
-- Agent playbooks: `.context/agents/README.md`
-- Contributor guide: `CONTRIBUTING.md`
+A importação ainda usa QWidget como modelo. A extração do modelo e os ajustes de
+protocolo são tarefas explícitas do roadmap; não declarar o exportador pronto.
+Os testes ficam em `tests/` deste módulo e devem executar sem servidor gráfico.

@@ -13,19 +13,8 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 
-# Configuração do caminho do Showbox Core
-if(NOT SHOWBOX_ROOT)
-    get_filename_component(SHOWBOX_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../showbox" ABSOLUTE)
-endif()
-message(STATUS "Using SHOWBOX_ROOT: ${SHOWBOX_ROOT}")
-
-# Localização da Biblioteca Showbox UI
-set(SHOWBOX_UI_DIR "${SHOWBOX_ROOT}/libs/showbox-ui")
-set(SHOWBOX_UI_INCLUDE "${SHOWBOX_UI_DIR}/include")
-set(SHOWBOX_UI_LIB_DIR "${SHOWBOX_ROOT}/build/lib")
-
-# Importar a Biblioteca Showbox UI via subdiretório
-add_subdirectory("${SHOWBOX_UI_DIR}" "libs/showbox-ui")
+# A biblioteca compartilhada é definida pela raiz do monorepo.
+set(SHOWBOX_UI_INCLUDE "${CMAKE_SOURCE_DIR}/libs/ui/include")
 
 # Fontes do Studio
 set(STUDIO_SOURCES 

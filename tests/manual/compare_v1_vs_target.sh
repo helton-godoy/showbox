@@ -9,7 +9,7 @@ fi
 
 # Build Legacy (QMake)
 echo "=== Building Legacy Showbox ==="
-pushd src/code/showbox
+pushd apps/runtime
 if command -v qmake6 &>/dev/null; then
 	qmake6 showbox.pro
 else
@@ -34,8 +34,8 @@ popd
 
 echo "=== Launching Comparison ==="
 echo "Legacy (expecting 'Legacy Button'):"
-if [[ -f src/code/showbox/bin/showbox-legacy ]]; then
-	echo 'add pushbutton "Legacy Button" btn1' | ./src/code/showbox/bin/showbox-legacy &
+if [[ -f apps/runtime/bin/showbox-legacy ]]; then
+	echo 'add pushbutton "Legacy Button" btn1' | ./apps/runtime/bin/showbox-legacy &
 	LEGACY_PID=$!
 else
 	echo "Legacy binary not found."

@@ -4,7 +4,7 @@
 # Demonstrates the chart widget with pie chart and data visualization
 #
 
-# SHOWBOX_BIN="${SHOWBOX_BIN:-./src/code/showbox/bin/showbox}"
+# SHOWBOX_BIN="${SHOWBOX_BIN:-./apps/runtime/bin/showbox}"
 
 while IFS=$'=' read key value; do
 	# Chart slice clicks are reported as chart1.slice["label"]=value

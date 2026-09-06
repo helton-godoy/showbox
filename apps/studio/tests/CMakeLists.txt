@@ -154,3 +154,8 @@ target_include_directories(tst_StylePerformance PRIVATE
 )
 
 add_test(NAME tst_StylePerformance COMMAND tst_StylePerformance)
+
+add_test(NAME tst_UndoRedo COMMAND tst_UndoRedo)
+set_tests_properties(tst_WidgetConfigs tst_StudioIntegration tst_ScriptGenerator
+    tst_ProjectSerializer tst_UndoRedo tst_Hierarchy tst_StylePerformance
+    PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen" TIMEOUT 60)

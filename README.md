@@ -1,26 +1,38 @@
 # Showbox
 
-Showbox builds Qt 6 graphical interfaces from commands read on stdin and emits
-user actions on stdout. It is a KDE Plasma 6 compatible successor to Dialogbox,
-designed for shell scripts while preserving the established command contract.
+Showbox é um ambiente Qt6 para criar ferramentas visuais com shell script como
+back-end principal, sucessor espiritual do Kommander.
 
-```bash
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-cmake --build build --parallel
-QT_QPA_PLATFORM=offscreen ctest --test-dir build --output-on-failure
+- **showbox**: motor que recebe comandos pela entrada e emite eventos pela saída.
+- **showbox-studio**: editor visual experimental, agora no mesmo repositório.
+
+## Desenvolvimento
+
+```sh
+just doctor
+just setup       # Debian/Ubuntu e derivados; instala dependências com sudo
+just build
+just test
+just run-studio
 ```
 
-Example:
+Em uma máquina sem just, comece com `bash tools/setup/debian.sh`.
+Just é opcional e não é instalado pelo setup.
 
-```bash
-showbox <<'EOF'
-set title "Example"
-add label "Hello from Showbox" greeting
-add pushbutton "Close" close exit default
-show
-EOF
-```
+Sem just: `cmake --preset dev`, `cmake --build --preset dev` e
+`ctest --preset dev`. O build fica em `build/dev` de cada worktree.
 
-Documentation starts at [docs/index.md](docs/index.md). The refactoring status
-and isolated-session work packages are tracked in
-[docs/project/v1/ROADMAP.md](docs/project/v1/ROADMAP.md).
+## Estado
+
+A consolidação é incremental. O motor vem de `integration/showbox-v1` e o Studio
+vem da `develop` do antigo showbox-studio. Geração shell, preview e persistência
+completa de ações ainda precisam de validação e correções; o editor é experimental.
+
+- [Roadmap oficial](docs/project/ROADMAP.md)
+- [Desenvolvimento e testes](docs/development/README.md)
+- [Usuário](docs/user/README.md)
+- [Manual CLI](docs/cli/README.md)
+- [Origem e migração](docs/migration/README.md)
+- [Trabalho com agentes e worktrees](docs/development/worktrees.md)
+
+O histórico e os créditos GPLv3+ dos projetos de origem são preservados.

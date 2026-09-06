@@ -1,4 +1,5 @@
 #include <QtTest>
+#include <QPushButton>
 #include "core/ProjectSerializer.h"
 #include "core/StudioWidgetFactory.h"
 #include <QTemporaryFile>
@@ -71,7 +72,9 @@ void tst_ProjectSerializer::testSaveLoad()
     
     QCOMPARE(loadedBtn->property("text").toString(), "Save Me");
     QCOMPARE(loadedChk->property("checked").toBool(), true);
-    QCOMPARE(loadedBtn->property("showbox_type").toString(), "pushbutton"); // lower case
+    // A factory normaliza PushButton para button antes de salvar.
+    QCOMPARE(loadedBtn->property("showbox_type"), btn->property("showbox_type"));
+    QVERIFY(qobject_cast<QPushButton *>(loadedBtn));
 
     delete root;
     qDeleteAll(loadedWidgets);

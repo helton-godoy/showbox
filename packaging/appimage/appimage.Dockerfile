@@ -8,6 +8,8 @@ RUN apt-get update -qq && apt-get install -qqy --no-install-recommends \
     # Build tools
     build-essential \
     cmake \
+    git \
+    python3 \
     wget \
     ca-certificates \
     file \

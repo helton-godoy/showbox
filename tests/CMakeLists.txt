@@ -37,7 +37,7 @@ target_link_libraries(tst_clibuilder PRIVATE
 )
 
 target_include_directories(tst_clibuilder PRIVATE
-    ../src/code/showbox/core/builder
+    ../apps/runtime/core/builder
 )
 
 add_test(NAME tst_clibuilder COMMAND tst_clibuilder)
@@ -53,7 +53,7 @@ target_link_libraries(tst_parser PRIVATE
 )
 
 target_include_directories(tst_parser PRIVATE
-    ../src/code/showbox/core/parser
+    ../apps/runtime/core/parser
 )
 
 add_test(NAME tst_parser COMMAND tst_parser)
@@ -105,7 +105,7 @@ target_link_libraries(tst_tokenizer PRIVATE
 )
 
 target_include_directories(tst_tokenizer PRIVATE
-    ../src/code/showbox/core/parser
+    ../apps/runtime/core/parser
 )
 
 add_test(NAME tst_tokenizer COMMAND tst_tokenizer)
@@ -121,7 +121,7 @@ target_link_libraries(tst_command_parser PRIVATE
 )
 
 target_include_directories(tst_command_parser PRIVATE
-    ../src/code/showbox/core/parser
+    ../apps/runtime/core/parser
 )
 
 add_test(NAME tst_command_parser COMMAND tst_command_parser)
@@ -169,3 +169,9 @@ set_tests_properties(
     cli_contract
     PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen"
 )
+
+find_package(Python3 3.9 REQUIRED COMPONENTS Interpreter)
+find_package(Git REQUIRED)
+add_test(NAME worktree_isolation
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/test_worktree.py)
+set_tests_properties(worktree_isolation PROPERTIES TIMEOUT 30)

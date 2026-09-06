@@ -10,9 +10,9 @@ qmake6 \
     DESTDIR="${build_dir}/bin" \
     OBJECTS_DIR="${build_dir}/obj" \
     MOC_DIR="${build_dir}/moc" \
-    "${source_root}/src/code/showbox/showbox.pro" \
+    "${source_root}/apps/runtime/showbox.pro" \
     -o "${build_dir}/Makefile"
 
-make -C "${build_dir}" -j"$(getconf _NPROCESSORS_ONLN)"
+make -C "${build_dir}" -j"${SHOWBOX_BUILD_JOBS:-2}"
 
 printf '%s\n' "${build_dir}/bin/showbox-legacy"

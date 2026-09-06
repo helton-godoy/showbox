@@ -6,7 +6,7 @@ TEMPLATE = app
 TARGET = tst_commands
 
 # Path to showbox source code (from tests/auto/)
-SHOWBOX_SRC = ../../src/code/showbox
+SHOWBOX_SRC = ../../apps/runtime
 
 SOURCES += tst_commands.cpp \
            $$SHOWBOX_SRC/commands/add_command.cpp \

@@ -1,9 +1,0 @@
-{
-  "id": "parser_modernization_v1_20260116",
-  "name": "V1 Parser Modernization",
-  "description": "Implementation of a modern, robust parser to map legacy V1 text commands to the new Builder/Config architecture.",
-  "status": "in-progress",
-  "created": "2026-01-16",
-  "priority": "high",
-  "dependencies": ["widget_parity_v1_20260116"]
-}

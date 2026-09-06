@@ -4,7 +4,7 @@
 # Demonstrates the progressbar widget with normal and busy modes
 #
 
-# SHOWBOX_BIN="${SHOWBOX_BIN:-./src/code/showbox/bin/showbox}"
+# SHOWBOX_BIN="${SHOWBOX_BIN:-./apps/runtime/bin/showbox}"
 
 # Demo with static progress bar
 # ${SHOWBOX_BIN} <<EODEMO

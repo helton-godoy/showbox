@@ -7,6 +7,8 @@ FROM fedora:latest
 RUN dnf install -y --setopt=install_weak_deps=False \
     rpm-build \
     cmake \
+    git \
+    python3 \
     gcc-c++ \
     qt6-qtbase-devel \
     qt6-qtcharts-devel \

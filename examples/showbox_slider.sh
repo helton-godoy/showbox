@@ -4,7 +4,7 @@
 # Demonstrates the slider widget with min/max values
 #
 
-# SHOWBOX_BIN="${SHOWBOX_BIN:-./src/code/showbox/bin/showbox}"
+# SHOWBOX_BIN="${SHOWBOX_BIN:-./apps/runtime/bin/showbox}"
 
 while IFS=$'=' read key value; do
 	case ${key} in

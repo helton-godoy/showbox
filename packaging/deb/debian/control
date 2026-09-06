@@ -4,6 +4,8 @@ Priority: optional
 Maintainer: Helton Godoy <helton@example.com>
 Build-Depends: debhelper-compat (= 13),
                cmake,
+               git,
+               python3 (>= 3.9),
                qt6-base-dev,
                qt6-charts-dev,
                libqt6charts6-dev,

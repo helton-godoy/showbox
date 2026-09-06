@@ -8,6 +8,8 @@ RUN apt-get update -qq && apt-get install -qqy \
     # Build tools
     build-essential \
     cmake \
+    git \
+    python3 \
     debhelper \
     devscripts \
     fakeroot \
