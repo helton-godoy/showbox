@@ -1,6 +1,6 @@
 # SB-003 — Modelo de projeto versionado
 
-Estado: em execução.
+Estado: concluída localmente, sujeita a review da branch `feat/SB-003-project-model`.
 
 - Objetivo: extrair um modelo de projeto independente dos widgets Qt, com formato
   versionado e validação, garantindo round-trip sem perdas nas operações de
@@ -34,5 +34,25 @@ Estado: em execução.
     CI estendido para a nova biblioteca. Tudo local, sem push.
 
 ## Handoff
-A preencher ao final da implementação, com SHA final, testes executados e
-limitações, em docs/ ou neste arquivo.
+- SHA final da implementação: `ce92ed7` (branch `feat/SB-003-project-model`, commits
+  `da6d16c` modelo, `e13a68a` mapeamento/serialização, `ce92ed7` ADR/schema). Sem push.
+- Testes executados (KDE neon 24.04, GCC 13.3, Qt 6.11.1, offscreen):
+  - `ctest --preset dev`: 22/22 verdes, incluindo `tst_ProjectModel` (12/12),
+    `tst_ProjectWidgetMapper` (7/7) e `tst_ProjectSerializer` (6/6);
+    `just check` limpo.
+  - Oráculo legado: `build_legacy_oracle.sh` compila; `golden_contract.sh` passa com
+    `LC_ALL=C`. Sob `pt_BR.UTF-8` difere só na vírgula do formato de floats de chart
+    (legado `2,000000` vs motor `2.000000`); pré-existente e sem relação com a SB-003
+    (sem alterações em `apps/runtime`/`libs/ui` neste branch).
+- Alcance: round-trip sem perdas (tabs com páginas, grid/form com posição, table
+  headers/rows, combobox/list itens, textbox/textview/checkbox/radio/slider/spin/
+  progress), ações shell byte-a-byte, migração v1→v2 do hello-world, versão
+  desconhecida recusada com mensagem no MainWindow.
+- Limitações conhecidas:
+  - Form com rows esparsas comprime índices na reconstrução (sem linhas vazias);
+    linha com só rótulo vira item de campo (aproximação via addRow).
+  - `checked`/`checkable` sempre gravados para QAbstractButton; x/y/visible não
+    são restaurados; largura/altura via resize.
+  - Sem CI configurado no repositório para estender; sem ASan/UBSan nesta sessão
+    (mesma limitação da SB-001).
+  - Fora do escopo: undo/redo sobre o modelo e catálogo compartilhado (SB-004).
