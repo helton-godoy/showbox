@@ -1,6 +1,6 @@
 # SB-002 — Interface → Bash → interface
 
-Estado: em execução.
+Estado: concluída (commit d3291dd, branch feat/SB-002-shell-dispatch).
 
 - Objetivo: criar campo, botão e rótulo no Studio; associar uma ação Bash;
   executar e atualizar o rótulo na mesma janela; exportar para execução sem IDE.
@@ -26,3 +26,13 @@ antes de alterar o gerador e PreviewManager.
 
 Persistência completa do modelo e catálogo ficam em SB-003/SB-004; documentar
 explicitamente os tipos e propriedades suportados nesta primeira demonstração.
+
+## Handoff
+Commit final d3291dd sobre a base ec1c7af, branch feat/SB-002-shell-dispatch.
+Fluxo campo → Bash → rótulo fechado na mesma janela via shell/lib/runtime.sh,
+prévia visual sem ações, execução com logs e Parar, exportação independente do
+repositório e salvar/reabrir preservando o JSON das ações.
+Validação local: ctest 21/21 e ASan 2/2 aprovados (incluindo demo com clique real,
+aspas, espaços e `$(...)` neutro; erro de script visível; subprocessos encerrados);
+oráculo legado compilado. Limites: exportação restrita ao conjunto linear v1
+(sem grid/form), modelo completo fica na SB-003, catálogo na SB-004. Sem push.

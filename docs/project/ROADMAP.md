@@ -6,8 +6,8 @@ Somente o integrador altera esta tabela.
 | Tarefa | Entrega | Dependências | Estado |
 | --- | --- | --- | --- |
 | SB-001 | Histórico conciliado, monorepo, build e instruções únicos | — | Concluída localmente |
-| SB-002 | Corrigir exportação/preview e fechar interface → Bash → interface | SB-001 | Em execução |
-| SB-003 | Modelo versionado e salvar/reabrir ações sem perdas | SB-002 | Planejada |
+| SB-002 | Corrigir exportação/preview e fechar interface → Bash → interface | SB-001 | Concluída localmente |
+| SB-003 | Modelo versionado e salvar/reabrir ações sem perdas | SB-002 | Em execução |
 | SB-004 | Catálogo compartilhado de propriedades/eventos suportados | SB-003 | Planejada |
 | SB-005 | Pacotes separados, pipeline de release e testes de instalação | SB-001, SB-002 | Planejada |
 | SB-006 | Proteção Git remota e transição dos repositórios antigos | SB-005 | Planejada |
@@ -17,6 +17,7 @@ Criar campo, botão e rótulo; associar ação Bash; clicar e atualizar o rótul
 salvar, reabrir, exportar e executar sem Studio. Testar contra o motor real.
 
 ## Limites conhecidos na origem
-O gerador coleta callbacks depois de tentar emiti-los. O preview envia Bash
-como se fosse protocolo. Há widgets/opções experimentais fora do contrato v1.
-Não declarar a suíte pronta com base apenas em testes unitários antigos.
+Salvar/reabrir persistia conforme a árvore QWidget e ignorava a versão; a SB-003
+extrai o modelo versionado e a validação. Há widgets/opções experimentais fora do
+contrato v1 (grid/form não exportáveis). Não declarar a suíte pronta com base
+apenas em testes unitários antigos.
