@@ -41,6 +41,8 @@ set(STUDIO_SOURCES
     src/core/ScriptGenerator.h
     src/core/ProjectSerializer.cpp
     src/core/ProjectSerializer.h
+    src/core/ProjectWidgetMapper.cpp
+    src/core/ProjectWidgetMapper.h
     src/core/StudioWidgetFactory.h
     src/core/IStudioWidgetFactory.h
     src/core/PreviewManager.cpp
@@ -62,6 +64,7 @@ target_link_libraries(showbox-studio-components PUBLIC
     Qt6::Charts
     Qt6::Svg
     showbox-ui
+    showbox-project
 )
 
 add_executable(showbox-studio src/main.cpp)

@@ -27,6 +27,7 @@
 #include <QHBoxLayout>
 #include <QListWidget>
 #include <QMenuBar>
+#include <QMessageBox>
 #include <QProcess>
 #include <QSettings>
 #include <QStatusBar>
@@ -378,9 +379,18 @@ void MainWindow::onOpenClicked() {
     }
     m_inspector->updateHierarchy(m_canvas);
     m_projectDirectory = QFileInfo(fileName).absolutePath();
-    statusBar()->showMessage("Projeto carregado: " + fileName);
+    const QStringList errors = serializer.errors();
+    statusBar()->showMessage(errors.isEmpty()
+                                 ? "Projeto carregado: " + fileName
+                                 : "Projeto carregado com ressalvas: " +
+                                       fileName);
   } else {
-    statusBar()->showMessage("Erro ao carregar projeto.");
+    const QStringList errors = serializer.errors();
+    const QString message = errors.isEmpty()
+                                ? "Erro ao carregar projeto."
+                                : errors.join("\n");
+    QMessageBox::warning(this, "Showbox Studio", message);
+    statusBar()->showMessage("Não foi possível carregar o projeto.");
   }
 }
 
