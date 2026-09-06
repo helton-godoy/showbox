@@ -21,8 +21,10 @@ jobs:
       - name: Install Qt 6 toolchain
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -qqy build-essential cmake ninja-build git python3 \
+          sudo apt-get install -qqy build-essential cmake ninja-build git python3 shellcheck \
             qt6-base-dev qt6-charts-dev qt6-svg-dev
+      - name: Validar suporte Bash
+        run: shellcheck -x -s bash shell/lib/runtime.sh examples/hello-world/run.sh
       - name: Configure
         run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
       - name: Build
@@ -50,7 +52,7 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - run: |
           sudo apt-get update -qq
-          sudo apt-get install -qqy build-essential cmake ninja-build git python3 \
+          sudo apt-get install -qqy build-essential cmake ninja-build git python3 shellcheck \
             qt6-base-dev qt6-charts-dev qt6-svg-dev
       - name: Build with ASan and UBSan
         run: >-

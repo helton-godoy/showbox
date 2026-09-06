@@ -6,7 +6,7 @@ Somente o integrador altera esta tabela.
 | Tarefa | Entrega | Dependências | Estado |
 | --- | --- | --- | --- |
 | SB-001 | Histórico conciliado, monorepo, build e instruções únicos | — | Concluída localmente |
-| SB-002 | Corrigir exportação/preview e fechar interface → Bash → interface | SB-001 | Planejada |
+| SB-002 | Corrigir exportação/preview e fechar interface → Bash → interface | SB-001 | Em execução |
 | SB-003 | Modelo versionado e salvar/reabrir ações sem perdas | SB-002 | Planejada |
 | SB-004 | Catálogo compartilhado de propriedades/eventos suportados | SB-003 | Planejada |
 | SB-005 | Pacotes separados, pipeline de release e testes de instalação | SB-001, SB-002 | Planejada |

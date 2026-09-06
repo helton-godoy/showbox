@@ -6,5 +6,5 @@ Durante a migração, os guias existentes continuam válidos para o motor:
 - [Widgets](../widgets-reference.md)
 - [Exemplos](../../examples/README.md)
 
-O Studio é experimental. O tutorial completo com ações shell será publicado
-quando o marco SB-002 tiver um teste contra o motor real.
+O Studio é experimental. O [tutorial de ações Bash](shell-actions.md) descreve
+a primeira aplicação exportável, validada contra o motor real na SB-002.

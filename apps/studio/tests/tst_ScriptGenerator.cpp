@@ -49,12 +49,12 @@ void tst_ScriptGenerator::testBasicGeneration()
 
     qDebug() << "Generated Script:\n" << output;
 
-    QVERIFY(output.contains("#!/bin/bash"));
-    QVERIFY(output.contains("showbox << EOD"));
+    QVERIFY(output.contains("#!/usr/bin/env bash"));
+    QVERIFY(output.contains("mkfifo"));
     // Verificar linhas específicas
-    QVERIFY(output.contains("add button \"Button\" btn1"));
+    QVERIFY(output.contains("add pushbutton \"Button\" btn1"));
     QVERIFY(output.contains("add label \"Label\" lbl1"));
-    QVERIFY(output.contains("EOD"));
+    QVERIFY(output.contains("_sb_run"));
 }
 
 void tst_ScriptGenerator::testProperties()
@@ -140,9 +140,9 @@ void tst_ScriptGenerator::testTabsGeneration()
     QString script = gen.generate(root);
     
     // 6. Verificar
-    QVERIFY(script.contains("add tabs \"\" my_tabs"));
+    QVERIFY(script.contains("add tabs my_tabs"));
     QVERIFY(script.contains("add page \"Tab 1\" my_tabs_page1"));
-    QVERIFY(script.contains("add button \"Click Me\" btn1"));
+    QVERIFY(script.contains("add pushbutton \"Click Me\" btn1"));
     QVERIFY(script.contains("end page"));
     QVERIFY(script.contains("add page \"Settings\" page2"));
     QVERIFY(script.contains("end tabs"));

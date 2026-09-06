@@ -22,10 +22,15 @@ test: build
 
 check:
     git diff --check
-    for script in tools/setup/*.sh; do bash -n "$script"; done
+    for script in tools/setup/*.sh shell/lib/*.sh examples/hello-world/*.sh; do bash -n "$script"; done
+    shellcheck -x -s bash shell/lib/runtime.sh examples/hello-world/run.sh
 
 run-studio: build
     build/dev/bin/showbox-studio
 
 worktree id topic:
     python3 tools/git/worktree.py "$1" "$2"
+
+# Executa a demonstração contra o motor desta worktree.
+demo: build
+    SHOWBOX_BIN="$PWD/build/dev/bin/showbox" bash examples/hello-world/run.sh

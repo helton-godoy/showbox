@@ -1,12 +1,12 @@
 # SB-002 — Interface → Bash → interface
 
-Estado: planejada, ainda não iniciada.
+Estado: em execução.
 
 - Objetivo: criar campo, botão e rótulo no Studio; associar uma ação Bash;
   executar e atualizar o rótulo na mesma janela; exportar para execução sem IDE.
-- Base: fixar SHA após revisão de SB-001, antes de criar a worktree.
+- Base: ec1c7afc4929d6639d649d1df0f7f6245eca6c42.
 - Branch prevista: feat/SB-002-shell-dispatch.
-- Responsável: a designar pelo integrador.
+- Responsável: integrador desta sessão.
 - Dependência: SB-001 aprovada.
 - Escopo: apps/studio/src/core, integração na MainWindow, shell/lib,
   examples/hello-world e testes de fluxo completo.

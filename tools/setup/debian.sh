@@ -7,6 +7,6 @@ case " ${ID:-} ${ID_LIKE:-} " in
 esac
 printf 'Instalando dependências de desenvolvimento pelo apt; sudo pode pedir senha.\n'
 sudo apt-get update
-sudo apt-get install -y build-essential git cmake ninja-build python3 \
+sudo apt-get install -y build-essential git cmake ninja-build python3 util-linux \
     qt6-base-dev qt6-charts-dev qt6-svg-dev shellcheck
 printf 'Ambiente preparado. Execute just doctor ou cmake --preset dev.\n'

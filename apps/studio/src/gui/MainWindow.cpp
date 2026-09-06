@@ -14,6 +14,15 @@
 #include <QActionGroup>
 #include <QDockWidget>
 #include <QFile>
+#include <QDir>
+#include <QFileInfo>
+#include <QJsonArray>
+#include <QJsonObject>
+#include <QJsonDocument>
+#include <QSaveFile>
+#include <QLabel>
+#include <QLineEdit>
+#include <QPushButton>
 #include <QFileDialog>
 #include <QHBoxLayout>
 #include <QListWidget>
@@ -57,12 +66,16 @@ MainWindow::MainWindow(QWidget *parent)
 
   // Sincronizar seleção: Canvas -> Inspector & Property Editor
 
+  m_projectDirectory = QDir::currentPath();
+
   // MenuBar
   QMenu *fileMenu = menuBar()->addMenu("&File");
   fileMenu->addAction("Open", this, &MainWindow::onOpenClicked,
                       QKeySequence::Open);
   fileMenu->addAction("Save", this, &MainWindow::onSaveClicked,
                       QKeySequence::Save);
+  fileMenu->addAction("Exportar aplicação Bash…", this, &MainWindow::onExportClicked);
+  fileMenu->addAction("Nova demonstração campo/botão/rótulo", this, &MainWindow::onDemoClicked);
   fileMenu->addSeparator();
   fileMenu->addAction("Exit", this, &QWidget::close, QKeySequence::Quit);
 
@@ -107,7 +120,7 @@ MainWindow::MainWindow(QWidget *parent)
   m_inspector->updateHierarchy(m_canvas);
 }
 
-MainWindow::~MainWindow() { delete m_factory; }
+MainWindow::~MainWindow() { delete m_previewManager; delete m_factory; }
 
 void MainWindow::setupUI() {
   statusBar()->showMessage("Pronto");
@@ -138,9 +151,20 @@ void MainWindow::setupUI() {
 
   toolBar->addSeparator();
 
-  QAction *runAction = toolBar->addAction("Run Preview");
+  QAction *visualAction = toolBar->addAction("Prévia visual");
+  connect(visualAction, &QAction::triggered, this, &MainWindow::onVisualPreview);
+  QAction *runAction = toolBar->addAction("Executar aplicação");
   runAction->setShortcut(QKeySequence("F5"));
   connect(runAction, &QAction::triggered, this, &MainWindow::onRunClicked);
+
+  QAction *stopAction = toolBar->addAction("Parar");
+  stopAction->setEnabled(false);
+  connect(stopAction, &QAction::triggered, m_previewManager, &PreviewManager::stop);
+  connect(m_previewManager, &PreviewManager::runningChanged, this,
+          [runAction, visualAction, stopAction](bool running) {
+    runAction->setEnabled(!running); visualAction->setEnabled(!running);
+    stopAction->setEnabled(running);
+  });
 
   // Atalho global para Delete
   QAction *deleteAction = new QAction(this);
@@ -199,6 +223,7 @@ void MainWindow::setupUI() {
   m_propEditor = new PropertyEditor(propsTabWidget);
   m_actionEditor = new ActionEditor(propsTabWidget);
   m_actionEditor->setController(m_controller);
+  connect(m_actionEditor, &ActionEditor::executionRequested, this, &MainWindow::onRunClicked);
 
   propsTabWidget->addTab(m_propEditor, "Propriedades");
   propsTabWidget->addTab(m_actionEditor, "Ações");
@@ -211,6 +236,7 @@ void MainWindow::setupUI() {
   dockPreview->setObjectName("PreviewDock"); // For saving state later
   m_previewLog = new QTextEdit(dockPreview);
   m_previewLog->setReadOnly(true);
+  m_previewLog->document()->setMaximumBlockCount(2000);
   m_previewLog->setStyleSheet(
       "background-color: #1e1e1e; color: #00ff00; font-family: Monospace;");
   dockPreview->setWidget(m_previewLog);
@@ -219,13 +245,15 @@ void MainWindow::setupUI() {
   // Connect Preview Signals
   connect(m_previewManager, &PreviewManager::previewOutput, this,
           [this](const QString &out) {
-            m_previewLog->append(out);
+            m_previewLog->moveCursor(QTextCursor::End);
+            m_previewLog->insertPlainText(out);
             // Auto scroll
             m_previewLog->moveCursor(QTextCursor::End);
           });
   connect(m_previewManager, &PreviewManager::previewError, this,
           [this](const QString &err) {
-            m_previewLog->append("<span style='color:red'>" + err + "</span>");
+            m_previewLog->moveCursor(QTextCursor::End);
+            m_previewLog->insertPlainText(err);
           });
   connect(m_previewManager, &PreviewManager::previewFinished, this,
           [this](int code) {
@@ -292,9 +320,9 @@ void MainWindow::onRunClicked() {
   QString script = gen.generate(m_canvas);
 
   if (script.isEmpty()) {
-    statusBar()->showMessage("Erro: Nada para exportar.");
+    statusBar()->showMessage(gen.errorString());
     m_previewLog->append(
-        "<span style='color:orange'>Warning: Nothing to export.</span>");
+        gen.errorString().toHtmlEscaped());
     return;
   }
 
@@ -310,7 +338,7 @@ void MainWindow::onRunClicked() {
     dock->show();
 
   // Run via Manager
-  m_previewManager->runPreview(script);
+  m_previewManager->runPreview(script, m_projectDirectory);
 }
 
 void MainWindow::onSaveClicked() {
@@ -324,6 +352,7 @@ void MainWindow::onSaveClicked() {
 
   ProjectSerializer serializer;
   if (serializer.save(fileName, m_canvas, m_factory)) {
+    m_projectDirectory = QFileInfo(fileName).absolutePath();
     statusBar()->showMessage("Projeto salvo com sucesso: " + fileName);
   } else {
     statusBar()->showMessage("Erro ao salvar projeto.");
@@ -348,6 +377,7 @@ void MainWindow::onOpenClicked() {
       m_controller->manageWidget(w);
     }
     m_inspector->updateHierarchy(m_canvas);
+    m_projectDirectory = QFileInfo(fileName).absolutePath();
     statusBar()->showMessage("Projeto carregado: " + fileName);
   } else {
     statusBar()->showMessage("Erro ao carregar projeto.");
@@ -436,4 +466,47 @@ void MainWindow::onToolboxStyleChanged(int style) {
 
   QString styleName = (style == 0) ? "Classic" : "Tree";
   statusBar()->showMessage("Estilo do Toolbox alterado para: " + styleName);
+}
+
+void MainWindow::onVisualPreview() {
+  ScriptGenerator generator;
+  const auto commands = generator.generateUi(m_canvas);
+  if (commands.isEmpty()) { statusBar()->showMessage(generator.errorString()); return; }
+  m_previewManager->runVisualPreview(commands);
+}
+
+void MainWindow::onExportClicked() {
+  ScriptGenerator generator;
+  const auto script = generator.generate(m_canvas);
+  if (script.isEmpty()) { statusBar()->showMessage(generator.errorString()); return; }
+  const auto path = QFileDialog::getSaveFileName(this, "Exportar aplicação Bash", {}, "Bash (*.sh)");
+  if (path.isEmpty()) return;
+  QSaveFile file(path);
+  const auto bytes = script.toUtf8();
+  if (!file.open(QIODevice::WriteOnly) || file.write(bytes) != bytes.size() || !file.commit()) {
+    statusBar()->showMessage("Não foi possível exportar a aplicação."); return;
+  }
+  QFile::setPermissions(path, QFile::permissions(path) | QFileDevice::ExeOwner);
+  statusBar()->showMessage("Aplicação exportada: " + path);
+}
+
+void MainWindow::onDemoClicked() {
+  m_controller->selectWidget(nullptr);
+  m_controller->undoStack()->clear();
+  m_canvas->clear();
+  auto *entry = m_factory->createWidget("textbox", "entry");
+  auto *button = m_factory->createWidget("pushbutton", "run");
+  auto *result = m_factory->createWidget("label", "result");
+  button->setProperty("text", "Saudar");
+  result->setProperty("text", "Preencha o campo e clique em Saudar.");
+  const QJsonObject action{{"type", "shell"}, {"command",
+    "showbox_get VALUE entry\nshowbox_set result text \"Olá: $VALUE\"\nprintf 'Ação concluída\\n'"}};
+  button->setProperty("showbox_actions", QString::fromUtf8(QJsonDocument(
+    QJsonObject{{"clicked", QJsonArray{action}}}).toJson()));
+  for (auto *widget : {entry, button, result}) {
+    m_canvas->addWidget(widget); m_controller->manageWidget(widget);
+  }
+  m_inspector->updateHierarchy(m_canvas);
+  m_controller->selectWidget(button);
+  statusBar()->showMessage("Demonstração criada. Use Executar aplicação ou Prévia visual.");
 }

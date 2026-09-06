@@ -238,6 +238,8 @@ void PropertyEditor::addPropertyRow(const QMetaProperty &prop,
   } else if (value.typeId() == QMetaType::QColor ||
              name.contains("color", Qt::CaseInsensitive) ||
              name.contains("background", Qt::CaseInsensitive)) {
+    // O editor de cor cria seu próprio item de valor.
+    delete valueItem;
     addColorButtonForRow(row, name, value);
 
   } else if (value.typeId() == QMetaType::QFont ||

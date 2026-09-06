@@ -17,8 +17,8 @@ set(CMAKE_AUTORCC ON)
 set(SHOWBOX_UI_INCLUDE "${CMAKE_SOURCE_DIR}/libs/ui/include")
 
 # Fontes do Studio
-set(STUDIO_SOURCES 
-    src/main.cpp
+set(STUDIO_SOURCES
+    resources/shell.qrc
     src/gui/MainWindow.cpp
     src/gui/MainWindow.h
     src/gui/Canvas.cpp
@@ -47,22 +47,25 @@ set(STUDIO_SOURCES
     src/core/PreviewManager.h
 )
 
-add_executable(showbox-studio 
+add_library(showbox-studio-components STATIC
     ${STUDIO_SOURCES}
 )
 
 # Includes
-target_include_directories(showbox-studio PRIVATE 
+target_include_directories(showbox-studio-components PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
 # Linkagem
-target_link_libraries(showbox-studio PRIVATE 
-    Qt6::Widgets 
+target_link_libraries(showbox-studio-components PUBLIC
+    Qt6::Widgets
     Qt6::Charts
     Qt6::Svg
     showbox-ui
 )
+
+add_executable(showbox-studio src/main.cpp)
+target_link_libraries(showbox-studio PRIVATE showbox-studio-components)
 
 enable_testing()
 add_subdirectory(tests)
@@ -80,12 +83,12 @@ install(TARGETS showbox-studio
 
 # Instala o ícone SVG (Scalable) para garantir alta definição
 # O comando RENAME garante que o ícone tenha o nome esperado pelo .desktop
-install(FILES packaging/icon/showbox-studio.svg 
+install(FILES packaging/icon/showbox-studio.svg
     DESTINATION ${CMAKE_INSTALL_DATADIR}/icons/hicolor/scalable/apps
     RENAME showbox-studio.svg
 )
 
 # Instala o arquivo .desktop
-install(FILES packaging/appimage/showbox-studio.desktop 
+install(FILES packaging/appimage/showbox-studio.desktop
     DESTINATION ${CMAKE_INSTALL_DATADIR}/applications
 )

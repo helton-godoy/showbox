@@ -34,6 +34,8 @@ void tst_ProjectSerializer::testSaveLoad()
     
     QWidget *btn = m_factory->createWidget("PushButton", "btn_save");
     btn->setProperty("text", "Save Me");
+    const QString actions = R"({"clicked":[{"type":"shell","command":"showbox_get VALUE entry"}]})";
+    btn->setProperty("showbox_actions", actions);
     btn->setParent(root); // Simula Canvas
 
     QWidget *chk = m_factory->createWidget("CheckBox", "chk_opt");
@@ -75,6 +77,7 @@ void tst_ProjectSerializer::testSaveLoad()
     // A factory normaliza PushButton para button antes de salvar.
     QCOMPARE(loadedBtn->property("showbox_type"), btn->property("showbox_type"));
     QVERIFY(qobject_cast<QPushButton *>(loadedBtn));
+    QCOMPARE(loadedBtn->property("showbox_actions").toString(), actions);
 
     delete root;
     qDeleteAll(loadedWidgets);

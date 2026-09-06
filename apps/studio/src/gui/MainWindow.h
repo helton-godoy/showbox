@@ -25,6 +25,9 @@ public:
 
 private slots:
   void onRunClicked();
+  void onVisualPreview();
+  void onExportClicked();
+  void onDemoClicked();
   void onSaveClicked();
   void onOpenClicked();
   void onDeleteClicked();
@@ -51,6 +54,8 @@ private:
   QDockWidget *m_dockToolbox;
   AbstractToolbox *m_toolbox;
   int m_toolboxStyle; // 0 = Classic, 1 = Tree
+
+  QString m_projectDirectory;
 
   // Live Preview
   PreviewManager *m_previewManager;

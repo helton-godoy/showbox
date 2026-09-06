@@ -25,8 +25,11 @@ Sem just: `cmake --preset dev`, `cmake --build --preset dev` e
 ## Estado
 
 A consolidação é incremental. O motor vem de `integration/showbox-v1` e o Studio
-vem da `develop` do antigo showbox-studio. Geração shell, preview e persistência
-completa de ações ainda precisam de validação e correções; o editor é experimental.
+vem da `develop` do antigo showbox-studio. A SB-002 fornece execução Bash, prévia sem ações e exportação para um conjunto
+inicial de componentes. O editor permanece experimental; a paridade completa
+de propriedades e o modelo de projeto são trabalhos posteriores.
+
+Experimente `just demo` ou siga o [guia de ações Bash](docs/user/shell-actions.md).
 
 - [Roadmap oficial](docs/project/ROADMAP.md)
 - [Desenvolvimento e testes](docs/development/README.md)

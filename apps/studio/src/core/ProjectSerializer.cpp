@@ -55,7 +55,7 @@ QJsonObject ProjectSerializer::serializeWidget(QWidget *widget,
 
   // Lista de propriedades de interesse (mesma lógica do ScriptGenerator, mas
   // expansível)
-  QStringList keys = {"text",    "title",   "checked", "value",
+  QStringList keys = {"showbox_actions", "text",    "title",   "checked", "value",
                       "minimum", "maximum", "visible", "enabled"};
 
   for (const QString &key : keys) {
