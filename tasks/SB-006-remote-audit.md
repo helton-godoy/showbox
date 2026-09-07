@@ -15,12 +15,12 @@ local das referências em `refs/heads/audit/remote-showbox/2026-09-07/*`.
 
 ### Branches remotas (SHA no GitHub)
 
-| branch | SHA remoto | protegida |
-|---|---|---|
-| `main` | `eab3300348671b1d2c2784595bb3b4294a18e78f` | não |
-| `develop` | `2848cb37d7137ba49bd6b608171937f8c2c60b02` | não |
-| `bugfix/quick-fixes` | `2848cb37d7137ba49bd6b608171937f8c2c60b02` | não |
-| `integration/showbox-v1` | `a5dd820e55c0e690f471451b95ddd6dade7de0c6` | não |
+| branch                   | SHA remoto                                 | protegida |
+| ------------------------ | ------------------------------------------ | --------- |
+| `main`                   | `eab3300348671b1d2c2784595bb3b4294a18e78f` | não       |
+| `develop`                | `2848cb37d7137ba49bd6b608171937f8c2c60b02` | não       |
+| `bugfix/quick-fixes`     | `2848cb37d7137ba49bd6b608171937f8c2c60b02` | não       |
+| `integration/showbox-v1` | `a5dd820e55c0e690f471451b95ddd6dade7de0c6` | não       |
 
 `origin/HEAD` aponta para `origin/main`.
 
@@ -35,12 +35,12 @@ local das referências em `refs/heads/audit/remote-showbox/2026-09-07/*`.
 
 ### Repositórios antigos (em `helton-godoy/*`, antes da transição)
 
-| repositório | default branch | SHA | archived |
-|---|---|---|---|
-| `dialogbox` | `master` | `6989740746f376becc989ab2698e77d14186a0f9` | false |
-| `SHantilly` | `main` | `33c4b0644cc695f2bbf3d64d8e2c6c7b318aa85d` | false |
-| `SHantilly-Studio` | `main` | `eda620c13b3b91238ba5b538b390c0420e108dec` | false |
-| `showbox-studio` | `main` | `84786852552e163fff10ffb00660dbf8b628cae1` | false |
+| repositório        | default branch | SHA                                        | archived |
+| ------------------ | -------------- | ------------------------------------------ | -------- |
+| `dialogbox`        | `master`       | `6989740746f376becc989ab2698e77d14186a0f9` | false    |
+| `SHantilly`        | `main`         | `33c4b0644cc695f2bbf3d64d8e2c6c7b318aa85d` | false    |
+| `SHantilly-Studio` | `main`         | `eda620c13b3b91238ba5b538b390c0420e108dec` | false    |
+| `showbox-studio`   | `main`         | `84786852552e163fff10ffb00660dbf8b628cae1` | false    |
 
 Pushed_at: dialogbox 2020-11-16, SHantilly 2026-08-31, SHantilly-Studio
 2026-07-20, showbox-studio 2026-01-19.

@@ -20,11 +20,11 @@ citadas pelo código do programador continuam sob sua responsabilidade.
 
 ## Escrever ações
 
-```bash
+````bash
 showbox_get VALUE entry
 showbox_set result text "Olá: $VALUE"
 printf 'Ação concluída.\n'
-```
+```text
 
 - `showbox_get VAR componente`: consulta um valor escalar na janela atual, em até
   três segundos. A variável não leva `$` e deve começar por uma letra.
@@ -65,3 +65,4 @@ respostas multilinha e consultas simultâneas exigem um contrato posterior.
 Salvar/reabrir agora preserva o JSON das ações. Isso não substitui a SB-003:
 modelo independente dos widgets, validação do formato, layouts e persistência
 completa continuam sendo a próxima etapa.
+````

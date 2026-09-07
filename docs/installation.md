@@ -24,7 +24,7 @@ Este guia cobre todas as formas de instalar o Showbox no seu sistema.
 
 A forma mais fácil para sistemas baseados em Debian.
 
-```bash
+````bash
 # Baixar o pacote mais recente
 wget https://github.com/helton-godoy/showbox/releases/latest/download/showbox_1.0.0_amd64.deb
 
@@ -33,7 +33,7 @@ sudo dpkg -i showbox_1.0_amd64.deb
 
 # Resolver dependências (se necessário)
 sudo apt-get install -f
-```
+```text
 
 **Sistemas suportados:**
 
@@ -60,7 +60,7 @@ chmod +x showbox-1.0-x86_64.AppImage
 
 # Ou mover para o PATH
 sudo mv showbox-1.0-x86_64.AppImage /usr/local/bin/showbox
-```
+```text
 
 > **Nota**: AppImage inclui todas as dependências Qt6 embutidas.
 
@@ -77,19 +77,19 @@ Para desenvolvedores ou sistemas não suportados.
 ```bash
 sudo apt-get install build-essential qt6-base-dev qt6-charts-dev \
     libgl1-mesa-dev cmake
-```
+```text
 
 **Fedora:**
 
 ```bash
 sudo dnf install qt6-qtbase-devel qt6-qtcharts-devel gcc-c++ make cmake
-```
+```text
 
 **Arch Linux:**
 
 ```bash
 sudo pacman -S qt6-base qt6-charts base-devel cmake
-```
+```text
 
 #### 3.2 Clonar e Compilar
 
@@ -104,7 +104,7 @@ cmake --build build --parallel
 
 # O binário estará em:
 # ./build/bin/showbox
-```
+```text
 
 #### 3.3 Instalar (opcional)
 
@@ -115,7 +115,7 @@ sudo make install
 # Ou adicionar ao PATH manualmente
 echo 'export PATH="$PATH:/caminho/para/showbox/build/bin"' >> ~/.bashrc
 source ~/.bashrc
-```
+```text
 
 ---
 
@@ -129,7 +129,7 @@ showbox --version
 
 # Teste rápido
 echo 'add label "Instalação bem sucedida!" | add pushbutton "OK" exit default' | showbox
-```
+```text
 
 Se uma janela aparecer com a mensagem, a instalação foi bem sucedida! 🎉
 
@@ -147,7 +147,7 @@ export QT_STYLE_OVERRIDE=Fusion
 
 # Ou via argumento
 showbox --style fusion < comandos.txt
-```
+```text
 
 ### Variáveis de Ambiente
 
@@ -165,23 +165,24 @@ showbox --style fusion < comandos.txt
 
 ```bash
 sudo apt-get remove showbox
-```
+```text
 
 ### AppImage
 
 ```bash
 rm /usr/local/bin/showbox
-```
+```text
 
 ### Compilação Manual
 
 ```bash
 cd showbox/apps/runtime
 sudo make uninstall
-```
+```text
 
 ---
 
 ## Próximos Passos
 
 Instalação concluída? Siga para o [Início Rápido](getting-started.md) para criar seu primeiro diálogo!
+````

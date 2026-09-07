@@ -1,3 +1,5 @@
+# Gerenciamento do Conductor via CLI
+
 Para gerenciar o Conductor na linha de comando sem a TUI do Gemini CLI, utilize o modo "headless". Este modo permite executar comandos, scripts e automações diretamente, retornando ao terminal após a conclusão da tarefa.
 
 Como fazer:

@@ -24,9 +24,9 @@ Botão de comando clicável.
 
 **Sintaxe:**
 
-```
+````text
 add pushbutton "título" nome [apply] [exit] [default] [checkable] [checked]
-```
+```text
 
 **Opções:**
 
@@ -44,7 +44,7 @@ add pushbutton "título" nome [apply] [exit] [default] [checkable] [checked]
 nome=clicked          # Botão normal
 nome=pressed          # Botão toggle pressionado
 nome=released         # Botão toggle liberado
-```
+```text
 
 **Exemplo:**
 
@@ -52,7 +52,7 @@ nome=released         # Botão toggle liberado
 add pushbutton "Salvar" btn_save apply exit default
 set btn_save icon "document-save"
 set btn_save stylesheet "background: #4CAF50; color: white; padding: 8px 16px;"
-```
+```text
 
 ---
 
@@ -64,9 +64,9 @@ Caixa de seleção para opções independentes.
 
 **Sintaxe:**
 
-```
+```text
 add checkbox "título" nome [checked]
-```
+```text
 
 **Valor reportado:** `1` (marcado) ou `0` (desmarcado)
 
@@ -75,7 +75,7 @@ add checkbox "título" nome [checked]
 ```bash
 add checkbox "Aceito os termos" chk_termos
 add checkbox "Lembrar senha" chk_lembrar checked
-```
+```text
 
 ---
 
@@ -85,9 +85,9 @@ Botão de opção para seleção exclusiva em grupo.
 
 **Sintaxe:**
 
-```
+```text
 add radiobutton "título" nome [checked]
-```
+```text
 
 > **Importante:** Use dentro de um `groupbox` para agrupar opções mutuamente exclusivas.
 
@@ -101,7 +101,7 @@ add radiobutton "Pequeno" radio_p
 add radiobutton "Médio" radio_m checked
 add radiobutton "Grande" radio_g
 end groupbox
-```
+```text
 
 ---
 
@@ -111,9 +111,9 @@ Campo de entrada de texto em linha única.
 
 **Sintaxe:**
 
-```
+```text
 add textbox "título" nome [password] [text "valor inicial"] [placeholder "dica"]
-```
+```text
 
 **Opções:**
 
@@ -131,7 +131,7 @@ add textbox "título" nome [password] [text "valor inicial"] [placeholder "dica"
 add textbox "Usuário:" txt_user
 add textbox "Senha:" txt_pass password
 set txt_user placeholder "Digite seu email"
-```
+```text
 
 ---
 
@@ -141,12 +141,12 @@ Lista de itens com seleção.
 
 **Sintaxe:**
 
-```
+```text
 add listbox "título" nome [activation] [selection]
 add item "texto" [ícone] [current]
 ...
 end listbox
-```
+```text
 
 **Opções:**
 
@@ -165,7 +165,7 @@ add item "documento.pdf" "document-open" current
 add item "imagem.png" "image-x-generic"
 add item "planilha.csv" "x-office-spreadsheet"
 end listbox
-```
+```text
 
 ---
 
@@ -175,12 +175,12 @@ Lista suspensa de seleção única (não editável).
 
 **Sintaxe:**
 
-```
+```text
 add dropdownlist "título" nome [selection]
 add item "texto" [current]
 ...
 end dropdownlist
-```
+```text
 
 **Valor reportado:** Texto do item selecionado
 
@@ -192,7 +192,7 @@ add item "Brasil" current
 add item "Portugal"
 add item "Angola"
 end dropdownlist
-```
+```text
 
 ---
 
@@ -202,12 +202,12 @@ Lista suspensa editável.
 
 **Sintaxe:**
 
-```
+```text
 add combobox "título" nome [selection]
 add item "texto" [current]
 ...
 end combobox
-```
+```text
 
 **Valor reportado:** Texto digitado/selecionado
 
@@ -219,7 +219,7 @@ add item "São Paulo" current
 add item "Rio de Janeiro"
 add item "Belo Horizonte"
 end combobox
-```
+```text
 
 ---
 
@@ -229,9 +229,9 @@ Controle deslizante para valores numéricos.
 
 **Sintaxe:**
 
-```
+```text
 add slider nome [vertical] [minimum valor] [maximum valor]
-```
+```text
 
 **Padrões:** minimum=0, maximum=100
 
@@ -242,7 +242,7 @@ add slider nome [vertical] [minimum valor] [maximum valor]
 ```bash
 add slider sld_volume minimum 0 maximum 100
 set sld_volume value 75
-```
+```text
 
 ---
 
@@ -252,9 +252,9 @@ Seletor de data interativo.
 
 **Sintaxe:**
 
-```
+```text
 add calendar "título" nome [date "YYYY-MM-DD"] [minimum "YYYY-MM-DD"] [maximum "YYYY-MM-DD"] [format "formato"] [selection] [navigation]
-```
+```text
 
 **Opções:**
 
@@ -275,7 +275,7 @@ add calendar "título" nome [date "YYYY-MM-DD"] [minimum "YYYY-MM-DD"] [maximum 
 add calendar "Data de Nascimento:" cal_nascimento selection navigation
 set cal_nascimento date "1990-01-15"
 set cal_nascimento format "dd/MM/yyyy"
-```
+```text
 
 ---
 
@@ -287,9 +287,9 @@ Exibe texto, imagem ou animação.
 
 **Sintaxe:**
 
-```
+```text
 add label "conteúdo" nome [picture] [animation]
-```
+```text
 
 **Modos:**
 
@@ -302,7 +302,7 @@ add label "conteúdo" nome [picture] [animation]
 ```bash
 add label "<h2>Título</h2><p>Descrição em <b>negrito</b></p>" lbl_info
 add label "/usr/share/icons/logo.svg" lbl_logo picture
-```
+```text
 
 ---
 
@@ -312,9 +312,9 @@ Barra de progresso.
 
 **Sintaxe:**
 
-```
+```text
 add progressbar nome [vertical] [busy]
-```
+```text
 
 **Propriedades:**
 
@@ -323,7 +323,7 @@ set nome value 50        # Define progresso (0-100)
 set nome minimum 0       # Valor mínimo
 set nome maximum 100     # Valor máximo
 set nome busy            # Modo indeterminado (animação)
-```
+```text
 
 **Exemplo:**
 
@@ -332,7 +332,7 @@ add progressbar pb_download
 set pb_download value 35
 # ou modo indeterminado:
 add progressbar pb_loading busy
-```
+```text
 
 ---
 
@@ -342,9 +342,9 @@ add progressbar pb_loading busy
 
 **Sintaxe:**
 
-```
+```text
 add textview nome [file "caminho"]
-```
+```text
 
 **Formatos suportados:** Texto plano, HTML
 
@@ -353,7 +353,7 @@ add textview nome [file "caminho"]
 ```bash
 add textview tv_licenca file "/usr/share/doc/showbox/LICENSE"
 set tv_licenca stylesheet "font-family: monospace; min-width: 40em; min-height: 20em;"
-```
+```text
 
 ---
 
@@ -363,9 +363,9 @@ Linha divisória visual.
 
 **Sintaxe:**
 
-```
+```text
 add separator [nome] [vertical] [plain|raised|sunken]
-```
+```text
 
 **Estilos:** `plain` (sólida), `raised` (3D elevada), `sunken` (3D afundada, padrão)
 
@@ -373,7 +373,7 @@ add separator [nome] [vertical] [plain|raised|sunken]
 
 ```bash
 add separator sep1 horizontal sunken
-```
+```text
 
 ---
 
@@ -383,9 +383,9 @@ Tabela editável com busca.
 
 **Sintaxe:**
 
-```
+```text
 add table "col1;col2;col3" nome [file "arquivo.csv"] [readonly] [selection] [search]
-```
+```text
 
 **Opções:**
 
@@ -401,14 +401,14 @@ add table "col1;col2;col3" nome [file "arquivo.csv"] [readonly] [selection] [sea
 ```bash
 nome[linha][coluna]=valor    # Célula editada
 nome_selection=numero        # Linha selecionada
-```
+```text
 
 **Exemplo:**
 
 ```bash
 add table "Nome;Email;Telefone" tbl_contatos search selection
 set tbl_contatos file "contatos.csv"
-```
+```text
 
 ---
 
@@ -418,9 +418,9 @@ Gráfico interativo (pizza, barras, etc.).
 
 **Sintaxe:**
 
-```
+```text
 add chart "título" nome
-```
+```text
 
 **Propriedades:**
 
@@ -429,7 +429,7 @@ set nome data "Label1:Valor1;Label2:Valor2;..."   # Dados
 set nome append "NovoLabel:Valor"                  # Adiciona dados
 set nome axis "horizontal|vertical"                # Tipo de eixo
 set nome export "/caminho/grafico.png"            # Exporta imagem
-```
+```text
 
 **Evento:** `nome.slice["Label"]=valor` ao clicar em fatia
 
@@ -438,7 +438,7 @@ set nome export "/caminho/grafico.png"            # Exporta imagem
 ```bash
 add chart "Vendas por Região" chart_vendas
 set chart_vendas data "Norte:1500;Sul:2300;Leste:1800;Oeste:2100"
-```
+```text
 
 ---
 
@@ -450,11 +450,11 @@ Container com borda para agrupar widgets.
 
 **Sintaxe:**
 
-```
+```text
 add frame nome [vertical|horizontal] [noframe|box|panel|styled] [plain|raised|sunken]
 ...
 end frame
-```
+```text
 
 **Padrão:** horizontal, sem borda
 
@@ -466,7 +466,7 @@ add stretch
 add pushbutton "Cancelar" btn_cancel exit
 add pushbutton "OK" btn_ok apply exit
 end frame
-```
+```text
 
 ---
 
@@ -476,11 +476,11 @@ Container com título e borda.
 
 **Sintaxe:**
 
-```
+```text
 add groupbox "título" nome [vertical|horizontal] [checkable] [checked]
 ...
 end groupbox
-```
+```text
 
 **Opções:**
 
@@ -496,7 +496,7 @@ add groupbox "Opções Avançadas" grp_avancado vertical checkable
 add checkbox "Modo verbose" chk_verbose
 add slider sld_timeout minimum 1 maximum 60
 end groupbox
-```
+```text
 
 ---
 
@@ -506,12 +506,12 @@ Container com abas para múltiplas páginas.
 
 **Sintaxe:**
 
-```
+```text
 add tabs nome [top|bottom|left|right]
 add page "título" nome_pagina [ícone] [current]
 ...
 end tabs
-```
+```text
 
 **Exemplo:**
 
@@ -525,7 +525,7 @@ add page "Avançado" pg_avancado
 add label "Configurações avançadas aqui"
 
 end tabs
-```
+```text
 
 ---
 
@@ -535,9 +535,9 @@ Página dentro de um `tabs`.
 
 **Sintaxe:**
 
-```
+```text
 add page "título" nome [ícone] [current]
-```
+```text
 
 > Ver exemplo completo em `tabs` acima.
 
@@ -551,9 +551,9 @@ Adiciona espaço fixo no layout.
 
 **Sintaxe:**
 
-```
+```text
 add space [tamanho]
-```
+```text
 
 **Padrão:** 1 pixel
 
@@ -561,7 +561,7 @@ add space [tamanho]
 
 ```bash
 add space 20  # 20 pixels de espaço
-```
+```text
 
 ---
 
@@ -571,9 +571,9 @@ Adiciona espaço flexível que ocupa área disponível.
 
 **Sintaxe:**
 
-```
+```text
 add stretch [fator]
-```
+```text
 
 **Padrão:** fator 1
 
@@ -584,7 +584,7 @@ add frame btn_frame horizontal
 add stretch          # Empurra botões para a direita
 add pushbutton "OK" btn_ok
 end frame
-```
+```text
 
 ---
 
@@ -594,9 +594,9 @@ Item para widgets de lista (listbox, combobox, dropdownlist).
 
 **Sintaxe:**
 
-```
+```text
 add item "texto" [ícone] [current]
-```
+```text
 
 **Opções:**
 
@@ -610,7 +610,7 @@ add listbox "Opções:" lst_opcoes
 add item "Primeira" "dialog-information" current
 add item "Segunda" "dialog-question"
 end listbox
-```
+```text
 
 ---
 
@@ -633,3 +633,4 @@ Propriedades aplicáveis a qualquer widget via `set`:
 
 - [Guia de Layouts](layouts.md) - Criar interfaces complexas
 - [Funcionalidades Avançadas](advanced-features.md) - Stylesheets, comunicação bidirecional
+````

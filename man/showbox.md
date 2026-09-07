@@ -63,13 +63,13 @@ Estes comandos realizam ações diretas em widgets ou no layout.
 
 Abaixo estão os tipos de widgets que podem ser criados com o comando `add`.
 
-#### **De Ação**
+### **De Ação**
 
 - **pushbutton** `título` `nome` [`apply`] [`exit`] [`default`] [`checkable`] [`checked`]: Um botão padrão.
   - `apply`/`exit`: Define papéis especiais para o botão.
   - `checkable`: Permite que o botão seja "pressionado" e permaneça nesse estado.
 
-#### **De Exibição**
+### **De Exibição**
 
 - **label** `título` `nome` [`picture`|`animation`]: Um rótulo para texto ou imagens.
   - `picture`/`animation`: Indica que o `título` é o caminho para uma imagem/animação.
@@ -79,7 +79,7 @@ Abaixo estão os tipos de widgets que podem ser criados com o comando `add`.
 - **chart** `título` `nome`: Um gráfico interativo para visualização de dados.
 - **separator** [`nome`] [`vertical`] [`plain`|`raised`|`sunken`]: Uma linha separadora visual.
 
-#### **De Entrada**
+### **De Entrada**
 
 - **checkbox** `título` `nome` [`checked`]: Uma caixa de seleção individual.
 - **radiobutton** `título` `nome` [`checked`]: Um botão de opção, geralmente usado dentro de um `groupbox` para seleção única.
@@ -92,7 +92,7 @@ Abaixo estão os tipos de widgets que podem ser criados com o comando `add`.
   - `cabeçalhos`: String com nomes das colunas, separados por `;`.
   - Opções: `file "caminho.csv"`, `readonly`, `search`.
 
-#### **De Layout (Contêineres)**
+### **De Layout (Contêineres)**
 
 - **frame** `nome` [`vertical`|`horizontal`] [`estilo...`]: Um contêiner com uma moldura para agrupar outros widgets.
 - **groupbox** `título` `nome` [`vertical`|`horizontal`] [`checkable`]: Similar a um `frame`, mas com um título. Pode ser `checkable` para habilitar/desabilitar todos os widgets filhos de uma vez.
@@ -105,7 +105,7 @@ Abaixo estão os tipos de widgets que podem ser criados com o comando `add`.
 
 Este script cria uma janela com um rótulo e um botão de "Sair".
 
-```bash
+````bash
 #!/bin/bash
 
 showbox << EOF
@@ -114,7 +114,7 @@ add label "Olá, Mundo! Bem-vindo ao Showbox" greeting
 add pushbutton "Sair" btn_sair exit
 show
 EOF
-```
+```text
 
 ### Exemplo 2: Formulário de Login
 
@@ -159,7 +159,7 @@ if [ $? -eq 1 ]; then
   echo "Senha: $pass_input"
   echo "Lembrar: $remember_cb"
 fi
-```
+```text
 
 _Neste exemplo, assumimos que `add textbox` é um widget válido para entrada de texto._
 
@@ -184,3 +184,4 @@ Bugs podem ser reportados no sistema de issues do projeto.
 ## VEJA TAMBÉM
 
 **zenity(1)**, **kdialog(1)**
+````

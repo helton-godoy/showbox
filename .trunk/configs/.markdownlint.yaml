@@ -1,2 +1,7 @@
 # Prettier friendly markdownlint config (all formatting rules disabled)
 extends: markdownlint/style/prettier
+# MD051 (link-fragments) reporta falso positivo em âncoras válidas de TOC com
+# acentuação pt-BR quando o documento contém blocos de código remotos: cada
+# fragmento casa com seu heading isoladamente, mas a presença de fences faz o
+# parser micromark do markdownlint 0.47 invalidar âncoras íntegras.
+MD051: false

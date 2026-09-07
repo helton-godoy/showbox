@@ -12,7 +12,7 @@ Para que seu AppImage execute em "qualquer" versão de Linux, você deve compil�
 
 O AppImage é essencialmente uma imagem de um sistema de arquivos. Sua estrutura deve seguir o padrão:
 
-```text
+````text
 MeuApp.AppDir/
 ├── AppRun (Link simbólico para o executável ou script de inicialização)
 ├── meu-app.desktop
@@ -29,7 +29,7 @@ MeuApp.AppDir/
         │               └── meu-app.svg
         └── applications/ (Cópia do .desktop)
 
-```
+```text
 
 ## 3. Ícones em Alta Definição (Scalable)
 
@@ -58,7 +58,7 @@ Terminal=false
 # Isso força o Qt a tentar usar os portais para caixas de diálogo
 X-AppImage-Integrate=true
 
-```
+```text
 
 ### O Script de Inicialização (AppRun)
 
@@ -82,7 +82,7 @@ export QT_PLUGIN_PATH="$HERE/usr/plugins"
 
 exec "$HERE/usr/bin/meu-app" "$@"
 
-```
+```text
 
 ## 5. Empacotamento com linuxdeploy
 
@@ -108,7 +108,7 @@ export QMAKE=/caminho/para/seu/qt6/bin/qmake
     --plugin qt \
     --output appimage
 
-```
+```text
 
 ## 6. Garantindo o "KDialog" (Portais)
 
@@ -171,7 +171,7 @@ install(FILES "meu-app.desktop"
     DESTINATION "${CMAKE_INSTALL_DATADIR}/applications"
 )
 
-```
+```text
 
 ## 8. Como usar isso para gerar o AppDir
 
@@ -188,7 +188,7 @@ cmake --build build
 # O DESTDIR é o segredo aqui: ele finge que a raiz do sistema é a sua pasta AppDir
 make -C build install DESTDIR=$(pwd)/MeuApp.AppDir
 
-```
+```text
 
 ## 9. Por que isso resolve seus problemas?
 
@@ -203,3 +203,4 @@ Para garantir que seu app está realmente usando os portais, você pode rodar o 
 Se ao abrir um arquivo ele usar o seletor do seu sistema (com seus favoritos e tema), a integração está perfeita.
 
 Você gostaria que eu criasse um script `build_appimage.sh` que automatiza todo esse processo, desde a compilação até o download das ferramentas `linuxdeploy`?
+````

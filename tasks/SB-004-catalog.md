@@ -41,6 +41,7 @@ Estado: concluída localmente, sem push.
   - ctest completo verde (22 suítes + tst_Catalog); sem push.
 
 ## Handoff
+
 - SHA base: a158568 (abre o contrato SB-004 no tip da SB-003).
 - Branch: feat/SB-004-catalog.
 - Entrega:

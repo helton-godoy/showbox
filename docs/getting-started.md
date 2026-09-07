@@ -13,11 +13,11 @@ Aprenda a criar interfaces gráficas com Showbox em minutos! Este guia apresenta
 3. **Usuário** interage com a interface
 4. **Showbox** reporta eventos via **stdout**
 
-```
+````text
 Script ──stdin──▶ Showbox ──GUI──▶ Usuário
                      │
                      └──stdout──▶ Script (eventos)
-```
+```text
 
 ### Estrutura Básica de um Script
 
@@ -38,7 +38,7 @@ EOF
 
 # Aqui você pode processar a saída
 echo "Diálogo fechado com código: $?"
-```
+```text
 
 ---
 
@@ -55,7 +55,7 @@ add label "Bem-vindo ao Showbox!"
 add pushbutton "OK" btn_ok exit default
 show
 EOF
-```
+```text
 
 **O que acontece:**
 
@@ -100,7 +100,7 @@ if [ $? -eq 1 ]; then
 else
     echo "Usuário cancelou"
 fi
-```
+```text
 
 **Conceitos novos:**
 
@@ -140,7 +140,7 @@ if [ $? -eq 1 ]; then
     [ "$chk_debug" = "1" ] && echo "Debug: Habilitado"
     [ "$chk_notify" = "1" ] && echo "Notificações: Habilitado"
 fi
-```
+```text
 
 **Conceitos novos:**
 
@@ -184,7 +184,7 @@ if [ $? -eq 1 ]; then
         echo "Tema selecionado: Automático"
     fi
 fi
-```
+```text
 
 **Conceitos novos:**
 
@@ -220,7 +220,7 @@ if [ $? -eq 1 ]; then
     eval "$OUTPUT"
     echo "Sistema selecionado: $lst_sistemas"
 fi
-```
+```text
 
 **Conceitos novos:**
 
@@ -241,7 +241,7 @@ Use `<< 'EOF'` (com aspas) para texto literal:
 showbox << 'EOF'
 add label "Texto literal $variavel não expande"
 EOF
-```
+```text
 
 Use `<< EOF` (sem aspas) para expandir variáveis:
 
@@ -250,14 +250,14 @@ NOME="João"
 showbox << EOF
 add label "Olá, $NOME!"
 EOF
-```
+```text
 
 ### Estilização Rápida
 
 ```bash
 add pushbutton "Botão Estilizado" btn_style
 set btn_style stylesheet "background-color: #2196F3; color: white; padding: 10px;"
-```
+```text
 
 ### Modo Oculto
 
@@ -268,7 +268,7 @@ showbox --hidden << 'EOF'
 # ... muitos widgets ...
 show  # Mostra só quando tudo estiver pronto
 EOF
-```
+```text
 
 ---
 
@@ -279,3 +279,4 @@ Agora que você conhece o básico:
 1. **[Referência de Widgets](widgets-reference.md)** - Todos os 20 widgets disponíveis
 2. **[Guia de Layouts](layouts.md)** - Criar interfaces complexas
 3. **[Funcionalidades Avançadas](advanced-features.md)** - Comunicação bidirecional, estilos
+````

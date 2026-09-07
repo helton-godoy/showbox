@@ -12,7 +12,7 @@ Soluções para problemas comuns ao usar o Showbox.
 
 **Solução:**
 
-```bash
+````bash
 # Verificar onde está instalado
 which showbox || find /usr -name "showbox" 2>/dev/null
 
@@ -22,7 +22,7 @@ export PATH="$PATH:/caminho/para/showbox"
 # Adicionar permanentemente
 echo 'export PATH="$PATH:/caminho/para/showbox"' >> ~/.bashrc
 source ~/.bashrc
-```
+```text
 
 ---
 
@@ -34,7 +34,7 @@ source ~/.bashrc
 
 ```bash
 sudo apt-get install qt6-base-dev qt6-charts-dev
-```
+```text
 
 **Solução com AppImage:** Use o AppImage que inclui todas as dependências.
 
@@ -65,7 +65,7 @@ step horizontal
 add frame col2 vertical
 add label "Coluna 2"
 end frame
-```
+```text
 
 ---
 
@@ -78,7 +78,7 @@ end frame
    ```bash
    # Adicione no final do script
    show
-   ```
+````
 
 2. **Widget dentro de container fechado:**
 
@@ -104,12 +104,12 @@ end frame
 
 **Solução:** Remova ou reposicione o `stretch`:
 
-```bash
+````bash
 # Muito espaço entre widgets
 add label "A"
 add stretch    # Remove esta linha se indesejado
 add label "B"
-```
+```text
 
 ---
 
@@ -130,7 +130,7 @@ add label "Texto com \"aspas\" internas"
 
 # ✅ CORRETO - Aspas simples externas
 add label 'Texto com "aspas" internas'
-```
+```text
 
 ---
 
@@ -144,7 +144,7 @@ add label 'Texto com "aspas" internas'
 showbox << 'EOF'   # Note as ASPAS em EOF
 add label "Preço: $100 & mais!"
 EOF
-```
+```text
 
 ---
 
@@ -156,7 +156,7 @@ set lbl_img picture /path/to/my image.png
 
 # ✅ CORRETO
 set lbl_img picture "/path/to/my image.png"
-```
+```text
 
 ---
 
@@ -176,7 +176,7 @@ end listbox
 add listbox "Lista:" lst selection
 add item "Item 1"
 end listbox
-```
+```text
 
 ---
 
@@ -195,7 +195,7 @@ done < <(showbox << 'EOF'
 ...
 EOF
 )
-```
+```text
 
 ---
 
@@ -211,7 +211,7 @@ echo "set lbl text 'Novo texto'" >&$OUTPUTFD
 
 # Em alguns casos, adicione sleep mínimo
 sleep 0.01
-```
+```text
 
 ---
 
@@ -232,7 +232,7 @@ ls /usr/share/icons/*/
 
 # Usar caminho absoluto como fallback
 set btn_save icon "/usr/share/icons/Adwaita/48x48/actions/document-save.png"
-```
+```text
 
 ---
 
@@ -242,14 +242,14 @@ set btn_save icon "/usr/share/icons/Adwaita/48x48/actions/document-save.png"
 
 ```bash
 set stylesheet "* { font-size: 14px; }"
-```
+```text
 
 **Solução via variável de ambiente (HiDPI):**
 
 ```bash
 export QT_SCALE_FACTOR=1.5
 showbox < comandos.txt
-```
+```text
 
 ---
 
@@ -262,7 +262,7 @@ showbox < comandos.txt
 ```bash
 export QT_STYLE_OVERRIDE=Fusion
 showbox < comandos.txt
-```
+```text
 
 ---
 
@@ -290,7 +290,7 @@ case $? in
     1) echo "OK clicado" ;;
     0) echo "Cancelado" ;;
 esac
-```
+```text
 
 ---
 
@@ -298,7 +298,7 @@ esac
 
 ```bash
 set txt_campo text ""
-```
+```text
 
 ---
 
@@ -308,7 +308,7 @@ set txt_campo text ""
 disable btn_nome
 # Ou
 set btn_nome enabled 0
-```
+```text
 
 ---
 
@@ -319,7 +319,7 @@ Use `query`:
 ```bash
 echo "query" >&$OUTPUTFD
 # Leia os valores do INPUTFD
-```
+```text
 
 ---
 
@@ -329,7 +329,7 @@ Sim, Qt6 suporta SVG nativamente:
 
 ```bash
 add label "/path/to/image.svg" lbl_logo picture
-```
+```text
 
 ---
 
@@ -346,7 +346,7 @@ Não há modo verbose nativo. Para debug:
    # Digite comandos manualmente e veja o resultado
    add label "teste"
    show
-   ```
+````
 
 2. **Log de comandos:**
 

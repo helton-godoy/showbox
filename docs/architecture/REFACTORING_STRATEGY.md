@@ -14,7 +14,7 @@ Para permitir que o **Showbox Studio** e o **Showbox CLI** coexistam com 100% de
 
 O código fonte será reorganizado para isolar a lógica de UI da lógica de parsing de texto.
 
-```mermaid
+````mermaid
 graph TD
     subgraph "Aplicações (Consumers)"
         CLI[Showbox CLI] -- Lê Stdin --> Lib
@@ -27,7 +27,7 @@ graph TD
 
     CLI --> Lib
     Studio --> Lib
-```
+```text
 
 ---
 
@@ -101,4 +101,4 @@ Os Widgets Qt atuais contêm lógica de execução de shell script (ex: `system(
 │           └── ...
 └── apps/
     └── studio/             # O novo Editor (IDE)
-```
+````

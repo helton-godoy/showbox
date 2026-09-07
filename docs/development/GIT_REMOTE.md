@@ -28,9 +28,9 @@ operacionalizadas por proteções configuradas no GitHub (ver ADR 0006 e
     ShellCheck, validação da árvore de instalação e smoke de CLI contratual.
   - `sanitizers` (app_id 15368 / GitHub Actions) — build e testes com
     ASan/UBSan.
-  Os nomes acima correspondem aos nomes efetivos dos check-runs produzidos pelo
-  workflow `Showbox CI`; a proteção vincula cada contexto ao app_id do GitHub
-  Actions para evitar colisões (`tools/setup/doctor.sh` valida).
+    Os nomes acima correspondem aos nomes efetivos dos check-runs produzidos pelo
+    workflow `Showbox CI`; a proteção vincula cada contexto ao app_id do GitHub
+    Actions para evitar colisões (`tools/setup/doctor.sh` valida).
 - Exigência de aprovação humana: **zero**. A garantia é técnica (PR + checks),
   conforme decisão para repositório de conta única.
 

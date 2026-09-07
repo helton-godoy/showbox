@@ -15,7 +15,7 @@ Criar um diálogo simples com uma mensagem e um botão para fechar.
 
 ## Código Completo
 
-```bash
+````bash
 #!/bin/bash
 #
 # Tutorial 01: Hello World
@@ -36,7 +36,7 @@ show
 EOF
 
 echo "Diálogo fechado!"
-```
+```text
 
 ---
 
@@ -48,7 +48,7 @@ echo "Diálogo fechado!"
 showbox << 'EOF'
 ...
 EOF
-```
+```text
 
 O heredoc (`<< 'EOF'`) permite enviar múltiplas linhas para o showbox. As aspas em `'EOF'` impedem a expansão de variáveis dentro do bloco.
 
@@ -56,7 +56,7 @@ O heredoc (`<< 'EOF'`) permite enviar múltiplas linhas para o showbox. As aspas
 
 ```bash
 set title "Meu Primeiro Diálogo"
-```
+```text
 
 O comando `set` sem nome de widget configura a janela principal.
 
@@ -64,7 +64,7 @@ O comando `set` sem nome de widget configura a janela principal.
 
 ```bash
 add label "<h2>Olá, Mundo!</h2>" lbl_welcome
-```
+```text
 
 - `add` - Comando para adicionar widget
 - `label` - Tipo do widget (rótulo de texto)
@@ -75,7 +75,7 @@ add label "<h2>Olá, Mundo!</h2>" lbl_welcome
 
 ```bash
 add pushbutton "OK" btn_ok exit default
-```
+```text
 
 - `pushbutton` - Tipo botão clicável
 - `"OK"` - Texto do botão
@@ -87,7 +87,7 @@ add pushbutton "OK" btn_ok exit default
 
 ```bash
 show
-```
+```text
 
 Exibe a interface construída.
 
@@ -98,7 +98,7 @@ Exibe a interface construída.
 ```bash
 chmod +x hello_world.sh
 ./hello_world.sh
-```
+```text
 
 ---
 
@@ -121,3 +121,4 @@ Modifique o código para:
 ## Próximo Tutorial
 
 [02. Formulário de Login →](02-formulario-login.md)
+````

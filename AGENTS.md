@@ -1,12 +1,14 @@
 # Showbox — instruções para contribuição
 
 ## Missão e fontes oficiais
+
 Showbox é o nome canônico: motor Qt6 e Studio para ferramentas visuais com Bash.
 Interaja em português brasileiro. Leia `docs/project/ROADMAP.md`,
 `docs/architecture/adr/0001-monorepo.md` e o contrato em `tasks/` antes de editar.
 `docs/project/v1/` registra o ciclo histórico do motor, não o roadmap da suíte.
 
 ## Trabalho isolado
+
 - Uma tarefa, branch e worktree por responsável. Não trocar a branch de outro agente.
 - Definir objetivo, SHA base, escopo, dependências e aceite antes da implementação.
 - Não alterar contratos compartilhados sem coordenar seus consumidores.
@@ -16,6 +18,7 @@ Interaja em português brasileiro. Leia `docs/project/ROADMAP.md`,
 - Não publicar ou configurar serviços externos sem autorização do mantenedor.
 
 ## Código e verificação
+
 C++17, Qt6, CMake e quatro espaços para código novo. Preserve formatação de código
 importado em mudanças mecânicas. O motor não depende do Studio. Widgets compartilhados
 ficam em `libs/ui`; não copiar suas implementações para o editor.
@@ -29,6 +32,7 @@ Registre testes realmente executados e falhas conhecidas. Não confunda compila�
 com funcionamento de geração, preview ou ações.
 
 ## Entrega
+
 Conventional Commits com escopo; PRs pequenos. Separar movimentações e mudanças de
 comportamento. Informar tarefa, SHA base/final, testes e limitações no handoff.
 Não incluir binários, caches, segredos ou documentação gerada no Git.

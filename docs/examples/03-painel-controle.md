@@ -19,7 +19,7 @@ Criar um painel de controle profissional com:
 
 ## Código Completo
 
-```bash
+````bash
 #!/bin/bash
 #
 # Tutorial 03: Painel de Controle
@@ -130,7 +130,7 @@ show
 EOF
 
 echo "Painel fechado"
-```
+```text
 
 ---
 
@@ -150,7 +150,7 @@ step horizontal   # ← Cria nova coluna à direita
 add tabs tabs_main
 # ... conteúdo das abas ...
 end tabs
-```
+```text
 
 ### Largura Fixa da Sidebar
 
@@ -159,7 +159,7 @@ set sidebar stylesheet "
     min-width: 180px;
     max-width: 180px;
 "
-```
+```text
 
 Força largura fixa enquanto o conteúdo principal é flexível.
 
@@ -168,13 +168,13 @@ Força largura fixa enquanto o conteúdo principal é flexível.
 ```bash
 add page "Dashboard" pg_dash current
 set pg_dash icon "go-home"
-```
+```text
 
 ---
 
 ## Diagrama do Layout
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────┐
 │ Painel de Controle                                          │
 ├───────────────┬─────────────────────────────────────────────┤
@@ -191,10 +191,11 @@ set pg_dash icon "go-home"
 │               │  Status: ═══════════════                   │
 │  [Sair]       │                                             │
 └───────────────┴─────────────────────────────────────────────┘
-```
+```text
 
 ---
 
 ## Próximo Tutorial
 
 [04. Tabela de Dados →](04-tabela-dados.md)
+````

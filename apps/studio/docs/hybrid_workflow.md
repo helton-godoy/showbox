@@ -47,9 +47,9 @@ O Executive utiliza os scripts especializados em `scripts/swarm/` para delegar t
 
 **Exemplo:**
 
-```bash
+````bash
 ./scripts/swarm/architect.sh "Criar novo subsistema de pagamento" --level 3
-```
+```text
 
 ### Fase 3: Execução (Swarm)
 
@@ -89,3 +89,4 @@ O agente `architect` agora suporta níveis de profundidade:
 - `--level 2` (Standard): Padrão com testes.
 - `--level 3` (Detailed): Design de sistemas complexos.
 - `--level 4` (Strategic): Arquitetura corporativa.
+````

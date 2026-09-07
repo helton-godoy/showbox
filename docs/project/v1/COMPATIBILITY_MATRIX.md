@@ -6,17 +6,17 @@ compatibility; malformed known commands must not crash or partially mutate UI.
 
 ## Commands
 
-| Command | Required behavior | Automated |
-| --- | --- | --- |
-| `add` | Create the documented widget or container | Partial |
-| `end` | Close the current list/container/page context | Yes |
-| `set` / `unset` | Use legacy `name property value` ordering | Yes |
-| `enable` / `disable` | Toggle named widget | Yes |
-| `show` / `hide` | Empty name targets dialog; name targets widget | Yes |
-| `query` | Print every enabled named reportable widget as `name=value` | Yes |
-| `remove` / `clear` | Remove widget or container contents safely | Yes |
-| `step` | Create horizontal columns and vertical rows | Yes |
-| `position` | Move insertion before/behind widgets/items/pages or onto containers | Yes |
+| Command              | Required behavior                                                   | Automated |
+| -------------------- | ------------------------------------------------------------------- | --------- |
+| `add`                | Create the documented widget or container                           | Partial   |
+| `end`                | Close the current list/container/page context                       | Yes       |
+| `set` / `unset`      | Use legacy `name property value` ordering                           | Yes       |
+| `enable` / `disable` | Toggle named widget                                                 | Yes       |
+| `show` / `hide`      | Empty name targets dialog; name targets widget                      | Yes       |
+| `query`              | Print every enabled named reportable widget as `name=value`         | Yes       |
+| `remove` / `clear`   | Remove widget or container contents safely                          | Yes       |
+| `step`               | Create horizontal columns and vertical rows                         | Yes       |
+| `position`           | Move insertion before/behind widgets/items/pages or onto containers | Yes       |
 
 `position` is automated for ordinary widgets, `frame`/`groupbox`, tab pages,
 and indexed or text-addressed list/table items.
@@ -48,12 +48,12 @@ part of the 1.0 compatibility promise.
 Build the historical executable outside the source tree and enable its CTest
 comparison explicitly:
 
-```sh
+````sh
 tests/compatibility/build_legacy_oracle.sh "$PWD" "$PWD/build-legacy-oracle"
 cmake -S . -B build -DSHOWBOX_LEGACY_ORACLE="$PWD/build-legacy-oracle/bin/showbox-legacy"
 cmake --build build --parallel
 ctest --test-dir build -R legacy_golden_contract --output-on-failure
-```
+```text
 
 The stable CMake targets never compile or link legacy sources.
 
@@ -64,3 +64,4 @@ The stable CMake targets never compile or link legacy sources.
 - Table edit: `name[row][column]=value`.
 - Calendar: ISO date in `name=YYYY-MM-DD` form.
 - `query` and apply actions flush stdout before any dialog exit.
+````
