@@ -82,3 +82,8 @@ verify_platform
 install_dir="$(resolve_install_dir)"
 install_launcher "${install_dir}"
 printf 'Trunk pronto: %s\n' "${install_dir}/trunk"
+
+if [[ ${1-} == check ]]; then
+	shift
+	exec "${install_dir}/trunk" check --cache=false "$@"
+fi
