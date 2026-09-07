@@ -1,11 +1,11 @@
 # SB-004 — Catálogo compartilhado de propriedades/eventos
 
-Estado: em execução.
+Estado: concluída localmente, sem push.
 
 - Objetivo: uma única fonte para tipos canônicos, aliases, eventos, containers e
   nomes de propriedade suportados, consumida pelo motor, pelo modelo de projeto e
   pelo Studio — sem mudar comportamento de exportação nem o protocolo v1.
-- Base: feat/SB-003-project-model tip (16b56a1).
+- Base: feat/SB-003-project-model tip (a158568, commit que abre este contrato).
 - Branch prevista: feat/SB-004-catalog.
 - Responsável: integrador desta sessão.
 - Dependência: SB-003 concluída.
@@ -41,5 +41,35 @@ Estado: em execução.
   - ctest completo verde (22 suítes + tst_Catalog); sem push.
 
 ## Handoff
-A preencher ao final da implementação, com SHA final, testes executados e
-limitações.
+- SHA base: a158568 (abre o contrato SB-004 no tip da SB-003).
+- Branch: feat/SB-004-catalog.
+- Entrega:
+  - libs/catalog (showbox-catalog, Qt6::Core) com WidgetInfo e API de consulta;
+    registro de 27 entradas; flags de container, scriptable, parserCapable e
+    queryable; nomes canônicos curtos com aliases legados do motor e
+    cliType para o `add` divergente (button → pushbutton); progressbar sem
+    eventos; toolbox derivado do registro (Layouts, Spacers, Básico, Entrada,
+    Dados, Containers).
+  - Migrados para o catálogo: libs/project (ProjectModel, ProjectNode),
+    apps/studio (ProjectWidgetMapper, StudioWidgetFactory, ScriptGenerator,
+    ActionEditor, toolbox do MainWindow, Canvas). ObjectInspector mantém
+    políticas explícitas de alvos de drop e apresentação da árvore (ADR 0004).
+    apps/runtime sem código novo; consistência coberta pelo teste
+    parserCapableMatchesEngineAdd.
+  - Corrigida divergência: progressbar changed removido do modelo.
+- Testes executados (worktree showbox-worktrees/SB-004-catalog):
+  - `just test` (build dev): 23/23 (22 suítes + tst_widget_catalog).
+  - Oráculo legado: build_legacy_oracle.sh + golden_contract.sh verdes com
+    LC_ALL=C; sob pt_BR.UTF-8 persiste a diferença pré-existente de floats com
+    vírgula (2,000000 vs 2.000000) em slices de chart — sem mudanças em
+    apps/runtime ou libs/ui no branch.
+  - ADR 0004 registrada.
+- Limitações/notas:
+  - Nenhuma nova exportação nem mudança de protocolo; o gerador continua
+    emitindo `add pushbutton`.
+  - Políticas de UI mantidas explícitas nos consumidores (não duplicação do
+    catálogo, ADR 0004): layout rows do PropertyEditor (window/groupbox/frame/
+    page), alvos de drop e apresentação da árvore do ObjectInspector, e o ramo
+    checkable de botões. O menu de contexto de abas (tabwidget) e o destaque de
+    containers no Canvas foram harmonizados ao canônico do catálogo.
+  - Sem CI remoto nem ASan nesta tarefa.
