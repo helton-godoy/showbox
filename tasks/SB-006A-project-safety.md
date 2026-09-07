@@ -73,13 +73,17 @@ Estado: concluída.
 
 ## Handoff
 
-- Base: `a966cb5`. Final da branch: `a94c43d`.
+- Base: `a966cb5`. Final da branch: `394522d`.
 - Commits:
   - `889ed81` — fix(project): validação recursiva, abertura segura e save
     atômico (SB-006A) [código + testes].
   - `6b9bba0` — docs(tasks): encerra SB-006A com handoff, testes e limitações.
   - `a94c43d` — fix(project): rastreia alterações pelo estado limpo real da
     pilha (SB-006A) [commit corretivo pós-revisão].
+  - `5db0d06` — docs(tasks): registra commit corretivo do rastreio de alterações
+    (SB-006A).
+  - `394522d` — fix(project): demonstração nasce como documento modificado
+    (SB-006A) [commit corretivo pós-revisão].
 - Arquivos alterados:
   - `libs/project/src/ProjectModel.cpp` — `validateActions`/`validateQueryTargets`
     recursam `children` no início (os `return` internos não pulam a descida);
@@ -111,11 +115,17 @@ Estado: concluída.
     `confirmDiscardIfModified()` (que chama `hasUnsavedChanges`).
   - Teste novo `modifiedTrackingAcrossSaveAndEdit` cobre a sequência
     editar→salvar→editar→fechar/abrir (e Undo de volta ao ponto salvo).
+- Revisão [#P1 demonstração]: `onDemoClicked()` deixava pilha limpa e
+  `m_actionsModified=false`, então a demo nunca salva era descartável sem
+  confirmação ao fechar/abrir. Corrigido em `394522d`: mantém o estado limpo
+  durante a construção (sem sinais intermediários de `cleanChanged`) e define
+  `m_actionsModified = true` ao final. Teste `demoIsAvailableInStudio` agora
+  exige `QVERIFY(window.hasUnsavedChanges())`.
 - Testes executados (worktree SB-006A-project-safety):
   - `just build` — verde.
-  - `just test` — 23/23 verdes (incluindo 5 casos novos de modelo/serializer e
-    o `modifiedTrackingAcrossSaveAndEdit` da sequência editar→salvar→editar;
-    o `tst_ActionEditor::demoIsAvailableInStudio` roda sem modal).
+  - `just test` — 23/23 verdes (incluindo 5 casos novos de modelo/serializer, o
+    `modifiedTrackingAcrossSaveAndEdit` da sequência editar→salvar→editar e o
+    `demoIsAvailableInStudio` que agora exige documento modificado).
   - `just check` — verde (`git diff --check`, `bash -n`, ShellCheck).
   - Oráculo legado: não executado — não houve mudança de protocolo/runtime;
     `fromJson` v2 valida tipos porém preserva a forma do JSON emitido.
