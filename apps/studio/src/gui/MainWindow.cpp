@@ -67,17 +67,9 @@ MainWindow::MainWindow(QWidget *parent)
     m_inspector->updateHierarchy(m_canvas);
   });
 
-  // Rastrear modificações do documento: qualquer comando que suje o undo
-  // stack marca o projeto como modificado.
-  connect(m_controller->undoStack(), &QUndoStack::cleanChanged, this,
-          [this](bool clean) {
-            if (!clean)
-              m_documentModified = true;
-          });
-
-  // Edições de ações não geram comandos de undo; marcar diretamente.
+  // Edições de ações não geram comandos de undo; rastreá-las à parte.
   connect(m_actionEditor, &ActionEditor::actionsChanged, this,
-          [this]() { m_documentModified = true; });
+          [this]() { m_actionsModified = true; });
 
   // Sincronizar seleção: Canvas -> Inspector & Property Editor
 
@@ -367,7 +359,7 @@ void MainWindow::onSaveClicked() {
 
   ProjectSerializer serializer;
   if (serializer.save(fileName, m_canvas, m_factory)) {
-    m_documentModified = false;
+    markDocumentSaved();
     m_projectDirectory = QFileInfo(fileName).absolutePath();
     statusBar()->showMessage("Projeto salvo com sucesso: " + fileName);
   } else {
@@ -388,7 +380,7 @@ void MainWindow::onOpenClicked() {
   QList<QWidget *> widgets;
 
   if (serializer.load(fileName, m_factory, widgets)) {
-    m_documentModified = false;
+    m_actionsModified = false;
     m_controller->selectWidget(nullptr);
     m_controller->undoStack()->clear();
     m_canvas->clear();
@@ -416,7 +408,7 @@ void MainWindow::onOpenClicked() {
 }
 
 bool MainWindow::confirmDiscardIfModified() {
-  if (!m_documentModified)
+  if (!hasUnsavedChanges())
     return true;
 
   const QMessageBox::StandardButton answer = QMessageBox::question(
@@ -424,6 +416,15 @@ bool MainWindow::confirmDiscardIfModified() {
       "O projeto atual tem alterações não salvas. Descartar?",
       QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
   return answer == QMessageBox::Yes;
+}
+
+bool MainWindow::hasUnsavedChanges() const {
+  return m_actionsModified || !m_controller->undoStack()->isClean();
+}
+
+void MainWindow::markDocumentSaved() {
+  m_controller->undoStack()->setClean();
+  m_actionsModified = false;
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {
@@ -533,7 +534,7 @@ void MainWindow::onDemoClicked() {
   m_controller->selectWidget(nullptr);
   m_controller->undoStack()->clear();
   m_canvas->clear();
-  m_documentModified = false;
+  m_actionsModified = false;
   auto *entry = m_factory->createWidget("textbox", "entry");
   auto *button = m_factory->createWidget("pushbutton", "run");
   auto *result = m_factory->createWidget("label", "result");

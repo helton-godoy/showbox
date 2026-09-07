@@ -8,7 +8,11 @@
 #include <QPlainTextEdit>
 #include <QPushButton>
 #include "gui/ActionEditor.h"
+#include "gui/Canvas.h"
 #include "gui/MainWindow.h"
+#include "core/StudioCommands.h"
+#include "core/StudioController.h"
+#include "core/StudioWidgetFactory.h"
 
 class ActionEditorTest : public QObject {
     Q_OBJECT
@@ -47,6 +51,32 @@ private slots:
         QVERIFY(editor);
         QVERIFY(editor->getActionsJson().contains("showbox_get VALUE entry"));
         QVERIFY(window.findChild<QPushButton *>("run"));
+    }
+    void modifiedTrackingAcrossSaveAndEdit() {
+        MainWindow window;
+        auto *canvas = window.findChild<Canvas *>();
+        auto *controller = window.findChild<StudioController *>();
+        QVERIFY(canvas);
+        QVERIFY(controller);
+
+        QVERIFY(!window.hasUnsavedChanges());
+
+        StudioWidgetFactory factory;
+        QWidget *button = factory.createWidget("pushbutton", "run");
+        QVERIFY(button);
+        controller->undoStack()->push(new AddWidgetCommand(canvas, button, canvas));
+        QVERIFY(window.hasUnsavedChanges());
+
+        window.markDocumentSaved();
+        QVERIFY(!window.hasUnsavedChanges());
+
+        QWidget *label = factory.createWidget("label", "lbl");
+        QVERIFY(label);
+        controller->undoStack()->push(new AddWidgetCommand(canvas, label, canvas));
+        QVERIFY(window.hasUnsavedChanges());
+
+        controller->undoStack()->undo();
+        QVERIFY(!window.hasUnsavedChanges());
     }
 };
 QTEST_MAIN(ActionEditorTest)

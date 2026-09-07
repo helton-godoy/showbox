@@ -24,6 +24,9 @@ public:
   explicit MainWindow(QWidget *parent = nullptr);
   ~MainWindow();
 
+  bool hasUnsavedChanges() const;
+  void markDocumentSaved();
+
 protected:
   void closeEvent(QCloseEvent *event) override;
 
@@ -61,7 +64,7 @@ private:
   int m_toolboxStyle; // 0 = Classic, 1 = Tree
 
   QString m_projectDirectory;
-  bool m_documentModified = false;
+  bool m_actionsModified = false;
 
   // Live Preview
   PreviewManager *m_previewManager;
