@@ -14,7 +14,7 @@ def main():
     if len(sys.argv) != 3:
         raise SystemExit('Uso: worktree.py SB-014 shell-dispatch')
     task, topic = sys.argv[1:]
-    if not re.fullmatch(r'SB-[0-9]{3,}', task) or not re.fullmatch(r'[a-z0-9]+(?:-[a-z0-9]+)*', topic):
+    if not re.fullmatch(r'SB-[0-9]{3,}[A-Z]?', task) or not re.fullmatch(r'[a-z0-9]+(?:-[a-z0-9]+)*', topic):
         raise SystemExit('Identificador ou assunto inválido.')
     root = Path(git('rev-parse', '--show-toplevel'))
     if git('status', '--porcelain'):
