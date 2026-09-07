@@ -9,4 +9,6 @@ printf 'Instalando dependências de desenvolvimento pelo apt; sudo pode pedir se
 sudo apt-get update
 sudo apt-get install -y build-essential git cmake ninja-build python3 util-linux \
     qt6-base-dev qt6-charts-dev qt6-svg-dev shellcheck
+# Empacotamento e testes de instalação em container (packaging/).
+sudo apt-get install -y debhelper dpkg-dev fakeroot podman
 printf 'Ambiente preparado. Execute just doctor ou cmake --preset dev.\n'
