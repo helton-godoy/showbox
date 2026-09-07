@@ -10,7 +10,7 @@ Somente o integrador altera esta tabela.
 | SB-003 | Modelo versionado e salvar/reabrir ações sem perdas | SB-002 | Concluída localmente |
 | SB-004 | Catálogo compartilhado de propriedades/eventos suportados | SB-003 | Concluída localmente |
 | SB-005 | Pacotes separados, pipeline de release e testes de instalação | SB-001, SB-002 | Concluída localmente |
-| SB-006 | Proteção Git remota e transição dos repositórios antigos | SB-005 | Planejada |
+| SB-006 | Proteção Git remota e transição dos repositórios antigos | SB-005 | Em execução |
 
 ## Marco de produto
 Criar campo, botão e rótulo; associar ação Bash; clicar e atualizar o rótulo;
