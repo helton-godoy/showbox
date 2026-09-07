@@ -1,6 +1,28 @@
 # SB-006 — Proteção Git remota e transição dos repositórios antigos
 
-Estado: em execução.
+Estado: concluída em 2026-09-07.
+
+## Resultado final
+
+- `main` em `93f6d07` (merge commit do PR #1 `integration→main` = `a2a0669` e
+  do PR #2 de governança = `93f6d07`), CI remoto verde (build-test, sanitizers,
+  SonarCloud).
+- Proteções ativas e verificadas por teste destrutivo (passo 8): push direto,
+  force-push e deleção de `main`/`integration/showbox-v1` rejeitados; tags `v*`
+  com deleção/sobrescrita rejeitadas. Ruleset `tags-v-protection` (id 22465807)
+  em `active`; tag de teste `v1.0.0-test` criada/removida no exercício.
+- Required checks corrigidos: contexts reais `build-test` e `sanitizers`
+  (app_id 15368, GitHub Actions); docs e `doctor.sh` alinhados (commit
+  `4b5f5ba`, PR #2).
+- `release.yml` exercitado via `workflow_dispatch` em `main` (run
+  34149545912): 4 artefatos (deb ubuntu/debian, rpm, AppImage) + `install-smoke`
+  verdes; job `release` skipped (sem tag). **Nenhum release criado**.
+- 4 repositórios antigos arquivados após commit de redirecionamento no README da
+  default branch: `dialogbox` (master), `SHantilly`, `SHantilly-Studio`,
+  `showbox-studio` (main) — todos `archived: true`.
+- Branches obsoletas `develop` e `bugfix/quick-fixes` removidas (apontavam para
+  `2848cb3`, ancestral de `main` confirmado por `git merge-base`); branch
+  temporária e `chore/SB-006-governanca-tags` (merged) removidas.
 
 - Objetivo: proteger as branches de integração do `helton-godoy/showbox` no
   GitHub, fazer o primeiro push do monorepo (integration e main consolidada),

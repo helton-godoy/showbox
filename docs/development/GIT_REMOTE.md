@@ -79,3 +79,14 @@ operacionalizadas por proteções configuradas no GitHub (ver ADR 0006 e
 `just doctor` valida a presença/autenticação do `gh`, o acesso ao repositório,
 a existência das branches remotas, as proteções aplicadas e os nomes reais dos
 checks obrigatórios (passo a passo em `tools/setup/doctor.sh`).
+
+## Integrações de GitHub Apps
+
+- Apenas o GitHub Actions e o SonarCloud estão instalados. Apps de terceiros
+  que foram instalados anteriormente sem worker ativo (`codegen-sh`,
+  `prefect-horizon`, `cursor`, `continue`, `kilo-code-bot`, `trunk-io`) foram
+  desinstalados por deixarem check-suites `queued` para sempre e bloquearem
+  merges.
+- Não reinstalar apps que possam registrar check-suites sem um worker real
+  ativo; qualquer avaliação passa antes por um contrato (ex.: SB-007 para o
+  Trunk).
