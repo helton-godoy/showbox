@@ -2,7 +2,7 @@
 SHOWBOX_BIN="${SHOWBOX_BIN:-./apps/runtime/bin/showbox}"
 
 if [[ ! -x ${SHOWBOX_BIN} ]]; then
-	echo "Error: ${SHOWBOX_BIN} not found or not executable."
+	echo "Error: ${SHOWBOX_BIN} not found or not executable." >&2
 	exit 1
 fi
 

@@ -19,6 +19,7 @@ mkfifo "${FIFO}"
 cleanup() {
 	rm -f "${FIFO}"
 	kill %1 2>/dev/null || true
+	return 0
 }
 trap cleanup EXIT
 
