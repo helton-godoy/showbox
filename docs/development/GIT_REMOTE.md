@@ -24,12 +24,13 @@ operacionalizadas por proteções configuradas no GitHub (ver ADR 0006 e
 - O PR deve estar atualizado com a base (`Update branch`/up-to-date) antes do
   merge.
 - Checks obrigatórios (configurados como required status checks de PR):
-  - `Showbox CI / build-test` — build, testes (23 suítes), ShellCheck,
-    validação da árvore de instalação e smoke de CLI contratual.
-  - `Showbox CI / sanitizers` — build e testes com ASan/UBSan.
-  Os nomes acima são os esperados pelo workflow `Showbox CI`; o valor efetivo é
-  o que o GitHub produz por run e deve ser confirmado via API
-  (`tools/setup/doctor.sh` compara com o que está configurado na proteção).
+  - `build-test` (app_id 15368 / GitHub Actions) — build, testes (23 suítes),
+    ShellCheck, validação da árvore de instalação e smoke de CLI contratual.
+  - `sanitizers` (app_id 15368 / GitHub Actions) — build e testes com
+    ASan/UBSan.
+  Os nomes acima correspondem aos nomes efetivos dos check-runs produzidos pelo
+  workflow `Showbox CI`; a proteção vincula cada contexto ao app_id do GitHub
+  Actions para evitar colisões (`tools/setup/doctor.sh` valida).
 - Exigência de aprovação humana: **zero**. A garantia é técnica (PR + checks),
   conforme decisão para repositório de conta única.
 
@@ -37,7 +38,9 @@ operacionalizadas por proteções configuradas no GitHub (ver ADR 0006 e
 
 - Tags de release são criadas somente pelo job de release do `release.yml`
   (fluxo autorizado), nunca manualmente por push direto.
-- Regra de proteção de tags com padrão `v*`: proíbe sobrescrita e exclusão.
+- Regra de proteção de tags com padrão `v*`: proíbe sobrescrita
+  (`non_fast_forward`) e exclusão (`deletion`), aplicada por ruleset
+  `tags-v-protection` (validação em `just doctor`).
 - O primeiro release é um **draft** (nada é publicado publicamente) até a SB-007
   decidir a primeira versão pública com tag real.
 

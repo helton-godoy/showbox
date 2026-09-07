@@ -33,7 +33,7 @@ fi
 
 # --- Repositório remoto (helton-godoy/showbox) ---------------------------------
 repo="helton-godoy/showbox"
-expected_checks=("Showbox CI / build-test" "Showbox CI / sanitizers")
+expected_checks=("build-test" "sanitizers")
 check_protection() {
 	local branch="$1"
 	local payload
@@ -96,10 +96,10 @@ if command -v gh >/dev/null 2>&1; then
 			missing=1
 		fi
 	done
-	if gh api "repos/${repo}/tags/protection" >/dev/null 2>&1; then
+	if gh api "repos/${repo}/rulesets" 2>/dev/null | grep -q 'tags-v-protection'; then
 		printf '%s\n' 'OK: tags protegidas (v*)'
 	else
-		printf '%s\n' 'Ausente: proteção de tags v*' >&2
+		printf '%s\n' 'Ausente: regra de proteção de tags v* (ruleset "tags-v-protection")' >&2
 		missing=1
 	fi
 else
