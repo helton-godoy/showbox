@@ -1,62 +1,49 @@
 #!/bin/bash
 #
-# ShowBox AppImage Builder
-# Uses linuxdeploy with Qt plugin for automatic dependency bundling
+# ShowBox Studio AppImage Builder
+# Empacota o editor visual (showbox-studio) com as bibliotecas Qt via linuxdeploy.
 #
+# Execução padrão pelo container (start-pkg-appimage.sh); sem engine de
+# container, rode dentro do diretório packaging/appimage a partir da árvore
+# com as ferramentas linuxdeploy disponíveis em LINUXDEPLOY_TOOLS_DIR.
 
-set -e
+set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 DIST_DIR="${PROJECT_ROOT}/dist"
 APPDIR="${SCRIPT_DIR}/ShowBox.AppDir"
-VERSION="1.0.0"
 BUILD_DIR="${APPIMAGE_BUILD_DIR:-${PROJECT_ROOT}/build-appimage}"
-
-echo "=== ShowBox AppImage Builder ==="
-
-# Download linuxdeploy tools if not present
+VERSION="1.0.0"
 TOOLS_DIR="${LINUXDEPLOY_TOOLS_DIR:-${SCRIPT_DIR}/tools}"
-mkdir -p "${TOOLS_DIR}"
 
-if [[ ! -f "${TOOLS_DIR}/linuxdeploy-x86_64.AppImage" ]]; then
-	echo "Downloading linuxdeploy..."
-	wget -q -O "${TOOLS_DIR}/linuxdeploy-x86_64.AppImage" \
-		"https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage"
-	chmod +x "${TOOLS_DIR}/linuxdeploy-x86_64.AppImage"
-fi
+echo "=== ShowBox Studio AppImage Builder ==="
 
-if [[ ! -f "${TOOLS_DIR}/linuxdeploy-plugin-qt-x86_64.AppImage" ]]; then
-	echo "Downloading linuxdeploy Qt plugin..."
-	wget -q -O "${TOOLS_DIR}/linuxdeploy-plugin-qt-x86_64.AppImage" \
-		"https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage"
-	chmod +x "${TOOLS_DIR}/linuxdeploy-plugin-qt-x86_64.AppImage"
-fi
+mkdir -p "${TOOLS_DIR}" "${DIST_DIR}"
 
-# Always rebuild from the mounted source tree. Reusing a pre-existing binary
-# can silently package a different revision than the one being released.
-echo "Building ShowBox..."
-cmake -S "${PROJECT_ROOT}" -B "${BUILD_DIR}" -DCMAKE_BUILD_TYPE=Release -DSHOWBOX_BUILD_STUDIO=OFF
+for tool in linuxdeploy-x86_64.AppImage linuxdeploy-plugin-qt-x86_64.AppImage; do
+	if [[ ! -x "${TOOLS_DIR}/${tool}" ]] && [[ -x "${SCRIPT_DIR}/${tool}" ]]; then
+		cp "${SCRIPT_DIR}/${tool}" "${TOOLS_DIR}/${tool}"
+	fi
+done
+
+# Construção sempre a partir da árvore local, Release, com o Studio habilitado.
+cmake -S "${PROJECT_ROOT}" -B "${BUILD_DIR}" -DCMAKE_BUILD_TYPE=Release
 cmake --build "${BUILD_DIR}" --parallel
 
-# Create AppDir structure
+# Instalação completa via CMake (binário, desktop e ícone canônicos).
 rm -rf "${APPDIR}"
-mkdir -p "${APPDIR}/usr/bin"
-mkdir -p "${APPDIR}/usr/share/applications"
-mkdir -p "${APPDIR}/usr/share/icons/hicolor/scalable/apps"
+mkdir -p "${APPDIR}"
+DESTDIR="${APPDIR}" cmake --install "${BUILD_DIR}" --prefix /usr --strip
 
-# Copy files
-cp "${BUILD_DIR}/bin/showbox" "${APPDIR}/usr/bin/"
-cp "${SCRIPT_DIR}/showbox.desktop" "${APPDIR}/usr/share/applications/"
-cp "${SCRIPT_DIR}/showbox.svg" \
-	"${APPDIR}/usr/share/icons/hicolor/scalable/apps/showbox.svg"
+# AppRun customizado com os portais XDG.
+cp "${SCRIPT_DIR}/AppRun" "${APPDIR}/AppRun"
+chmod +x "${APPDIR}/AppRun"
 
-# linuxdeploy detects the XCB platform from the build environment, but Wayland
-# plugins are loaded dynamically and must be seeded into the AppDir explicitly.
+# Plugins Wayland são carregados dinamicamente e precisam ser semeados.
 QT_PLUGIN_DIR="$(qtpaths6 --plugin-dir)"
 mkdir -p "${APPDIR}/usr/plugins/platforms"
-cp "${QT_PLUGIN_DIR}/platforms/"libqwayland-*.so \
-	"${APPDIR}/usr/plugins/platforms/"
+cp "${QT_PLUGIN_DIR}/platforms/"libqwayland-*.so "${APPDIR}/usr/plugins/platforms/" 2>/dev/null || true
 for plugin_group in \
 	wayland-decoration-client \
 	wayland-graphics-integration-client \
@@ -66,12 +53,9 @@ for plugin_group in \
 	fi
 done
 
-# Create dist directory
-mkdir -p "${DIST_DIR}"
-
-# Build AppImage using linuxdeploy with Qt plugin
-# The Qt plugin automatically detects and bundles Qt dependencies
+# linuxdeploy detecta e empacota as dependências Qt do AppDir.
 export VERSION="${VERSION}"
+export QMAKE="$(command -v qmake6)"
 
 cd "${SCRIPT_DIR}"
 
@@ -79,16 +63,19 @@ cd "${SCRIPT_DIR}"
 	--appdir "${APPDIR}" \
 	--plugin qt \
 	--output appimage \
-	--desktop-file "${APPDIR}/usr/share/applications/showbox.desktop" \
-	--icon-file "${APPDIR}/usr/share/icons/hicolor/scalable/apps/showbox.svg"
+	--custom-apprun "${APPDIR}/AppRun"
 
-# Move to dist
-mv ShowBox*.AppImage "${DIST_DIR}/" 2>/dev/null || true
+# Move para dist com nome determinístico.
+shopt -s nullglob
+for candidate in ShowBox*.AppImage Showbox_*.AppImage ShowboxStudio*.AppImage; do
+	if [[ -f "${candidate}" ]]; then
+		mv -f "${candidate}" "${DIST_DIR}/ShowBox-Studio-${VERSION}-x86_64.AppImage"
+		break
+	fi
+done
 
-# Cleanup
 rm -rf "${APPDIR}"
 
 echo ""
 echo "=== Build Complete ==="
-echo "AppImage available in: ${DIST_DIR}"
-ls -la "${DIST_DIR}"/*.AppImage 2>/dev/null || echo "No AppImage found"
+ls -la "${DIST_DIR}"/ShowBox-Studio-*.AppImage 2>/dev/null || echo "No AppImage found"
