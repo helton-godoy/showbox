@@ -6,10 +6,10 @@
 
 # SHOWBOX_BIN="${SHOWBOX_BIN:-./apps/runtime/bin/showbox}"
 
-while IFS=$'=' read key value; do
+while IFS=$'=' read -r key value; do
 	case ${key} in
 	cb1)
-		if [[ "${value}" == "1" ]]; then
+		if [[ ${value} == "1" ]]; then
 			echo "Option 1 is checked"
 		else
 			echo "Option 1 is unchecked"
@@ -24,11 +24,14 @@ while IFS=$'=' read key value; do
 	cancel)
 		echo "User clicked Cancel pushbutton"
 		;;
+	*) ;;
 	esac
 done < <(
 
-#	${SHOWBOX_BIN} <<EODEMO
-showbox <<EODEMO
+	#	${SHOWBOX_BIN} <<EODEMO
+	# shellcheck disable=SC2312  # exit do showbox propositalmente ignorado no while < <(showbox)
+
+	showbox <<EODEMO
 add checkbox "&Option 1" cb1
 add textbox "&Text field" txt1 "text to edit"
 add frame horizontal

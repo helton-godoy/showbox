@@ -4,7 +4,7 @@
 
 flag=0
 
-while IFS=$'=' read key value; do
+while IFS=$'=' read -r key value; do
 	case ${key} in
 	cb1)
 		if [[ ${value} == "1" ]]; then
@@ -24,11 +24,14 @@ while IFS=$'=' read key value; do
 		flag=1
 		echo User clicked Cancel pushbutton
 		;;
+	*) ;;
 	esac
 done < <(
 
-#	${SHOWBOX_BIN} <<EODEMO
-showbox <<EODEMO
+	#	${SHOWBOX_BIN} <<EODEMO
+	# shellcheck disable=SC2312  # exit do showbox propositalmente ignorado no while < <(showbox)
+
+	showbox <<EODEMO
 add label "<small>This script demonstrates unidirectional communication with the showbox application." note
 set note stylesheet "qproperty-textInteractionFlags: NoTextInteraction;"
 add separator

@@ -16,7 +16,8 @@ else
 	echo "qmake6 not found, skipping legacy build (assuming it is built or environment issue)"
 fi
 if [[ -f Makefile ]]; then
-	make -j$(nproc)
+	jobs_nproc="$(nproc)"
+	make -j"${jobs_nproc}"
 fi
 popd
 
@@ -26,7 +27,8 @@ mkdir -p build
 pushd build
 if command -v cmake &>/dev/null; then
 	cmake ..
-	make -j$(nproc)
+	jobs_nproc="$(nproc)"
+	make -j"${jobs_nproc}"
 else
 	echo "cmake not found, skipping target build"
 fi
@@ -50,6 +52,6 @@ else
 fi
 
 echo "Press Enter to close applications..."
-read
+read -r
 if [[ -n ${LEGACY_PID} ]]; then kill "${LEGACY_PID}" 2>/dev/null; fi
 if [[ -n ${TARGET_PID} ]]; then kill "${TARGET_PID}" 2>/dev/null; fi

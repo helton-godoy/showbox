@@ -1,7 +1,7 @@
 #!/bin/bash
 SHOWBOX_BIN="${SHOWBOX_BIN:-./apps/runtime/bin/showbox}"
 
-if [[ ! -f "${SHOWBOX_BIN}" ]]; then
+if [[ ! -f ${SHOWBOX_BIN} ]]; then
 	echo "Error: Binary not found at ${SHOWBOX_BIN}"
 	exit 1
 fi

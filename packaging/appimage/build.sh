@@ -52,7 +52,8 @@ done
 
 # linuxdeploy detecta e empacota as dependências Qt do AppDir.
 export VERSION="${VERSION}"
-export QMAKE="$(command -v qmake6)"
+QMAKE="$(command -v qmake6)"
+export QMAKE
 
 cd "${SCRIPT_DIR}"
 
@@ -67,7 +68,7 @@ cd "${SCRIPT_DIR}"
 # Move para dist com nome determinístico.
 shopt -s nullglob
 for candidate in ShowBox*.AppImage Showbox_*.AppImage ShowboxStudio*.AppImage; do
-	if [[ -f "${candidate}" ]]; then
+	if [[ -f ${candidate} ]]; then
 		mv -f "${candidate}" "${DIST_DIR}/ShowBox-Studio-${VERSION}-x86_64.AppImage"
 		break
 	fi

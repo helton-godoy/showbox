@@ -51,7 +51,9 @@ build_deb() {
 	# Each distro gets its own artifact directory: the shlibdeps recorded by
 	# dpkg-shlibdeps (e.g. libqt6core6t64 vs libqt6gui6) differ per base image.
 	mkdir -p "${DIST_DIR}/${distro}"
-	local version=$(head -1 "${SCRIPT_DIR}/debian/changelog" | grep -oP '\(.*?\)' | tr -d '()')
+	local version
+	# shellcheck disable=SC2312  # pipe de extração da versão: falha vira versão vazia, tratada pelo glob
+	version=$(head -1 "${SCRIPT_DIR}/debian/changelog" | grep -oP '\(.*?\)' | tr -d '()')
 	for deb_file in "${DIST_DIR}"/showbox*"_${version}_amd64.deb"; do
 		if [[ -f ${deb_file} ]]; then
 			mv "${deb_file}" "${DIST_DIR}/${distro}/$(basename "${deb_file}")"

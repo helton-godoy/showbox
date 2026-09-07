@@ -2,7 +2,6 @@
 set -e
 
 # Configurações de Caminhos
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_ROOT="/workspace/showbox-studio"
 SHOWBOX_ROOT="/workspace/showbox"
 BUILD_DIR="${PROJECT_ROOT}/build-pkg"
@@ -23,7 +22,8 @@ cmake "${PROJECT_ROOT}" \
 	-DCMAKE_INSTALL_PREFIX=/usr \
 	-DCMAKE_BUILD_TYPE=Release
 
-make -j$(nproc)
+jobs_nproc="$(nproc)"
+make -j"${jobs_nproc}"
 
 # 3. Instalação Completa via CMake (Binário, Ícone, Desktop)
 echo "[2/6] Installing to AppDir via CMake..."
@@ -32,12 +32,12 @@ make install DESTDIR="${APPDIR}"
 # 4. Baixar Ferramentas
 echo "[3/6] Downloading deployment tools..."
 cd "${BUILD_DIR}"
-WGET_OPTS="--no-check-certificate -q -nc"
-wget ${WGET_OPTS} https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
-wget ${WGET_OPTS} https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage
-wget ${WGET_OPTS} https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
-wget ${WGET_OPTS} https://github.com/AppImage/type2-runtime/releases/download/continuous/runtime-x86_64
-chmod +x *.AppImage
+WGET_OPTS=(--no-check-certificate -q -nc)
+wget "${WGET_OPTS[@]}" https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
+wget "${WGET_OPTS[@]}" https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage
+wget "${WGET_OPTS[@]}" https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
+wget "${WGET_OPTS[@]}" https://github.com/AppImage/type2-runtime/releases/download/continuous/runtime-x86_64
+chmod +x ./*.AppImage
 
 # 5. Configurar Ambiente para Temas e Portais
 export EXTRA_QT_PLUGINS="platformthemes,wayland-graphics-integration"

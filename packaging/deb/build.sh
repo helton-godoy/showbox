@@ -11,7 +11,7 @@ PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 DIST_DIR="${PROJECT_ROOT}/dist"
 
 cleanup() {
-    rm -rf "${PROJECT_ROOT}/debian"
+	rm -rf "${PROJECT_ROOT}/debian"
 }
 trap cleanup EXIT
 

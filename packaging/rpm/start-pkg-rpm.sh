@@ -7,14 +7,14 @@ container_engine="${CONTAINER_ENGINE:-podman}"
 image_name="showbox-rpm"
 
 "${container_engine}" build \
-    -f "${script_dir}/fedora.Dockerfile" \
-    -t "${image_name}" \
-    "${script_dir}"
+	-f "${script_dir}/fedora.Dockerfile" \
+	-t "${image_name}" \
+	"${script_dir}"
 
 "${container_engine}" run --rm \
-    -v "${project_root}:/build/showbox:rw,Z" \
-    -w /build/showbox \
-    "${image_name}" \
-    bash ./packaging/rpm/build.sh
+	-v "${project_root}:/build/showbox:rw,Z" \
+	-w /build/showbox \
+	"${image_name}" \
+	bash ./packaging/rpm/build.sh
 
 ls -la "${project_root}/dist/"*.rpm

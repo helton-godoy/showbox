@@ -7,7 +7,7 @@
 # SHOWBOX_BIN="${SHOWBOX_BIN:-./apps/runtime/bin/showbox}"
 
 # ${SHOWBOX_BIN} <<EODEMO
-showbox  <<EODEMO
+showbox <<EODEMO
 add label "<b>Select a date:</b>" title
 set title stylesheet "qproperty-textInteractionFlags: NoTextInteraction;"
 

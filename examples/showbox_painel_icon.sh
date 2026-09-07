@@ -4,7 +4,6 @@
 # Demonstrates a grid-like layout with icon buttons
 #
 
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 # SHOWBOX_BIN="${SHOWBOX_BIN:-./apps/runtime/bin/showbox}"
 
 # Use Adwaita icons (available on most Linux systems)
@@ -115,7 +114,8 @@ end frame
 
 show
 EODEMO
+status=$?
 
 echo ""
 echo "Widget selecionado ou diálogo fechado"
-echo "Exit code: $?"
+echo "Exit code: ${status}"

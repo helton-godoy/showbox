@@ -31,11 +31,12 @@ echo "Testing basic add/set commands with --new-parser..."
 # Or just rely on "didn't crash immediately".
 
 echo "add pushbutton 'OK' btn1 default" | timeout 2s "${DIALOGBOX}" --new-parser --hidden
+status=$?
 
-if [[ $? -eq 124 ]]; then
+if ((status == 124)); then
 	echo "Success: Application ran and timed out as expected (GUI loop active)."
 	exit 0
 else
-	echo "Failure: Application exited with code $?"
+	echo "Failure: Application exited with code ${status}"
 	exit 1
 fi

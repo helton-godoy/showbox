@@ -22,7 +22,7 @@ E_CANCEL=1
 
 # The trap checks whether the showbox application was terminated and if so
 # kills the current job and exits the script
-trap "if ! kill -0 ${DBPID} &>/dev/null; then kill %; echo The script cancelled by user; exit ${E_CANCEL}; fi" CHLD
+trap 'if ! kill -0 ${DBPID} &>/dev/null; then kill %; echo The script cancelled by user; exit ${E_CANCEL}; fi' CHLD
 set -o monitor # Enable SIGCHLD
 
 cat >&"${OUTPUTFD}" <<EODEMO
@@ -41,12 +41,13 @@ set okay default
 set okay focus
 EODEMO
 
-while IFS=$'=' read key value; do
+while IFS=$'=' read -r key _; do
 	case ${key} in
 	okay)
 		echo User initiated the long-run process
 		break
 		;;
+	*) ;;
 	esac
 done <&"${INPUTFD}"
 

@@ -6,7 +6,7 @@
 
 # SHOWBOX_BIN="${SHOWBOX_BIN:-./apps/runtime/bin/showbox}"
 
-while IFS=$'=' read key value; do
+while IFS=$'=' read -r key value; do
 	case ${key} in
 	slider1)
 		echo "Slider value changed: ${value}"
@@ -14,11 +14,14 @@ while IFS=$'=' read key value; do
 	slider2)
 		echo "Volume: ${value}%"
 		;;
+	*) ;;
 	esac
 done < <(
 
-#	${SHOWBOX_BIN} <<EODEMO
-showbox <<EODEMO
+	#	${SHOWBOX_BIN} <<EODEMO
+	# shellcheck disable=SC2312  # exit do showbox propositalmente ignorado no while < <(showbox)
+
+	showbox <<EODEMO
 add label "<b>Slider Demo</b>" title
 set title stylesheet "qproperty-textInteractionFlags: NoTextInteraction;"
 

@@ -18,8 +18,9 @@ add pushbutton C&ancel exit
 end frame
 set title "Demo 1"
 EODEMO
+status=$?
 
-if [[ $? == "0" ]]; then
+if ((status == 0)); then
 	echo User rejected dialog
 else
 	echo User accepted dialog

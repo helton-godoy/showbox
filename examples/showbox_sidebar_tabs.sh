@@ -6,7 +6,6 @@
 # - Right panel with tabs
 #
 
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 # SHOWBOX_BIN="${SHOWBOX_BIN:-./apps/runtime/bin/showbox}"
 
 # ${SHOWBOX_BIN} --resizable <<'EODEMO'
@@ -61,7 +60,8 @@ end tabs
 
 show
 EODEMO
+status=$?
 
 echo ""
 echo "Diálogo fechado"
-echo "Exit code: $?"
+echo "Exit code: ${status}"

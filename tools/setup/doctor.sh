@@ -2,10 +2,10 @@
 set -euo pipefail
 missing=0
 for tool in git cmake ninja c++ bash python3 qmake6; do
-	if command -v "$tool" >/dev/null 2>&1; then
-		printf 'OK: %s\n' "$tool"
+	if command -v "${tool}" >/dev/null 2>&1; then
+		printf 'OK: %s\n' "${tool}"
 	else
-		printf 'Ausente: %s\n' "$tool" >&2
+		printf 'Ausente: %s\n' "${tool}" >&2
 		missing=1
 	fi
 done
@@ -14,14 +14,15 @@ done
 case " ${ID-} ${ID_LIKE-} " in
 *debian* | *ubuntu* | *neon*)
 	for tool in dpkg-buildpackage dpkg-deb fakeroot dh; do
-		if command -v "$tool" >/dev/null 2>&1; then
-			printf 'OK: %s\n' "$tool"
+		if command -v "${tool}" >/dev/null 2>&1; then
+			printf 'OK: %s\n' "${tool}"
 		else
-			printf 'Ausente: %s\n' "$tool" >&2
+			printf 'Ausente: %s\n' "${tool}" >&2
 			missing=1
 		fi
 	done
 	;;
+*) ;;
 esac
 engine="$(command -v podman || command -v docker || true)"
 if [[ -n ${engine} ]]; then
@@ -70,11 +71,11 @@ check_protection() {
 	local branch="$1"
 	local payload
 	if ! payload="$(gh api "repos/${repo}/branches/${branch}/protection" 2>/dev/null)"; then
-		printf 'Proteção ausente: %s\n' "$branch" >&2
+		printf 'Proteção ausente: %s\n' "${branch}" >&2
 		return 1
 	fi
 	local info ctx count
-	info="$(printf '%s' "$payload" | python3 -c '
+	info="$(printf '%s' "${payload}" | python3 -c '
 import json, sys
 d = json.load(sys.stdin)
 ctx = (d.get("required_status_checks") or {}).get("contexts") or []
@@ -85,44 +86,47 @@ print("force_push=" + str(d.get("allows_force_pushes")))
 print("deletions=" + str(d.get("allows_deletions")))
 print("enforce_admins=" + str(d.get("enforce_admins", {}).get("enabled")))
 ')"
-	ctx="$(printf '%s\n' "$info" | sed -n 's/^contexts=//p')"
-	count="$(printf '%s\n' "$info" | sed -n 's/^approvals=//p')"
+	ctx="$(printf '%s\n' "${info}" | sed -n 's/^contexts=//p')"
+	count="$(printf '%s\n' "${info}" | sed -n 's/^approvals=//p')"
 	for expected in "${expected_checks[@]}"; do
-		if ! printf ',%s,' "$ctx" | grep -q ",${expected},"; then
+		if ! printf ',%s,' "${ctx}" | grep -q ",${expected},"; then
 			printf 'Check obrigatório ausente em %s: %s [contextos: %s]\n' \
-				"$branch" "$expected" "$ctx" >&2
+				"${branch}" "${expected}" "${ctx}" >&2
 			return 1
 		fi
 	done
-	printf 'OK: %s — approvals=%s contexts=[%s]\n' "$branch" "$count" "$ctx"
+	printf 'OK: %s — approvals=%s contexts=[%s]\n' "${branch}" "${count}" "${ctx}"
 }
 
 if command -v gh >/dev/null 2>&1; then
 	printf 'OK: gh\n'
 	if gh auth status >/dev/null 2>&1; then
+		# shellcheck disable=SC2312  # gh api no formato do printf: status intencionalmente ignorado
 		printf 'OK: autenticação gh (%s)\n' "$(gh api user --jq .login)"
 	else
 		printf 'Falha: gh não autenticado (gh auth login)\n' >&2
 		missing=1
 	fi
 	if gh repo view "${repo}" >/dev/null 2>&1; then
-		printf 'OK: acesso a %s (default branch: %s)\n' "$repo" "$(gh repo view "${repo}" --json defaultBranchRef --jq .defaultBranchRef.name)"
+		# shellcheck disable=SC2312  # gh repo view no printf: tupla intencionalmente sem verificar exit
+		printf 'OK: acesso a %s (default branch: %s)\n' "${repo}" "$(gh repo view "${repo}" --json defaultBranchRef --jq .defaultBranchRef.name)"
 	else
-		printf 'Falha: acesso ao repositório %s\n' "$repo" >&2
+		printf 'Falha: acesso ao repositório %s\n' "${repo}" >&2
 		missing=1
 	fi
 	remote_branches="$(git ls-remote --heads origin 2>/dev/null)"
 	for branch in main integration/showbox-v1; do
 		if printf '%s\n' "${remote_branches}" | grep -q "refs/heads/${branch}$"; then
-			printf 'OK: branch remota %s\n' "$branch"
+			printf 'OK: branch remota %s\n' "${branch}"
 		else
-			printf 'Ausente: branch remota %s\n' "$branch" >&2
+			printf 'Ausente: branch remota %s\n' "${branch}" >&2
 			missing=1
 		fi
 	done
 	# Proteções e nomes efetivos dos checks.
 	for branch in main integration/showbox-v1; do
-		if check_protection "$branch"; then
+		# shellcheck disable=SC2310  # set -e fica desativado no if; retorno tratado explicitamente
+		if check_protection "${branch}"; then
 			:
 		else
 			missing=1
