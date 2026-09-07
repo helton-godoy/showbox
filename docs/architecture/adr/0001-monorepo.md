@@ -3,6 +3,7 @@
 Estado: aceito pelo mantenedor em 2026-09-06.
 
 ## Decisão
+
 Preservar o repositório Showbox e importar o histórico do Studio uma única vez.
 O motor reside em apps/runtime, o editor em apps/studio e os widgets em libs/ui.
 CMake é o build canônico; just é a interface de comandos. Linux/Bash é a
@@ -14,11 +15,13 @@ Não criar módulos vazios nem reescrever parser e Studio durante a movimentaç�
 O protocolo atual permanece compatível até uma decisão versionada explícita.
 
 ## Consequências
+
 Mudanças de contrato e consumidores podem ser revistas no mesmo PR. O CI deve
 compilar os dois produtos. A importação conserva limitações do editor antigo;
 features experimentais não se tornam estáveis por serem movidas.
 
 ## Segurança de execução
+
 Abrir um projeto não executa scripts. Prévia visual e execução são distintas.
 O processo shell executa ações explicitamente solicitadas e fala com a mesma
 instância do motor. Saída de widgets é dado, nunca código para eval.

@@ -32,5 +32,5 @@ garantir que o pacote do motor não introduz o binário do Studio. Entradas de
 
 A pipeline de release (.github/workflows/release.yml) constrói deb ubuntu+debian,
 rpm e appimage, roda o smoke de instalação de cada artefato e publica um draft de
-release com os arquivos em tags v*. O CI diário valida build e árvore de
+release com os arquivos em tags v\*. O CI diário valida build e árvore de
 instalação via CMake.

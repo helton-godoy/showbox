@@ -194,56 +194,56 @@ unset textbox1 readonly
 
 ### Pushbutton Click
 
-```
+```text
 <pushbutton name>=clicked
 ```
 
 ### Toggle Pushbutton
 
-```
+```text
 <pushbutton name>=pressed
 <pushbutton name>=released
 ```
 
 ### Slider
 
-```
+```text
 <slider name>=<value>
 ```
 
 ### ListBox/ComboBox Selection
 
-```
+```text
 <list widget name>=<value>
 ```
 
 ### ListBox Activation
 
-```
+```text
 <list widget name>=<value>
 ```
 
 ### Table Cell Edit
 
-```
+```text
 <table name>[<row>][<col>]=<value>
 ```
 
 ### Chart Slice Click
 
-```
+```text
 <chart name>.slice["<label>"]=<value>
 ```
 
 ### Calendar Selection
 
-```
+```text
 <calendar name>=<date>
 ```
 
 ### Query Command
 
-```
+```text
 <name>=<value>
 <name>=<value>
 ...
@@ -251,7 +251,7 @@ unset textbox1 readonly
 
 ### Checkbox State
 
-```
+```text
 <checkbox name>=1
 <checkbox name>=0
 ```
@@ -349,7 +349,7 @@ enum Stage {
 
 ### Componentes Principais
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────┐
 │                      DialogParser                           │
 │  - run()           : Thread principal de parsing            │

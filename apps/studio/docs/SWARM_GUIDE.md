@@ -18,6 +18,7 @@ Para desenvolver uma nova feature com segurança e qualidade:
 
    ```bash
    ./scripts/swarm/architect.sh "Implementar sistema de Login" --level 2
+
    ```
 
 2. **Codificar (Coder):**

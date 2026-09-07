@@ -8,7 +8,7 @@ Estado: encerrada — handoff abaixo; integração na integration/showbox-v1.
 - Objetivo: empacotar motor e Studio como pacotes separados (deb e rpm com dois
   pacotes: `showbox` e `showbox-studio`; AppImage do Studio), unificar os scripts
   de packaging, adicionar testes de instalação/smoke em container e um pipeline
-  de release (GitHub Actions para tags v* e disparo manual) — sem publicar
+  de release (GitHub Actions para tags v\* e disparo manual) — sem publicar
   serviços externos nem fazer push.
 - Base: integration/showbox-v1 (f03ae20, merge da cadeia SB-001–SB-004).
 - Branch prevista: feat/SB-005-release.

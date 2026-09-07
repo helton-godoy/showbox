@@ -42,10 +42,76 @@ Estado: em execução.
   7. Validar o job em um PR (run real verde).
   8. Adicionar `trunk-check`, vinculado ao GitHub Actions, aos required checks
      de `main`/`integration/showbox-v1` — **somente após run real verde**.
-  O GitHub App do Trunk não é reinstalado nesta etapa: ele está associado
-  principalmente ao Merge Queue (exige organização ativa no serviço para
-  processar eventos) e reprisaria o bloqueio de check-suites `queued` da SB-006
-  se instalado isoladamente. O Merge Queue pode ser avaliado em tarefa futura.
+     O GitHub App do Trunk não é reinstalado nesta etapa: ele está associado
+     principalmente ao Merge Queue (exige organização ativa no serviço para
+     processar eventos) e reprisaria o bloqueio de check-suites `queued` da SB-006
+     se instalado isoladamente. O Merge Queue pode ser avaliado em tarefa futura.
+- Baseline registrado (passo 2 — 2026-09-07, Trunk CLI 1.25.0, commit
+  `0e59cb4`):
+  - Comando: `trunk check --all --no-fix --print-failures` (saída salva no
+    trabalho local; sem alterações aplicadas).
+  - Arquivos verificados: **325**.
+  - Totais: **275 lint issues** (89 auto-fixable), **13 security issues**,
+    **30 unformatted files**.
+  - Lint por linter (275): `shellcheck` 181, `markdownlint` 81, `hadolint` 10,
+    `yamllint` 3.
+  - Segurança (13): `checkov` 13 — CKV_DOCKER_2 ×6 (HEALTHCHECK ausente),
+    CKV_DOCKER_3 ×6 (usuário não criado no container), CKV_DOCKER_7 ×1 (imagem
+    base sem tag explícita).
+  - Formatação (30): `shfmt` 18 arquivos `.sh` + `prettier` 11 arquivos
+    (markdown/yaml), 1 arquivo adicional na contagem agregada da execução
+    registrada.
+  - shfmt (18): examples/demos/demo1_compat.sh, examples/demos/demo2_compat.sh,
+    examples/demos/visual_layout_test.sh, examples/hello-world/run.sh,
+    examples/showbox_calendar.sh, examples/showbox_charts.sh,
+    examples/showbox_pushbutton.sh, examples/showbox_slider.sh,
+    examples/showbox_table.sh, examples/showbox_textbox.sh,
+    shell/lib/runtime.sh, tests/compatibility/build_legacy_oracle.sh,
+    tests/compatibility/golden_contract.sh, tests/installation/install_smoke.sh,
+    tests/integration/cli_contract.sh, tests/integration/display_backends.sh,
+    tools/setup/debian.sh, tools/setup/doctor.sh.
+  - Ferramenta que falhou: `shfmt` apresentou crash interno transiente
+    (`absl::container_internal::raw_hash_map<>::at`) ao processar batches ≥ 21
+    arquivos; a reexecução com cache estabilizou. Limitação conhecida a
+    validar no CI (job `trunk-check` deve rodar em lote único).
+  - Sem achados: `actionlint`, `trufflehog`, `git-diff-check`.
+  - Arquivos afetados: 78 caminhos listados (docs/`*.md`, `tasks/*.md`,
+    `.github/workflows/*.yml`, `packaging/**/Dockerfile` e scripts,
+    `src/dev.Dockerfile`, `examples/**`, `tests/**`, `tools/setup/*.sh`,
+    `shell/lib/runtime.sh`, ADRs).
+  - Falsos positivos candidatos (a decidir nos commits de correção, sem
+    desativar em massa): shellcheck SC2034 (variáveis exportadas/usadas
+    externamente), SC2249 (arquivos sem extensão `.sh`), markdownlint MD040 em
+    blocos sem idioma (avaliar converter ou anotar), yamllint quoted-strings
+    (aspas redundantes em fluxos de texto).
+- Execução (passo 3 — 2026-09-07, commits em `feat/SB-007-trunk`):
+  - `2d37695` chore(trunk): instala e verifica Trunk CLI 1.25.0
+    (`tools/setup/trunk.sh` + `doctor.sh`).
+  - `cbef604` style(shell): shfmt + shellcheck em todos os 67 arquivos shell.
+  - `bd58183` style(docs): prettier em 62 Markdown + markdownlint zerado.
+  - `b58a49c` fix(ci): aspas redundantes em workflows (yamllint).
+  - `e5e4d38` fix(packaging): Dockerfiles (hadolint + checkov; fedora pinado em
+    `fedora:46`; `--no-install-recommends`; `HEALTHCHECK NONE`).
+  - Estado final local: `trunk check --all --no-fix --cache=false` → **0
+    issues** (325 arquivos).
+  - Exceções configuradas (todas com justificativa por achado, sem desativar em
+    massa):
+    - `.trunk/configs/.markdownlint.yaml` → `MD051: false`: falso positivo do
+      parser micromark do markdownlint 0.47 em âncoras de TOC válidas pt-BR
+      quando o documento contém blocos de código (comprovado por caso isolado).
+    - `.trunk/configs/.shellcheckrc` → `SC2154` (pré-existente, mantido).
+    - Dockerfiles: `# hadolint ignore=DL3008`/`DL3041` por arquivo (pacotes do
+      repositório da distro, fixado pelo tag da imagem base); `checkov:skip`
+      `CKV_DOCKER_3` por imagem (build/CI efêmero roda como root para gerar
+      artefatos e montar volume do host). CKV_DOCKER_2 resolvido com
+      `HEALTHCHECK NONE` (config real, não exceção).
+    - Usos únicos de `# shellcheck disable=SC2312/SC2310` com justificativa
+      inline onde mascarar o exit code é intencional (heredoc/pipe de
+      extração).
+  - Cobertura final: 67 shell (inclusive AppRun), 76 Markdown, 8 Dockerfiles,
+    2 workflows YAML; sem achados em actionlint/trufflehog/git-diff-check.
+  - Limitação conhecida: crash transiente do `shfmt` em batches ≥ 21 arquivos;
+    o job `trunk-check` roda em lote único (`check-mode: all`) — validar no CI.
 - Escopo:
   - Integrar o Trunk ao fluxo local (`just check`/`just doctor`) e ao CI
     (`ci.yml`): rodar `trunk check` (lint + formatação + segredos + verificação

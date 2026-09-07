@@ -14,7 +14,7 @@ Estado: concluída.
   push/proteção remota após esta correção integrada).
 - Problemas confirmados na revisão (arquivo:linha):
   - P1 — `apps/studio/src/gui/MainWindow.cpp:370` (onOpenClicked): `m_canvas
-    ->clear()` ocorre antes de `ProjectSerializer::load` validar; JSON
+->clear()` ocorre antes de `ProjectSerializer::load` validar; JSON
     corrompido, versão desconhecida ou erro elimina o trabalho aberto sem
     possibilidade de desfazer.
   - P1 — `libs/project/src/ProjectModel.cpp:320`/`323` (validate): chamadas a
@@ -36,8 +36,8 @@ Estado: concluída.
 - Escopo:
   1. **Abertura segura** (MainWindow::onOpenClicked): carregar em widget
      temporário/estrutura auxiliar, validar tudo e só então `m_canvas->clear()`
-     + inserir nós; em falha, preservar o projeto e histórico atuais e exibir
-     os erros.
+     - inserir nós; em falha, preservar o projeto e histórico atuais e exibir
+       os erros.
   2. **Validação recursiva** (ProjectModel::validate): `validateActions` e
      `validateQueryTargets` passam a percorrer `children` em todos os níveis
      (mesmo padrão de `collectNames`/`validateStructure`). Só `validate` é

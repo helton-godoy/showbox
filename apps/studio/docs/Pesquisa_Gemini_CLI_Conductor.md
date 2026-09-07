@@ -120,14 +120,14 @@ gemini "Analise as mudanças no último commit" --context git
 
 ## Limitações
 
-### Gemini CLI
+### Limitações do Gemini CLI
 
 - **Dependência de Rede:** Requer conexão estável com APIs do Google
 - **Limites de Uso:** Restrições de rate limiting (60/min, 1000/dia gratuito)
 - **Contexto Limitado:** Mesmo com 1M tokens, projetos muito grandes podem exceder
 - **Segurança:** Dados enviados para servidores Google (considerar compliance)
 
-### Sistema Conductor
+### Limitações do Sistema Conductor
 
 - **Complexidade Inicial:** Curva de aprendizado para workflows rigorosos
 - **Dependência de Qt6:** Limitado a ecossistemas C++/Qt

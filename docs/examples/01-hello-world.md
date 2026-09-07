@@ -108,7 +108,7 @@ Uma janela aparecerá com a mensagem "Olá, Mundo!" e um botão OK. Ao clicar no
 
 ---
 
-## Experimente!
+## Experimente
 
 Modifique o código para:
 

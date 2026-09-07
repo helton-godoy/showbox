@@ -4,7 +4,6 @@
 coproc showbox
 INPUTFD=${COPROC[0]}  # file descriptor the showbox process writes to
 OUTPUTFD=${COPROC[1]} # file descriptor the showbox process reads from
-DBPID=${COPROC_PID}   # PID of the showbox, if you need it for any purpose... e.g. to kill it
 
 # If your script doesn't use standard input/output you may redirect them to the pipes
 # and don't bore with redirection for each input/output command.
@@ -34,7 +33,7 @@ EODEMO
 flag=0
 cbflag=0
 
-while IFS=$'=' read key value; do
+while IFS=$'=' read -r key value; do
 	case ${key} in
 	dsbl)
 		# Note: if you use echo command don't forget to escape quotes as echo "eats" them
@@ -65,6 +64,7 @@ while IFS=$'=' read key value; do
 		flag=1
 		echo User clicked Cancel pushbutton
 		;;
+	*) ;;
 	esac
 done <&"${INPUTFD}"
 

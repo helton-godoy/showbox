@@ -148,7 +148,7 @@ Salva todo o conteúdo da tabela em formato CSV.
 
 Quando o usuário edita uma célula:
 
-```
+```text
 tbl_contatos[2][1]=novo_email@email.com
 ```
 

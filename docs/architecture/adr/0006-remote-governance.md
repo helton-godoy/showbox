@@ -16,7 +16,7 @@ remotas dependiam de autorização do mantenedor (único usuário, conta única)
 1. **Showbox é o repositório canônico** (`helton-godoy/showbox`). Todo
    desenvolvimento passa a acontecer nele; os quatro repositórios antigos são
    descontinuados com README de redirecionamento e arquivamento (`archived:
-   true`), conservando seu histórico como referência de arquivo.
+true`), conservando seu histórico como referência de arquivo.
 2. **Estratégia de integração**: `main` (entrega) recebe
    `integration/showbox-v1` (integração contínua) por PR com merge commit,
    preservando os SHAs da cadeia; tarefas entram por branches `feat/SB-*`

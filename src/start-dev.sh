@@ -25,7 +25,7 @@ if [[ -n ${DISPLAY} ]]; then
 	# DBus support for theme detection
 	if [[ -n ${DBUS_SESSION_BUS_ADDRESS} ]]; then
 		# Map the bus path if it is a unix path
-		DBUS_PATH=$(echo "${DBUS_SESSION_BUS_ADDRESS}" | sed 's/unix:path=//')
+		DBUS_PATH="${DBUS_SESSION_BUS_ADDRESS#unix:path=}"
 		if [[ -S ${DBUS_PATH} ]]; then
 			DOCKER_ARGS+=(-v "${DBUS_PATH}:${DBUS_PATH}")
 			DOCKER_ARGS+=(-e "DBUS_SESSION_BUS_ADDRESS=${DBUS_SESSION_BUS_ADDRESS}")
@@ -49,8 +49,8 @@ fi
 
 # Run the container
 # Mount the PARENT directory to /workspace to allow access to sibling repos (like showbox-studio accessing showbox)
-PARENT_DIR="$(dirname "$(pwd)")"
-CURRENT_DIR_NAME="$(basename "$(pwd)")"
+PARENT_DIR="$(dirname "${PWD}")"
+CURRENT_DIR_NAME="$(basename "${PWD}")"
 
 echo "Mounting workspace '${PARENT_DIR}' to '/workspace'"
 

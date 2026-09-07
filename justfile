@@ -21,9 +21,7 @@ test: build
     ctest --preset dev
 
 check:
-    git diff --check
-    for script in tools/setup/*.sh shell/lib/*.sh examples/hello-world/*.sh; do bash -n "$script"; done
-    shellcheck -x -s bash shell/lib/runtime.sh examples/hello-world/run.sh
+    tools/setup/trunk.sh check
 
 run-studio: build
     build/dev/bin/showbox-studio

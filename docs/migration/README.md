@@ -2,13 +2,13 @@
 
 Data: 2026-09-06. Implementação na branch chore/SB-001-monorepo.
 
-| Origem | Revisão | Destino |
-| --- | --- | --- |
-| showbox integration/showbox-v1 | a5dd820 | Motor da suíte |
-| showbox main | eab3300 | Histórico conciliado |
-| showbox-studio origin/develop | 38602a5 | apps/studio, importação subtree sem squash |
-| SHantilly main | 33c4b06 | Referência, sem importação nesta etapa |
-| SHantilly-Studio main | eda620c | Referência, sem importação nesta etapa |
+| Origem                         | Revisão | Destino                                    |
+| ------------------------------ | ------- | ------------------------------------------ |
+| showbox integration/showbox-v1 | a5dd820 | Motor da suíte                             |
+| showbox main                   | eab3300 | Histórico conciliado                       |
+| showbox-studio origin/develop  | 38602a5 | apps/studio, importação subtree sem squash |
+| SHantilly main                 | 33c4b06 | Referência, sem importação nesta etapa     |
+| SHantilly-Studio main          | eda620c | Referência, sem importação nesta etapa     |
 
 A main antiga removia documentação e adicionava binário legado. A conciliação
 mantém a documentação útil da integração e não reintroduz o binário gerado.

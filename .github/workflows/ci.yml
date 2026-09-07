@@ -2,7 +2,7 @@ name: Showbox CI
 
 on:
   push:
-    branches: [main, "chore/**", "integration/**"]
+    branches: [main, chore/**, integration/**]
   pull_request:
     branches: [main]
 
@@ -14,6 +14,19 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  trunk-check:
+    runs-on: ubuntu-24.04
+    permissions:
+      checks: write # para o Trunk registrar anotações no check run
+      contents: read
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Trunk Check
+        uses: trunk-io/trunk-action@04ba50e7658c81db7356da96657e6e77f220bfa3 # v1
+        with:
+          check-mode: all
+          cache: false
+
   build-test:
     runs-on: ubuntu-24.04
     steps:

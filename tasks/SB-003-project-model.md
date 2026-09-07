@@ -34,6 +34,7 @@ Estado: concluída localmente, sujeita a review da branch `feat/SB-003-project-m
     CI estendido para a nova biblioteca. Tudo local, sem push.
 
 ## Handoff
+
 - SHA final da implementação: `ce92ed7` (branch `feat/SB-003-project-model`, commits
   `da6d16c` modelo, `e13a68a` mapeamento/serialização, `ce92ed7` ADR/schema). Sem push.
 - Testes executados (KDE neon 24.04, GCC 13.3, Qt 6.11.1, offscreen):

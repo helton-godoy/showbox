@@ -330,7 +330,7 @@ set cal_entrega format "dd 'de' MMMM 'de' yyyy"
 
 A opção `selection` faz o calendário reportar imediatamente:
 
-```
+```text
 cal_entrega=2026-01-20
 ```
 

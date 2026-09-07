@@ -24,7 +24,7 @@ Botão de comando clicável.
 
 **Sintaxe:**
 
-```
+```text
 add pushbutton "título" nome [apply] [exit] [default] [checkable] [checked]
 ```
 
@@ -64,7 +64,7 @@ Caixa de seleção para opções independentes.
 
 **Sintaxe:**
 
-```
+```text
 add checkbox "título" nome [checked]
 ```
 
@@ -85,7 +85,7 @@ Botão de opção para seleção exclusiva em grupo.
 
 **Sintaxe:**
 
-```
+```text
 add radiobutton "título" nome [checked]
 ```
 
@@ -111,7 +111,7 @@ Campo de entrada de texto em linha única.
 
 **Sintaxe:**
 
-```
+```text
 add textbox "título" nome [password] [text "valor inicial"] [placeholder "dica"]
 ```
 
@@ -141,7 +141,7 @@ Lista de itens com seleção.
 
 **Sintaxe:**
 
-```
+```text
 add listbox "título" nome [activation] [selection]
 add item "texto" [ícone] [current]
 ...
@@ -175,7 +175,7 @@ Lista suspensa de seleção única (não editável).
 
 **Sintaxe:**
 
-```
+```text
 add dropdownlist "título" nome [selection]
 add item "texto" [current]
 ...
@@ -202,7 +202,7 @@ Lista suspensa editável.
 
 **Sintaxe:**
 
-```
+```text
 add combobox "título" nome [selection]
 add item "texto" [current]
 ...
@@ -229,7 +229,7 @@ Controle deslizante para valores numéricos.
 
 **Sintaxe:**
 
-```
+```text
 add slider nome [vertical] [minimum valor] [maximum valor]
 ```
 
@@ -252,7 +252,7 @@ Seletor de data interativo.
 
 **Sintaxe:**
 
-```
+```text
 add calendar "título" nome [date "YYYY-MM-DD"] [minimum "YYYY-MM-DD"] [maximum "YYYY-MM-DD"] [format "formato"] [selection] [navigation]
 ```
 
@@ -287,7 +287,7 @@ Exibe texto, imagem ou animação.
 
 **Sintaxe:**
 
-```
+```text
 add label "conteúdo" nome [picture] [animation]
 ```
 
@@ -312,7 +312,7 @@ Barra de progresso.
 
 **Sintaxe:**
 
-```
+```text
 add progressbar nome [vertical] [busy]
 ```
 
@@ -342,7 +342,7 @@ add progressbar pb_loading busy
 
 **Sintaxe:**
 
-```
+```text
 add textview nome [file "caminho"]
 ```
 
@@ -363,7 +363,7 @@ Linha divisória visual.
 
 **Sintaxe:**
 
-```
+```text
 add separator [nome] [vertical] [plain|raised|sunken]
 ```
 
@@ -383,7 +383,7 @@ Tabela editável com busca.
 
 **Sintaxe:**
 
-```
+```text
 add table "col1;col2;col3" nome [file "arquivo.csv"] [readonly] [selection] [search]
 ```
 
@@ -418,7 +418,7 @@ Gráfico interativo (pizza, barras, etc.).
 
 **Sintaxe:**
 
-```
+```text
 add chart "título" nome
 ```
 
@@ -450,7 +450,7 @@ Container com borda para agrupar widgets.
 
 **Sintaxe:**
 
-```
+```text
 add frame nome [vertical|horizontal] [noframe|box|panel|styled] [plain|raised|sunken]
 ...
 end frame
@@ -476,7 +476,7 @@ Container com título e borda.
 
 **Sintaxe:**
 
-```
+```text
 add groupbox "título" nome [vertical|horizontal] [checkable] [checked]
 ...
 end groupbox
@@ -506,7 +506,7 @@ Container com abas para múltiplas páginas.
 
 **Sintaxe:**
 
-```
+```text
 add tabs nome [top|bottom|left|right]
 add page "título" nome_pagina [ícone] [current]
 ...
@@ -535,7 +535,7 @@ Página dentro de um `tabs`.
 
 **Sintaxe:**
 
-```
+```text
 add page "título" nome [ícone] [current]
 ```
 
@@ -551,7 +551,7 @@ Adiciona espaço fixo no layout.
 
 **Sintaxe:**
 
-```
+```text
 add space [tamanho]
 ```
 
@@ -571,7 +571,7 @@ Adiciona espaço flexível que ocupa área disponível.
 
 **Sintaxe:**
 
-```
+```text
 add stretch [fator]
 ```
 
@@ -594,7 +594,7 @@ Item para widgets de lista (listbox, combobox, dropdownlist).
 
 **Sintaxe:**
 
-```
+```text
 add item "texto" [ícone] [current]
 ```
 

@@ -7,11 +7,11 @@ build_dir="${2:?uso: build_legacy_oracle.sh SOURCE_ROOT BUILD_DIR}"
 mkdir -p "${build_dir}/bin" "${build_dir}/obj" "${build_dir}/moc"
 
 qmake6 \
-    DESTDIR="${build_dir}/bin" \
-    OBJECTS_DIR="${build_dir}/obj" \
-    MOC_DIR="${build_dir}/moc" \
-    "${source_root}/apps/runtime/showbox.pro" \
-    -o "${build_dir}/Makefile"
+	DESTDIR="${build_dir}/bin" \
+	OBJECTS_DIR="${build_dir}/obj" \
+	MOC_DIR="${build_dir}/moc" \
+	"${source_root}/apps/runtime/showbox.pro" \
+	-o "${build_dir}/Makefile"
 
 make -C "${build_dir}" -j"${SHOWBOX_BUILD_JOBS:-2}"
 

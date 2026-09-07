@@ -159,7 +159,7 @@ set chart_nome export "/caminho/grafico.png"
 
 Evento emitido:
 
-```
+```text
 chart_vendas.slice["Norte"]=2500
 ```
 
@@ -186,7 +186,7 @@ set chart_nome axis "vertical"    # Linha/Área
 
 ## Diagrama de Arquitetura
 
-```
+```text
 ┌─────────────┐     FIFO_OUT      ┌─────────────┐
 │   Script    │ ─────────────────▶│   Showbox   │
 │   (bash)    │                   │   (Qt GUI)  │
@@ -202,7 +202,7 @@ set chart_nome axis "vertical"    # Linha/Área
 
 ---
 
-## Parabéns!
+## Parabéns
 
 Você completou todos os tutoriais básicos e intermediários!
 

@@ -1,15 +1,14 @@
-j#!/bin/bash
+#!/bin/bash
 SHOWBOX_BIN="${SHOWBOX_BIN:-./apps/runtime/bin/showbox}"
-DIALOGBOX=${1:-./dist_qt6/dialogbox}
 
 if [[ ! -x ${SHOWBOX_BIN} ]]; then
-	echo "Error: ${SHOWBOX_BIN} not found or not executable."
+	echo "Error: ${SHOWBOX_BIN} not found or not executable." >&2
 	exit 1
 fi
 
 FIFO=$(mktemp -u)
 mkfifo "${FIFO}"
-trap "rm -f ${FIFO}" EXIT
+trap 'rm -f "${FIFO}"' EXIT
 
 ${SHOWBOX_BIN} <"${FIFO}" &
 DIALOG_PID=$!

@@ -21,20 +21,20 @@ show
 EOF
 
 run_dialog() {
-    local executable="$1"
-    local output="$2"
-    local status
+	local executable="$1"
+	local output="$2"
+	local status
 
-    set +e
-    QT_QPA_PLATFORM=offscreen timeout 1 "${executable}" --hidden \
-        <"${commands_file}" >"${output}"
-    status=$?
-    set -e
+	set +e
+	QT_QPA_PLATFORM=offscreen timeout 1 "${executable}" --hidden \
+		<"${commands_file}" >"${output}"
+	status=$?
+	set -e
 
-    if [[ ${status} -ne 124 ]]; then
-        echo "${executable} terminou inesperadamente com status ${status}" >&2
-        return 1
-    fi
+	if [[ ${status} -ne 124 ]]; then
+		echo "${executable} terminou inesperadamente com status ${status}" >&2
+		return 1
+	fi
 }
 
 run_dialog "${legacy_bin}" "${work_dir}/legacy.out"

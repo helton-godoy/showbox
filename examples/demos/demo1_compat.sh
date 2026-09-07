@@ -23,8 +23,9 @@ end frame
 set title "ShowBox Demo 1"
 show
 EODEMO
+status=$?
 
-if [[ "$?" == "0" ]]; then
+if ((status == 0)); then
 	echo "User rejected dialog (exit code 0)"
 else
 	echo "User accepted dialog (exit code 1)"

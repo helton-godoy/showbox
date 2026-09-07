@@ -113,17 +113,17 @@ Estado: concluída em 2026-09-07.
   `archived: true`): `dialogbox` (default `master`, head `e1cb356`),
   `SHantilly` (head `2b52ed6`), `SHantilly-Studio` (head `4e1e45c`),
   `showbox-studio` (head `ce3f2e5`) — todos arquivados via `PATCH ... -F
-  archived=true` e confirmados com `isArchived=true`.
+archived=true` e confirmados com `isArchived=true`.
 - Branches remotas removidas: `develop` e `bugfix/quick-fixes` (head comum
   `2848cb3`, confirmado ancestral de `main` por `git merge-base --is-ancestor`;
   commits preservados no monorepo). Branch temporária `tmp/SB-006-destructive-
-  test` e `chore/SB-006-governanca-tags` removidas após uso.
+test` e `chore/SB-006-governanca-tags` removidas após uso.
 - Verificações finais (locais, em `main` = `73c2c60`): `just doctor` verde
   (branches, proteções, checks e ruleset de tags); `just build` verde;
   `just test` verde (23/23).
 - Problemas encontrados e correções:
   1. **Required checks com nomes compostos** (`Showbox CI / build-test`, `Showbox
-     CI / sanitizers`) não correspondiam aos check-runs reais (`build-test`,
+CI / sanitizers`) não correspondiam aos check-runs reais (`build-test`,
      `sanitizers`), deixando todo PR `BLOCKED` com `mergeStateStatus` indefinido.
      Corrigido por API: contexts = `build-test`/`sanitizers` com app_id 15368.
      Documentação e `doctor.sh` alinhados no mesmo commit (`4b5f5ba`, PR #2).
@@ -137,7 +137,7 @@ Estado: concluída em 2026-09-07.
   3. **Tag de teste `v1.0.0-test`** criada durante o teste destrutivo (criação
      de tag não é bloqueada pelo ruleset); como deleção era bloqueada, a
      remoção exigiu desativar temporariamente o ruleset (PUT `enforcement:
-     disabled`), apagar a ref e reativar (`active`), e cancelar o run de release
+disabled`), apagar a ref e reativar (`active`), e cancelar o run de release
      que ela disparou. Ruleset reativado e conferido.
 - Limitações transferidas para a SB-007:
   - Primeiro release: draft associado a uma tag real `v*` (arquivos + notas)

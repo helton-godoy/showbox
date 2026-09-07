@@ -78,6 +78,7 @@ end frame
    ```bash
    # Adicione no final do script
    show
+
    ```
 
 2. **Widget dentro de container fechado:**
@@ -346,6 +347,7 @@ Não há modo verbose nativo. Para debug:
    # Digite comandos manualmente e veja o resultado
    add label "teste"
    show
+
    ```
 
 2. **Log de comandos:**

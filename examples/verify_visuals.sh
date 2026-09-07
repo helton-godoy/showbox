@@ -6,9 +6,10 @@ set -e
 
 echo "=== Compilando e Executando Verificador Visual ==="
 
+NP="$(nproc)"
 ./src/start-dev.sh "cd ../showbox && \
     mkdir -p build && cd build && \
     cmake .. && \
-    make -j$(nproc) visual_verifier && \
+    make -j${NP} visual_verifier && \
     echo 'Iniciando visual_verifier...' && \
     ./bin/visual_verifier"

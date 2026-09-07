@@ -8,7 +8,7 @@ Aprenda a criar interfaces complexas com o sistema de layouts do Showbox.
 
 O Showbox usa um sistema hierárquico de layouts:
 
-```
+```text
 ┌────────────────────────────────────────────────────────────┐
 │ NÍVEL 1: Layout Vertical Principal (coluna)                │
 │                                                            │
@@ -53,7 +53,7 @@ add label "Coluna 3"
 
 **Resultado:**
 
-```
+```text
 ┌──────────┐ ┌──────────┐ ┌──────────┐
 │ Coluna 1 │ │ Coluna 2 │ │ Coluna 3 │
 └──────────┘ └──────────┘ └──────────┘
@@ -75,7 +75,7 @@ add label "Linha 3"
 
 **Resultado:**
 
-```
+```text
 ┌──────────┐
 │ Linha 1  │
 └──────────┘
@@ -191,7 +191,7 @@ EOF
 
 **Resultado Visual:**
 
-```
+```text
 ┌────────────────────────────────────────────────────────┐
 │ Painel de Controle                                     │
 ├──────────────┬─────────────────────────────────────────┤

@@ -6,7 +6,7 @@
 
 # SHOWBOX_BIN="${SHOWBOX_BIN:-./apps/runtime/bin/showbox}"
 
-while IFS=$'=' read key value; do
+while IFS=$'=' read -r key value; do
 	# Chart slice clicks are reported as chart1.slice["label"]=value
 	if [[ ${key} =~ ^chart1\.slice\[\"(.+)\"\]$ ]]; then
 		label="${BASH_REMATCH[1]}"
@@ -14,8 +14,10 @@ while IFS=$'=' read key value; do
 	fi
 done < <(
 
-#	${SHOWBOX_BIN} <<EODEMO
- showbox <<EODEMO
+	#	${SHOWBOX_BIN} <<EODEMO
+	# shellcheck disable=SC2312  # exit do showbox propositalmente ignorado no while < <(showbox)
+
+	showbox <<EODEMO
 add label "<b>Sales Distribution</b>" title
 set title stylesheet "qproperty-textInteractionFlags: NoTextInteraction;"
 

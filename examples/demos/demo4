@@ -12,7 +12,7 @@ mkfifo "${FIFOIN}" "${FIFOOUT}"
 showbox <"${FIFOOUT}" >"${FIFOIN}" &
 DBPID=$! # PID of the showbox, if you need it for any purpose... e.g. to kill it
 
-trap "kill ${DBPID} &>/dev/null; wait ${DBPID}; rm -rf \"${FIFOIN}\" \"${FIFOOUT}\"" EXIT
+trap 'kill ${DBPID} &>/dev/null; wait ${DBPID}; rm -rf "${FIFOIN}" "${FIFOOUT}"' EXIT
 
 # If your script doesn't use standard input/output you may redirect them to the pipes
 # and don't bore with redirection for each input/output command.
@@ -45,12 +45,12 @@ EODEMO
 flag=0
 cbflag=0
 
-while IFS=$'=' read key value; do
+while IFS=$'=' read -r key value; do
 	case ${key} in
 	dsbl)
 		# Note: if you use echo command don't forget to escape quotes as echo "eats" them
 		#    and don't forget to escape ampersand as otherwise shell will interpret it
-		if [[ "${cbflag}" == "0" ]]; then
+		if [[ ${cbflag} == "0" ]]; then
 			echo disable cb1 >"${FIFOOUT}"
 			echo set dsbl title \"\&Enable option 1\" >"${FIFOOUT}"
 			cbflag=1
@@ -62,7 +62,7 @@ while IFS=$'=' read key value; do
 		;;
 	cb1)
 		# Note: disabled widgets are not reported
-		if [[ "${value}" == "1" ]]; then
+		if [[ ${value} == "1" ]]; then
 			echo Option 1 is checked
 		else
 			echo Option 1 is unchecked
@@ -76,6 +76,7 @@ while IFS=$'=' read key value; do
 		flag=1
 		echo User clicked Cancel pushbutton
 		;;
+	*) ;;
 	esac
 done <"${FIFOIN}"
 
@@ -83,7 +84,7 @@ done <"${FIFOIN}"
 # was closed by the user with command similar to the below one:
 # kill -0 $DBPID &>/dev/null || exit
 
-if [[ "${flag}" == "0" ]]; then
+if [[ ${flag} == "0" ]]; then
 	echo User closed the window
 fi
 

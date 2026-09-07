@@ -11,6 +11,7 @@
   limitações do Studio explicitamente registradas.
 
 ## Handoff
+
 Build conjunto aprovado em KDE neon 24.04, GCC 13.3 e Qt 6.11.1.
 Primeira execução: 16/17 testes aprovados; persistência esperava pushbutton,
 mas a factory importada já normaliza para button. O teste foi corrigido para
@@ -24,6 +25,7 @@ isso não valida interação humana nem o fluxo de ações.
 main conciliada em a5602c9. Consulte git log da branch para SHA final desta entrega.
 
 ## Pendências explícitas
+
 - CI remoto e sanitizers não executados nesta sessão.
 - Pacotes DEB/RPM/AppImage não reconstruídos nesta sessão; receitas antigas são
   explicitamente apenas do motor até SB-005, para não incorporar Studio experimental.
@@ -31,5 +33,6 @@ main conciliada em a5602c9. Consulte git log da branch para SHA final desta entr
 - Proteção remota, publicação e arquivamento não realizados.
 
 ## Próximo passo
+
 Revisar SB-001 e iniciar o contrato SB-002-shell-dispatch em worktree própria,
 a partir do commit aprovado desta fundação.

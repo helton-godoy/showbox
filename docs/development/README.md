@@ -32,6 +32,25 @@ são verificações adicionais de release, não substituídos por offscreen.
 Para compilar somente o motor: `cmake --preset dev -DSHOWBOX_BUILD_STUDIO=OFF`.
 Reativar o Studio antes da validação de integração.
 
+## Validação com Trunk
+
+O Trunk CLI centraliza todas as checagens não relacionadas a build: lint,
+formatação (shfmt/prettier), segurança (hadolint/checkov), segredos
+(trufflehog), diffs (git-diff-check) e workflows (actionlint). A versão do CLI e
+dos linters é pinada em `.trunk/trunk.yaml` e o config de cada ferramenta fica
+em `.trunk/configs/`.
+
+```sh
+just doctor                     # instala e verifica o Trunk CLI 1.25
+trunk check --all --no-fix      # todo o repositório, sem aplicar correções
+trunk check                     # apenas os arquivos alterados (uso diário)
+just check                      # passo obrigatório antes de push
+```
+
+Cobertura: 67 scripts shell (inclusive AppRun e exemplos), 76 Markdown, 8
+Dockerfiles e 2 workflows YAML. Exceções configuradas com justificativa por
+achado (não desativam linters em massa): ver `tasks/SB-007-trunk.md`.
+
 ## Empacotamento e release
 
 Os artefatos (deb por distro, rpm, appimage) são construídos em container com

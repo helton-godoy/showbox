@@ -6,12 +6,12 @@ conflito de caminho e refletindo a dependência de execução do Studio pelo mot
 
 ## Formatos Suportados
 
-| Formato                        | Diretório   | Detecção de Dependências             | Saída                     |
-| ------------------------------ | ----------- | ------------------------------------ | ------------------------- |
-| **DEB** (Debian/Ubuntu)        | `deb/`      | Automática via `dpkg-shlibdeps`      | `dist/ubuntu/`, `dist/debian/` |
-| **RPM** (Fedora)               | `rpm/`      | Automática via `AutoReqProv`         | `dist/`                   |
-| **AppImage** (Studio)          | `appimage/` | Bundle via `linuxdeploy` + Qt plugin | `dist/ShowBox-Studio-*.AppImage` |
-| **Flatpak**                    | `flatpak/`  | Runtime KDE Platform 6.6             | — (não na pipeline)       |
+| Formato                 | Diretório   | Detecção de Dependências             | Saída                            |
+| ----------------------- | ----------- | ------------------------------------ | -------------------------------- |
+| **DEB** (Debian/Ubuntu) | `deb/`      | Automática via `dpkg-shlibdeps`      | `dist/ubuntu/`, `dist/debian/`   |
+| **RPM** (Fedora)        | `rpm/`      | Automática via `AutoReqProv`         | `dist/`                          |
+| **AppImage** (Studio)   | `appimage/` | Bundle via `linuxdeploy` + Qt plugin | `dist/ShowBox-Studio-*.AppImage` |
+| **Flatpak**             | `flatpak/`  | Runtime KDE Platform 6.6             | — (não na pipeline)              |
 
 Os debs são separados por distro porque o `dpkg-shlibdeps` registra dependências
 diferentes por imagem base (ex.: `libqt6core6t64` no Ubuntu 24.04 vs
@@ -53,7 +53,7 @@ just pkg-install-smoke appimage dist/ShowBox-Studio-1.0.0-x86_64.AppImage
 
 ## Estrutura
 
-```
+```text
 packaging/
 ├── README.md
 ├── desktop/           # Desktop entries canônicos (motor e Studio)

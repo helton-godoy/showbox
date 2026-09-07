@@ -13,7 +13,7 @@ Aprenda a criar interfaces gráficas com Showbox em minutos! Este guia apresenta
 3. **Usuário** interage com a interface
 4. **Showbox** reporta eventos via **stdout**
 
-```
+```text
 Script ──stdin──▶ Showbox ──GUI──▶ Usuário
                      │
                      └──stdout──▶ Script (eventos)
