@@ -50,5 +50,5 @@ remotas dependiam de autorização do mantenedor (único usuário, conta única)
 ## Verificação
 
 Configuração efetiva conferida por API (`gh api .../branches/.../protection` e
-`.../rules/tags`), push direto e force-push rejeitados em teste destrutivo
-controlado (branch descartável), e `just doctor` consistente.
+ruleset de tags `tags-v-protection`), push direto e force-push rejeitados em
+teste destrutivo controlado (branch descartável), e `just doctor` consistente.

@@ -37,7 +37,9 @@ operacionalizadas por proteções configuradas no GitHub (ver ADR 0006 e
 
 - Tags de release são criadas somente pelo job de release do `release.yml`
   (fluxo autorizado), nunca manualmente por push direto.
-- Regra de proteção de tags com padrão `v*`: proíbe sobrescrita e exclusão.
+- Regra de proteção de tags com padrão `v*`: proíbe sobrescrita
+  (`non_fast_forward`) e exclusão (`deletion`), aplicada por ruleset
+  `tags-v-protection` (validação em `just doctor`).
 - O primeiro release é um **draft** (nada é publicado publicamente) até a SB-007
   decidir a primeira versão pública com tag real.
 
