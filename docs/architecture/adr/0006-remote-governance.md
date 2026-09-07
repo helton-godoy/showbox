@@ -52,3 +52,25 @@ remotas dependiam de autorização do mantenedor (único usuário, conta única)
 Configuração efetiva conferida por API (`gh api .../branches/.../protection` e
 ruleset de tags `tags-v-protection`), push direto e force-push rejeitados em
 teste destrutivo controlado (branch descartável), e `just doctor` consistente.
+
+## Notas de implementação (2026-09-07)
+
+- **Correção dos required checks**: a proteção inicial usava os nomes compostos
+  `Showbox CI / build-test`/`Showbox CI / sanitizers`, que nunca correspondiam
+  aos check-runs reais (`build-test`/`sanitizers`, app_id 15368). Todo PR ficava
+  `BLOCKED` indefinidamente. Corrigido por API (contexts vinculados ao app_id do
+  GitHub Actions) e documentado em `GIT_REMOTE.md`/`doctor.sh`.
+- **Desinstalação de GitHub Apps de terceiros**: `codegen-sh`, `prefect-horizon`,
+  `cursor`, `continue`, `kilo-code-bot` e `trunk-io` foram desinstalados por não
+  terem worker ativo; suas check-suites ficavam `queued` para sempre e
+  bloqueavam merges. Remoção manual na conta (UI GitHub), sem perda funcional.
+  O Trunk é re-integrado na SB-007 como ferramenta de validação.
+- **Exercício do `release.yml`**: dispachado via `workflow_dispatch` em `main`
+  (run 34149545912) — artefatos e smokes verdes, job `release` skipped (sem
+  tag). Nenhum release/draft criado na SB-006.
+- **Arquivamento**: os quatro repositórios antigos
+  (`dialogbox`, `SHantilly`, `SHantilly-Studio`, `showbox-studio`) receberam
+  README de redirecionamento na default branch e foram arquivados
+  (`archived: true`).
+- **Branches obsoletas**: `develop` e `bugfix/quick-fixes` removidas do remoto
+  após confirmação de que seu head (`2848cb3`) é ancestral de `main`.
