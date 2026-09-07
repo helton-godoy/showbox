@@ -1,11 +1,17 @@
 FROM debian:trixie-slim
 
+# Imagem de build/CI efemera, sem processo em background: healthcheck desabilitado de proposito.
+HEALTHCHECK NONE
+
 # Avoid interactive prompts during package installation
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Update and install dependencies
 # Build dependencies (dev packages)
-RUN apt-get update -qq && apt-get install -qqy \
+# Pacotes vindos do repositorio da distro fixado pelo tag da base (debian:trixie-slim);
+# pinagem por pacote e inviavel de manter.
+# hadolint ignore=DL3008
+RUN apt-get update -qq && apt-get install -qqy --no-install-recommends \
     build-essential \
     cmake \
     git \
@@ -58,6 +64,6 @@ ENV LC_ALL=en_US.UTF-8
 # Set working directory
 WORKDIR /app
 
+# checkov:skip=CKV_DOCKER_3:container de dev interativo roda como root dentro do workspace montado do host
 # Default command
 CMD ["/bin/bash"]
-
