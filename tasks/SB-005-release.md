@@ -1,6 +1,6 @@
 # SB-005 — Pacotes separados, pipeline de release e testes de instalação
 
-Estado: aguardando integração.
+Estado: encerrada — handoff abaixo; integração na integration/showbox-v1.
 
 - Foco desta sessão: continuar a partir da base 577eb92 (contrato + ROADMAP) e
   concluir a implementação local. Handoff abaixo.

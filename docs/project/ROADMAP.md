@@ -9,7 +9,7 @@ Somente o integrador altera esta tabela.
 | SB-002 | Corrigir exportação/preview e fechar interface → Bash → interface | SB-001 | Concluída localmente |
 | SB-003 | Modelo versionado e salvar/reabrir ações sem perdas | SB-002 | Concluída localmente |
 | SB-004 | Catálogo compartilhado de propriedades/eventos suportados | SB-003 | Concluída localmente |
-| SB-005 | Pacotes separados, pipeline de release e testes de instalação | SB-001, SB-002 | Em execução |
+| SB-005 | Pacotes separados, pipeline de release e testes de instalação | SB-001, SB-002 | Concluída localmente |
 | SB-006 | Proteção Git remota e transição dos repositórios antigos | SB-005 | Planejada |
 
 ## Marco de produto
