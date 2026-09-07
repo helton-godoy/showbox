@@ -36,7 +36,7 @@ fi
 # Always rebuild from the mounted source tree. Reusing a pre-existing binary
 # can silently package a different revision than the one being released.
 echo "Building ShowBox..."
-cmake -S "${PROJECT_ROOT}" -B "${BUILD_DIR}" -DCMAKE_BUILD_TYPE=Release
+cmake -S "${PROJECT_ROOT}" -B "${BUILD_DIR}" -DCMAKE_BUILD_TYPE=Release -DSHOWBOX_BUILD_STUDIO=OFF
 cmake --build "${BUILD_DIR}" --parallel
 
 # Create AppDir structure

@@ -10,6 +10,8 @@ Source0:        %{name}-%{version}.tar.gz
 # Build dependencies
 BuildRequires:  gcc-c++
 BuildRequires:  cmake
+BuildRequires:  git
+BuildRequires:  python3 >= 3.9
 BuildRequires:  qt6-qtbase-devel
 BuildRequires:  qt6-qtcharts-devel
 BuildRequires:  qt6-qtsvg-devel
@@ -38,7 +40,7 @@ Features:
 %autosetup
 
 %build
-%cmake
+%cmake -DSHOWBOX_BUILD_STUDIO=OFF
 %cmake_build
 
 %install

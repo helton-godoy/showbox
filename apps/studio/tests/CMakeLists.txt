@@ -1,0 +1,15 @@
+find_package(Qt6 REQUIRED COMPONENTS Test)
+foreach(suite WidgetConfigs StudioIntegration ScriptGenerator ProjectSerializer ProjectWidgetMapper UndoRedo Hierarchy StylePerformance ShellFlow ActionEditor)
+    add_executable(tst_${suite} tst_${suite}.cpp)
+    target_link_libraries(tst_${suite} PRIVATE Qt6::Test showbox-studio-components)
+    add_test(NAME tst_${suite} COMMAND tst_${suite})
+    set_tests_properties(tst_${suite} PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen" TIMEOUT 60)
+endforeach()
+
+add_executable(showbox_test_driver runtime_driver.cpp)
+target_link_libraries(showbox_test_driver PRIVATE showbox-core Qt6::Test)
+target_compile_definitions(tst_ShellFlow PRIVATE DRIVER_PATH="$<TARGET_FILE:showbox_test_driver>")
+add_dependencies(tst_ShellFlow showbox_test_driver showbox)
+
+target_compile_definitions(tst_ShellFlow PRIVATE DEMO_PROJECT_PATH="${CMAKE_SOURCE_DIR}/examples/hello-world/hello-world.sbxproj")
+target_compile_definitions(tst_ProjectSerializer PRIVATE DEMO_PROJECT_PATH="${CMAKE_SOURCE_DIR}/examples/hello-world/hello-world.sbxproj")

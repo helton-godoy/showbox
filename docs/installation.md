@@ -176,7 +176,7 @@ rm /usr/local/bin/showbox
 ### Compilação Manual
 
 ```bash
-cd showbox/src/code/showbox
+cd showbox/apps/runtime
 sudo make uninstall
 ```
 

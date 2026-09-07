@@ -4,7 +4,7 @@
 # Demonstrates the calendar widget with date selection
 #
 
-# SHOWBOX_BIN="${SHOWBOX_BIN:-./src/code/showbox/bin/showbox}"
+# SHOWBOX_BIN="${SHOWBOX_BIN:-./apps/runtime/bin/showbox}"
 
 # ${SHOWBOX_BIN} <<EODEMO
 showbox  <<EODEMO

@@ -1,5 +1,5 @@
 j#!/bin/bash
-SHOWBOX_BIN="${SHOWBOX_BIN:-./src/code/showbox/bin/showbox}"
+SHOWBOX_BIN="${SHOWBOX_BIN:-./apps/runtime/bin/showbox}"
 DIALOGBOX=${1:-./dist_qt6/dialogbox}
 
 if [[ ! -x ${SHOWBOX_BIN} ]]; then

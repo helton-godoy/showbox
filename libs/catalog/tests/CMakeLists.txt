@@ -1,0 +1,8 @@
+find_package(Qt6 REQUIRED COMPONENTS Test)
+set(CMAKE_AUTOMOC ON)
+foreach(suite widget_catalog)
+    add_executable(tst_${suite} tst_${suite}.cpp)
+    target_link_libraries(tst_${suite} PRIVATE Qt6::Test showbox-catalog)
+    add_test(NAME tst_${suite} COMMAND tst_${suite})
+    set_tests_properties(tst_${suite} PROPERTIES TIMEOUT 60)
+endforeach()

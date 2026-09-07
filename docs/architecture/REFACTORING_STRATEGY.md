@@ -22,7 +22,7 @@ graph TD
     end
 
     subgraph "Showbox Shared Ecosystem"
-        Lib[libs/showbox-ui]
+        Lib[libs/ui]
     end
 
     CLI --> Lib
@@ -36,12 +36,12 @@ graph TD
 Para manter a compatibilidade com o sistema de empacotamento existente (`packaging/deb`, `packaging/rpm`, etc.), adotamos uma abordagem de build duplo durante a transição:
 
 1.  **Build Legado (QMake):**
-    - Mantido em `src/code/showbox/showbox.pro`.
-    - Configurado para incluir arquivos fonte (`SOURCES`) e cabeçalhos (`HEADERS`) diretamente da pasta `libs/showbox-ui` usando caminhos relativos (`../../../libs/...`).
+    - Mantido em `apps/runtime/showbox.pro`.
+    - Configurado para incluir arquivos fonte (`SOURCES`) e cabeçalhos (`HEADERS`) diretamente da pasta `libs/ui` usando caminhos relativos (`../../../libs/...`).
     - **Garante:** Que os pacotes `.deb`, `.rpm`, `.AppImage` continuem sendo gerados sem alteração nos scripts de CI/CD.
 
 2.  **Build Moderno (CMake):**
-    - Configurado na raiz (`CMakeLists.txt`) e em `libs/showbox-ui`.
+    - Configurado na raiz (`CMakeLists.txt`) e em `libs/ui`.
     - Trata `showbox-ui` como uma biblioteca estática real.
     - Usado para o desenvolvimento do **Showbox Studio** e testes unitários.
 
@@ -49,7 +49,7 @@ Para manter a compatibilidade com o sistema de empacotamento existente (`packagi
 
 ## 3. Log de Migração de Componentes
 
-Este registro rastreia quais componentes foram movidos do monólito (`src/code/showbox`) para a biblioteca (`libs/showbox-ui`).
+Este registro rastreia quais componentes foram movidos do monólito (`apps/runtime`) para a biblioteca (`libs/ui`).
 
 | Componente     | Data       | Motivo da Migração                                      | Dependências           |
 | :------------- | :--------- | :------------------------------------------------------ | :--------------------- |

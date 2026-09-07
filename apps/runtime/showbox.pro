@@ -8,7 +8,7 @@ isEmpty(OBJECTS_DIR): OBJECTS_DIR = $$PWD/obj
 isEmpty(MOC_DIR): MOC_DIR = $$OBJECTS_DIR
 
 # Input
-INCLUDEPATH += $$PWD/../../../libs/showbox-ui/include
+INCLUDEPATH += $$PWD/../../libs/ui/include
 INCLUDEPATH += $$PWD/legacy/v2_incomplete
 INCLUDEPATH += $$PWD/legacy/v1_monolith
 
@@ -19,11 +19,11 @@ HEADERS += showbox.h \
            legacy/v2_incomplete/parser.h \
            legacy/v2_incomplete/parser_driver.h \
            legacy/v2_incomplete/execution_context.h \
-           ../../../libs/showbox-ui/include/icon_helper.h \
-           ../../../libs/showbox-ui/include/theme_manager.h \
-           ../../../libs/showbox-ui/include/logger.h \
-           ../../../libs/showbox-ui/include/custom_table_widget.h \
-           ../../../libs/showbox-ui/include/custom_chart_widget.h \
+           ../../libs/ui/include/icon_helper.h \
+           ../../libs/ui/include/theme_manager.h \
+           ../../libs/ui/include/logger.h \
+           ../../libs/ui/include/custom_table_widget.h \
+           ../../libs/ui/include/custom_chart_widget.h \
            legacy/v2_incomplete/commands/add_command.h \
            legacy/v2_incomplete/commands/set_command.h \
            legacy/v2_incomplete/commands/query_command.h \
@@ -43,10 +43,10 @@ SOURCES += showbox.cc \
            legacy/v2_incomplete/parser.cpp \
            legacy/v2_incomplete/parser_driver.cpp \
            legacy/v2_incomplete/execution_context.cpp \
-           ../../../libs/showbox-ui/src/icon_helper.cpp \
-           ../../../libs/showbox-ui/src/theme_manager.cpp \
-           ../../../libs/showbox-ui/src/logger.cpp \
-           ../../../libs/showbox-ui/src/custom_chart_widget.cpp \
+           ../../libs/ui/src/icon_helper.cpp \
+           ../../libs/ui/src/theme_manager.cpp \
+           ../../libs/ui/src/logger.cpp \
+           ../../libs/ui/src/custom_chart_widget.cpp \
            legacy/v2_incomplete/commands/add_command.cpp \
            legacy/v2_incomplete/commands/set_command.cpp \
            legacy/v2_incomplete/commands/query_command.cpp \

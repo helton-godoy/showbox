@@ -19,7 +19,14 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 # Subprojetos
-add_subdirectory(libs/showbox-ui)
-add_subdirectory(src/code/showbox)
+add_subdirectory(libs/ui)
+add_subdirectory(apps/runtime)
 enable_testing()
+add_subdirectory(libs/catalog)
 add_subdirectory(tests)
+add_subdirectory(libs/project)
+
+option(SHOWBOX_BUILD_STUDIO "Compilar o editor visual experimental" ON)
+if(SHOWBOX_BUILD_STUDIO)
+    add_subdirectory(apps/studio)
+endif()

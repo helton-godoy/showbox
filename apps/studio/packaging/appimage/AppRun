@@ -1,0 +1,16 @@
+#!/bin/bash
+HERE="$(dirname "$(readlink -f "${0}")")"
+
+# Força o Qt a usar Portais XDG para Diálogos (File Picker nativo do sistema)
+export QT_PROPORTIONAL_FONTS=1
+export QT_QPA_PLATFORMTHEME="xdgdesktopportal"
+
+# Tenta detectar se está no KDE ou GNOME para o estilo visual
+if [ "$XDG_CURRENT_DESKTOP" = "KDE" ]; then
+	export QT_STYLE_OVERRIDE="Breeze"
+fi
+
+export LD_LIBRARY_PATH="$HERE/usr/lib:$LD_LIBRARY_PATH"
+export QT_PLUGIN_PATH="$HERE/usr/plugins"
+
+exec "$HERE/usr/bin/showbox-studio" "$@"

@@ -1,0 +1,25 @@
+{
+  "version": "1.0",
+  "widgets": [
+    {
+      "type": "textbox",
+      "name": "entry",
+      "properties": {}
+    },
+    {
+      "type": "button",
+      "name": "run",
+      "properties": {
+        "text": "Saudar",
+        "showbox_actions": "{\"clicked\": [{\"type\": \"shell\", \"command\": \"showbox_get VALUE entry\\nshowbox_set result text \\\"Olá: $VALUE\\\"\\nprintf \\\"Ação concluída.\\\\n\\\"\"}]}"
+      }
+    },
+    {
+      "type": "label",
+      "name": "result",
+      "properties": {
+        "text": "Preencha o campo e clique em Saudar."
+      }
+    }
+  ]
+}
