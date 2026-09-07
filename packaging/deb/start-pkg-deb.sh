@@ -48,13 +48,14 @@ build_deb() {
 		"${image_name}" \
 		bash -c "./packaging/deb/build.sh"
 
-	# Rename outputs with distro suffix
+	# Each distro gets its own artifact directory: the shlibdeps recorded by
+	# dpkg-shlibdeps (e.g. libqt6core6t64 vs libqt6gui6) differ per base image.
+	mkdir -p "${DIST_DIR}/${distro}"
 	local version=$(head -1 "${SCRIPT_DIR}/debian/changelog" | grep -oP '\(.*?\)' | tr -d '()')
 	for deb_file in "${DIST_DIR}"/showbox*"_${version}_amd64.deb"; do
 		if [[ -f ${deb_file} ]]; then
-			local new_name="${deb_file/_${version}_amd64/_${version}_${distro}_amd64}"
-			mv "${deb_file}" "${new_name}" 2>/dev/null || true
-			log_info "Package created: ${new_name}"
+			mv "${deb_file}" "${DIST_DIR}/${distro}/$(basename "${deb_file}")"
+			log_info "Package created: ${DIST_DIR}/${distro}/$(basename "${deb_file}")"
 		fi
 	done
 }
@@ -77,4 +78,4 @@ all)
 esac
 
 log_info "=== Build Complete ==="
-ls -la "${DIST_DIR}"/*.deb 2>/dev/null || log_warn "No .deb files found"
+ls -la "${DIST_DIR}"/*/*.deb 2>/dev/null || log_warn "No .deb files found"
