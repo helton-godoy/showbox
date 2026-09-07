@@ -58,7 +58,7 @@ if command -v trunk >/dev/null 2>&1; then
 	# (`/user/installations` retorna 403); a política (GIT_REMOTE.md, SB-007) é
 	# manter o app desinstalado. Conferir manualmente em
 	# https://github.com/settings/installations se houver suspeita.
-	printf 'OK: GitHub App do Trunk desinstalado (verificável apenas manualmente)\n'
+	printf 'INFO: GitHub App do Trunk não verificado (token atual não permite consultar instalações)\n'
 else
 	printf 'Ausente: trunk (execute bash tools/setup/trunk.sh)\n' >&2
 	missing=1

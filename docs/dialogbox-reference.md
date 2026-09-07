@@ -51,10 +51,10 @@ O Dialogbox é uma ferramenta CLI para criação de interfaces gráficas em scri
 
 Adiciona um novo widget ao diálogo.
 
-````bash
+```bash
 # Exemplo: Adicionar botão
 add pushbutton "Clique aqui" botao_ok default exit "OK"
-```text
+```
 
 #### `end [type]`
 
@@ -63,7 +63,7 @@ Finaliza containers (groupbox, frame, listbox, tabs, page).
 ```bash
 # Exemplo: Finalizar groupbox
 end groupbox
-```text
+```
 
 #### `set [name] options [text]`
 
@@ -75,7 +75,7 @@ set main title "Novo Título"
 
 # Exemplo: Definir texto em textbox
 set textbox1 text "Conteúdo"
-```text
+```
 
 #### `unset [name] options`
 
@@ -83,7 +83,7 @@ Remove propriedades.
 
 ```bash
 unset textbox1 readonly
-```text
+```
 
 ---
 
@@ -196,50 +196,50 @@ unset textbox1 readonly
 
 ```text
 <pushbutton name>=clicked
-```text
+```
 
 ### Toggle Pushbutton
 
 ```text
 <pushbutton name>=pressed
 <pushbutton name>=released
-```text
+```
 
 ### Slider
 
 ```text
 <slider name>=<value>
-```text
+```
 
 ### ListBox/ComboBox Selection
 
 ```text
 <list widget name>=<value>
-```text
+```
 
 ### ListBox Activation
 
 ```text
 <list widget name>=<value>
-```text
+```
 
 ### Table Cell Edit
 
 ```text
 <table name>[<row>][<col>]=<value>
-```text
+```
 
 ### Chart Slice Click
 
 ```text
 <chart name>.slice["<label>"]=<value>
-```text
+```
 
 ### Calendar Selection
 
 ```text
 <calendar name>=<date>
-```text
+```
 
 ### Query Command
 
@@ -247,14 +247,14 @@ unset textbox1 readonly
 <name>=<value>
 <name>=<value>
 ...
-```text
+```
 
 ### Checkbox State
 
 ```text
 <checkbox name>=1
 <checkbox name>=0
-```text
+```
 
 ---
 
@@ -341,7 +341,7 @@ enum Stage {
 };
 
 } // namespace DialogCommandTokens
-```text
+```
 
 ---
 
@@ -377,7 +377,7 @@ enum Stage {
 │  - QTabWidget, QCalendarWidget                              │
 │  - CustomTableWidget, CustomChartWidget                     │
 └─────────────────────────────────────────────────────────────┘
-```text
+```
 
 ### Fluxo de Parsing
 
@@ -403,7 +403,7 @@ struct DialogCommand {
     const char *getTitle() const { return title == BUFFER_SIZE - 1 ? nullptr : buffer + title; }
     // ... métodos similares para name, text, auxtext
 };
-```text
+```
 
 ---
 
@@ -426,7 +426,7 @@ end groupbox
 
 # Loop de eventos
 echo "Dialog started"
-```text
+```
 
 ---
 
@@ -455,5 +455,3 @@ echo "Dialog started"
 ---
 
 _Documentação gerada para referência do projeto Showbox (Qt6)._
-
-````

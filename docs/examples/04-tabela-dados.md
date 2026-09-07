@@ -20,7 +20,7 @@ Criar uma interface de gerenciamento de dados com:
 
 ## Código Completo
 
-````bash
+```bash
 #!/bin/bash
 #
 # Tutorial 04: Tabela de Dados
@@ -104,7 +104,7 @@ done <&$INPUTFD
 
 wait $COPROC_PID
 echo "Aplicação encerrada"
-```text
+```
 
 ---
 
@@ -114,7 +114,7 @@ echo "Aplicação encerrada"
 
 ```bash
 add table "Nome;Email;Telefone;Cidade" tbl_contatos search selection
-```text
+```
 
 - Headers separados por `;`
 - `search` - Adiciona campo de busca
@@ -124,7 +124,7 @@ add table "Nome;Email;Telefone;Cidade" tbl_contatos search selection
 
 ```bash
 set tbl_contatos add_line "João;joao@email.com;(11) 1234;SP"
-```text
+```
 
 Valores das colunas separados por `;`.
 
@@ -132,7 +132,7 @@ Valores das colunas separados por `;`.
 
 ```bash
 set tbl_contatos del_line
-```text
+```
 
 Remove a linha atualmente selecionada.
 
@@ -140,7 +140,7 @@ Remove a linha atualmente selecionada.
 
 ```bash
 set tbl_contatos file "/caminho/arquivo.csv"
-```text
+```
 
 Salva todo o conteúdo da tabela em formato CSV.
 
@@ -150,7 +150,7 @@ Quando o usuário edita uma célula:
 
 ```text
 tbl_contatos[2][1]=novo_email@email.com
-```text
+```
 
 Formato: `nome[linha][coluna]=valor`
 
@@ -162,11 +162,10 @@ Para carregar dados de um arquivo na inicialização:
 
 ```bash
 add table "Col1;Col2;Col3" tbl_dados file "/caminho/dados.csv" readonly
-```text
+```
 
 ---
 
 ## Próximo Tutorial
 
 [05. Gráfico Dinâmico →](05-grafico-dinamico.md)
-````

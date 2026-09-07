@@ -6,10 +6,10 @@
 
 ## 🚀 Início Rápido
 
-````bash
+```bash
 # Seu primeiro diálogo em uma linha!
 echo 'add label "Olá, Showbox!" | add pushbutton "Fechar" exit' | showbox
-```text
+```
 
 ---
 
@@ -72,7 +72,7 @@ echo 'add label "Olá, Showbox!" | add pushbutton "Fechar" exit' | showbox
                                │   Script    │
                                │  (resposta) │
                                └─────────────┘
-```text
+```
 
 ---
 
@@ -90,5 +90,4 @@ Showbox é software livre distribuído sob a [GNU GPL v3](../COPYING).
 
 ---
 
-_Documentação versão 1.0 | Atualizada em Janeiro 2026_
-````
+Documentação versão 1.0 — atualizada em Janeiro 2026.

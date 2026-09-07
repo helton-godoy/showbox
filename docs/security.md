@@ -10,7 +10,7 @@ Práticas de segurança para scripts Showbox.
 
 Todo dado vindo do usuário deve ser validado antes de usar.
 
-````bash
+```bash
 # ❌ PERIGOSO - Executa entrada diretamente
 OUTPUT=$(showbox << 'EOF'
 add textbox "Comando:" txt_cmd
@@ -27,7 +27,7 @@ case "$txt_cmd" in
     "status") systemctl status ;;
     *) echo "Comando não permitido" ;;
 esac
-```text
+```
 
 ---
 
@@ -58,7 +58,7 @@ if [ $? -eq 1 ]; then
 
     touch "/tmp/$SAFE_NAME"
 fi
-```text
+```
 
 ---
 
@@ -92,7 +92,7 @@ if ! is_email "$txt_email"; then
     echo "Email inválido"
     exit 1
 fi
-```text
+```
 
 ---
 
@@ -110,7 +110,7 @@ grep -- "$txt_busca" arquivo.txt
 
 # ✅ MAIS SEGURO - Use regex literals
 grep -F -- "$txt_busca" arquivo.txt
-```text
+```
 
 ---
 
@@ -125,7 +125,7 @@ ARQUIVO=$(basename "$txt_arquivo")  # Remove diretórios
 if [[ -f "/dados/$ARQUIVO" ]]; then
     cat "/dados/$ARQUIVO"
 fi
-```text
+```
 
 ---
 
@@ -138,7 +138,7 @@ sqlite3 db.sqlite "SELECT * FROM users WHERE name='$txt_nome'"
 # ✅ SEGURO - Use parâmetros ou escape
 SAFE_NOME=$(echo "$txt_nome" | sed "s/'/''/g")
 sqlite3 db.sqlite "SELECT * FROM users WHERE name='$SAFE_NOME'"
-```text
+```
 
 ---
 
@@ -148,7 +148,7 @@ sqlite3 db.sqlite "SELECT * FROM users WHERE name='$SAFE_NOME'"
 
 ```bash
 add textbox "Senha:" txt_senha password
-```text
+```
 
 ### Nunca Armazene Senhas em Texto Plano
 
@@ -159,7 +159,7 @@ echo "$txt_senha" > /tmp/senha.txt
 # ✅ Armazene hash
 HASH=$(echo -n "$txt_senha" | sha256sum | cut -d' ' -f1)
 echo "$HASH" > ~/.config/myapp/credentials.hash
-```text
+```
 
 ### Limpe Variáveis Sensíveis
 
@@ -172,7 +172,7 @@ resultado=$?
 
 # Limpar da memória
 unset txt_senha
-```text
+```
 
 ---
 
@@ -186,7 +186,7 @@ chmod 755 meu_script.sh    # rwxr-xr-x
 
 # Arquivos de configuração
 chmod 600 ~/.config/myapp/config  # rw-------
-```text
+```
 
 ### Arquivos Temporários
 
@@ -201,7 +201,7 @@ trap "rm -f '$TMPFILE'" EXIT
 # Ou diretório privado
 TMPDIR=$(mktemp -d)
 trap "rm -rf '$TMPDIR'" EXIT
-```text
+```
 
 ---
 
@@ -223,7 +223,7 @@ if [ "$EUID" -ne 0 ]; then
     echo "Este script requer privilégios de root"
     exit 1
 fi
-```text
+```
 
 ### Timeout para Processos
 
@@ -233,7 +233,7 @@ timeout 60 processo_demorado || {
     echo "Processo excedeu tempo limite"
     exit 1
 }
-```text
+```
 
 ---
 
@@ -251,7 +251,7 @@ log_action() {
 # Uso
 log_action "Usuário iniciou o aplicativo"
 log_action "Configuração alterada: tema=$radio_tema"
-```text
+```
 
 ### Não Logue Dados Sensíveis
 
@@ -261,7 +261,7 @@ log_action "Login attempt: user=$txt_user, pass=$txt_pass"
 
 # ✅ CORRETO
 log_action "Login attempt: user=$txt_user"
-```text
+```
 
 ---
 
@@ -280,7 +280,7 @@ if ! sha256sum -c file.tar.gz.sha256; then
     error_dialog "Arquivo corrompido ou adulterado!"
     exit 1
 fi
-```text
+```
 
 ### 2. Usar HTTPS
 
@@ -290,7 +290,7 @@ wget http://example.com/installer.sh
 
 # ✅ SEGURO
 wget https://example.com/installer.sh
-```text
+```
 
 ### 3. Pedir Confirmação para Ações Críticas
 
@@ -312,7 +312,7 @@ if [ $? -ne 1 ]; then
     echo "Operação cancelada"
     exit 0
 fi
-```text
+```
 
 ---
 
@@ -338,4 +338,3 @@ Antes de distribuir seu script:
 - [OWASP Shell Injection](https://owasp.org/www-community/attacks/Command_Injection)
 - [Bash Security Best Practices](https://mywiki.wooledge.org/BashGuide/Practices)
 - [CWE-78: OS Command Injection](https://cwe.mitre.org/data/definitions/78.html)
-````

@@ -6,9 +6,9 @@ Este guia fornece a referência completa para a utilização dos agentes autôno
 
 Antes de iniciar, garanta que o contexto do projeto está inicializado:
 
-````bash
+```bash
 ./scripts/setup_context.sh
-```text
+```
 
 ## 🚀 Sequência Mínima (Happy Path)
 
@@ -18,7 +18,8 @@ Para desenvolver uma nova feature com segurança e qualidade:
 
    ```bash
    ./scripts/swarm/architect.sh "Implementar sistema de Login" --level 2
-````
+
+   ```
 
 2. **Codificar (Coder):**
 
@@ -62,7 +63,7 @@ Para desenvolver uma nova feature com segurança e qualidade:
 
 O ciclo mais seguro e recomendado para features novas.
 
-````mermaid
+```mermaid
 graph TD
     Start([Início]) --> Context{"Contexto existe?"}
     Context -- Não --> Setup[setup_context.sh]
@@ -88,7 +89,7 @@ graph TD
     Refine --> Tests
     Valid -- Sim --> PR["Integrator Agent"]
     PR --> End([Fim])
-```text
+```
 
 ### 2. Fluxo Rápido (Quick Fix / YOLO)
 
@@ -99,7 +100,7 @@ graph LR
     Start([Bug Report]) --> Architect[Architect --level 0]
     Architect --> Coder[Coder Agent]
     Coder --> Commit[Git Commit]
-```text
+```
 
 ### 3. Fluxo Autônomo (One-Shot)
 
@@ -119,7 +120,7 @@ graph TD
     end
 
     Done --> Review[Human Review]
-```text
+```
 
 ### 4. Fluxo Estratégico (Strategic)
 
@@ -134,4 +135,4 @@ graph TD
     Plan --> Manager["Manager Agent (Conductor)"]
     Manager --> Tasks[Lista de Tarefas]
     Tasks --> Delegate([Delegar para Coder/QA])
-````
+```

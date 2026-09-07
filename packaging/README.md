@@ -29,11 +29,11 @@ de tools do formato. Para validar o ambiente local: `just doctor` e `just setup`
 
 Todos os comandos rodam da raiz do repositório:
 
-````bash
+```bash
 just pkg-deb        # deb: ubuntu e debian em dist/ubuntu e dist/debian
 just pkg-rpm        # rpm: showbox e showbox-studio em dist/
 just pkg-appimage   # appimage do Studio em dist/ShowBox-Studio-1.0.0-x86_64.AppImage
-```text
+```
 
 ## Smoke de Instalação
 
@@ -46,7 +46,7 @@ just pkg-install-smoke deb dist/ubuntu ubuntu
 just pkg-install-smoke deb dist/debian debian
 just pkg-install-smoke rpm dist
 just pkg-install-smoke appimage dist/ShowBox-Studio-1.0.0-x86_64.AppImage
-```text
+```
 
 `install_smoke.sh` exige podman (padrão) ou docker em `CONTAINER_ENGINE`.
 `INSTALL_SMOKE_DEBUG=1` imprime o script enviado ao container.
@@ -74,8 +74,7 @@ packaging/
     ├── build.sh
     ├── start-pkg-appimage.sh
     └── appimage.Dockerfile
-```text
+```
 
 Os artefatos em `dist/` e as ferramentas baixadas pelo linuxdeploy
 (`packaging/appimage/tools/`) ficam fora do Git.
-````

@@ -20,7 +20,7 @@ Criar um formulário de login com:
 
 ## Código Completo
 
-````bash
+```bash
 #!/bin/bash
 #
 # Tutorial 02: Formulário de Login
@@ -83,7 +83,7 @@ case $? in
         echo "Login cancelado pelo usuário"
         ;;
 esac
-```text
+```
 
 ---
 
@@ -93,7 +93,7 @@ esac
 
 ```bash
 add textbox "Senha:" txt_pass password
-```text
+```
 
 A opção `password` oculta os caracteres digitados.
 
@@ -101,7 +101,7 @@ A opção `password` oculta os caracteres digitados.
 
 ```bash
 set txt_user placeholder "Digite seu email"
-```text
+```
 
 Texto de dica exibido quando o campo está vazio.
 
@@ -111,7 +111,7 @@ Texto de dica exibido quando o campo está vazio.
 add groupbox "Credenciais" grp_creds vertical
 ...
 end groupbox
-```text
+```
 
 Agrupa widgets visualmente com uma borda e título.
 
@@ -120,7 +120,7 @@ Agrupa widgets visualmente com uma borda e título.
 ```bash
 OUTPUT=$(showbox << 'EOF' ... EOF)
 eval "$OUTPUT"
-```text
+```
 
 - Captura a saída do showbox na variável `OUTPUT`
 - `eval` transforma as linhas `nome=valor` em variáveis shell
@@ -132,7 +132,7 @@ case $? in
     1) # OK/Apply clicado
     *) # Cancelado
 esac
-```text
+```
 
 - `$? = 1` → Botão com `apply` e `exit` foi clicado
 - `$? = 0` → Diálogo fechado/cancelado
@@ -148,17 +148,16 @@ if [[ ! "$txt_user" =~ ^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}$ ]]; the
     echo "Email inválido!"
     exit 1
 fi
-```text
+```
 
 ### Adicionar ícone ao botão
 
 ```bash
 set btn_login icon "system-log-out"
-```text
+```
 
 ---
 
 ## Próximo Tutorial
 
 [03. Painel de Controle →](03-painel-controle.md)
-````

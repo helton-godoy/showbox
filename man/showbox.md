@@ -105,7 +105,7 @@ Abaixo estão os tipos de widgets que podem ser criados com o comando `add`.
 
 Este script cria uma janela com um rótulo e um botão de "Sair".
 
-````bash
+```bash
 #!/bin/bash
 
 showbox << EOF
@@ -114,7 +114,7 @@ add label "Olá, Mundo! Bem-vindo ao Showbox" greeting
 add pushbutton "Sair" btn_sair exit
 show
 EOF
-```text
+```
 
 ### Exemplo 2: Formulário de Login
 
@@ -159,7 +159,7 @@ if [ $? -eq 1 ]; then
   echo "Senha: $pass_input"
   echo "Lembrar: $remember_cb"
 fi
-```text
+```
 
 _Neste exemplo, assumimos que `add textbox` é um widget válido para entrada de texto._
 
@@ -184,4 +184,3 @@ Bugs podem ser reportados no sistema de issues do projeto.
 ## VEJA TAMBÉM
 
 **zenity(1)**, **kdialog(1)**
-````

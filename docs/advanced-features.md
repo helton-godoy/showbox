@@ -10,7 +10,7 @@ O Showbox suporta modificação dinâmica da interface em resposta a eventos do 
 
 ### Usando Pipes (coproc)
 
-````bash
+```bash
 #!/bin/bash
 
 # Iniciar showbox como co-processo
@@ -46,7 +46,7 @@ done <&$INPUTFD
 
 wait $COPROC_PID
 echo "Diálogo fechado"
-```text
+```
 
 ---
 
@@ -90,7 +90,7 @@ while IFS='=' read -r widget valor; do
             ;;
     esac
 done < "$FIFO_IN"
-```text
+```
 
 ---
 
@@ -102,7 +102,7 @@ O Showbox suporta stylesheets CSS-like do Qt para customização visual completa
 
 ```bash
 set widget_name stylesheet "propriedade: valor; propriedade2: valor2;"
-```text
+```
 
 ### Propriedades Comuns
 
@@ -135,7 +135,7 @@ set btn_send stylesheet "
     padding: 10px 20px;
     font-size: 14px;
 "
-```text
+```
 
 #### Botão com Hover (via diálogo)
 
@@ -154,7 +154,7 @@ set btn_send stylesheet "
         background-color: #0D47A1;
     }
 "
-```text
+```
 
 #### Campo de Texto Elegante
 
@@ -172,7 +172,7 @@ set txt_email stylesheet "
         background-color: white;
     }
 "
-```text
+```
 
 #### Caixa de Seleção Personalizada
 
@@ -193,7 +193,7 @@ set chk_terms stylesheet "
         border-color: #4CAF50;
     }
 "
-```text
+```
 
 ---
 
@@ -210,7 +210,7 @@ showbox < comandos.txt
 
 # Via linha de comando
 showbox --style fusion < comandos.txt
-```text
+```
 
 ### Tema Escuro via Stylesheet
 
@@ -251,7 +251,7 @@ set stylesheet "
         color: #e0e0e0;
     }
 "
-```text
+```
 
 ---
 
@@ -274,20 +274,20 @@ add pushbutton "Fechar" btn_close exit default
 
 show
 EOF
-```text
+```
 
 ### Atualização Dinâmica
 
 ```bash
 # Em loop de comunicação bidirecional:
 echo 'set chart_vendas append "Centro-Oeste:1500"' >&$OUTPUTFD
-```text
+```
 
 ### Exportar Gráfico
 
 ```bash
 set chart_vendas export "/tmp/grafico_vendas.png"
-```text
+```
 
 ---
 
@@ -297,7 +297,7 @@ set chart_vendas export "/tmp/grafico_vendas.png"
 
 ```bash
 add table "Nome;Email;Departamento" tbl_funcionarios file "funcionarios.csv" readonly search
-```text
+```
 
 ### Dados Dinâmicos
 
@@ -310,7 +310,7 @@ set tbl_dados del_line
 
 # Recarregar dados de um CSV
 set tbl_dados file "/tmp/dados-atualizados.csv"
-```text
+```
 
 ---
 
@@ -324,7 +324,7 @@ set cal_entrega date "2026-01-20"          # Data inicial
 set cal_entrega minimum "2026-01-15"       # Mínimo
 set cal_entrega maximum "2026-02-28"       # Máximo
 set cal_entrega format "dd 'de' MMMM 'de' yyyy"
-```text
+```
 
 ### Capturando Seleção
 
@@ -332,7 +332,7 @@ A opção `selection` faz o calendário reportar imediatamente:
 
 ```text
 cal_entrega=2026-01-20
-```text
+```
 
 ---
 
@@ -377,7 +377,7 @@ while IFS='=' read -r widget valor; do
 done <&$INPUTFD
 
 wait $COPROC_PID
-```text
+```
 
 ---
 
@@ -392,7 +392,7 @@ set btn_save iconsize 24
 
 add pushbutton "Abrir" btn_open
 set btn_open icon "/path/to/custom.svg" # Ícone personalizado
-```text
+```
 
 ### Nomes de Ícones Comuns
 
@@ -421,4 +421,3 @@ set btn_open icon "/path/to/custom.svg" # Ícone personalizado
 - [Boas Práticas](best-practices.md) - Organização e performance
 - [Segurança](security.md) - Validação e proteção
 - [Resolução de Problemas](troubleshooting.md) - FAQ e erros comuns
-````

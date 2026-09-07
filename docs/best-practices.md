@@ -8,7 +8,7 @@ Recomendações para escrever scripts Showbox eficientes e manuteníveis.
 
 ### Separar Interface da Lógica
 
-````bash
+```bash
 #!/bin/bash
 
 # === CONFIGURAÇÕES ===
@@ -32,7 +32,7 @@ process_output() {
 # === EXECUÇÃO ===
 OUTPUT=$(echo "$UI" | showbox)
 [ $? -eq 1 ] && process_output "$OUTPUT"
-```text
+```
 
 ---
 
@@ -59,7 +59,7 @@ $(add_styled_button "Salvar" btn_save "#4CAF50")
 $(add_styled_button "Cancelar" btn_cancel "#f44336")
 show
 EOF
-```text
+```
 
 ---
 
@@ -97,7 +97,7 @@ add textbox "Email:" t2
 # ✅ Bom
 add textbox "Nome:" txt_user_name
 add textbox "Email:" txt_user_email
-```text
+```
 
 ---
 
@@ -111,7 +111,7 @@ showbox --hidden << 'EOF'
 # ... muitos widgets ...
 show  # Mostra tudo de uma vez
 EOF
-```text
+```
 
 ### Minimize Atualizações em Loop
 
@@ -127,7 +127,7 @@ for i in {5..100..5}; do
     echo "set pb_download value $i" >&$OUTPUTFD
     sleep 0.5
 done
-```text
+```
 
 ### Batch de Comandos
 
@@ -143,7 +143,7 @@ set lbl1 text "A"
 set lbl2 text "B"
 set lbl3 text "C"
 EOF
-```text
+```
 
 ---
 
@@ -172,7 +172,7 @@ case $? in
         exit 1
         ;;
 esac
-```text
+```
 
 ### Validar Entrada
 
@@ -196,7 +196,7 @@ EOF
         exit 1
     fi
 fi
-```text
+```
 
 ---
 
@@ -226,7 +226,7 @@ EOF
 if confirm_dialog "Deseja continuar?" "Confirme"; then
     echo "Usuário confirmou"
 fi
-```text
+```
 
 ### Diálogo de Erro
 
@@ -245,7 +245,7 @@ EOF
 
 # Uso
 error_dialog "Arquivo não encontrado!"
-```text
+```
 
 ### Diálogo de Entrada
 
@@ -278,7 +278,7 @@ EOF
 # Uso
 nome=$(input_dialog "Digite seu nome:" "João")
 echo "Nome digitado: $nome"
-```text
+```
 
 ---
 
@@ -306,7 +306,7 @@ end frame
 
 show
 EOF
-```text
+```
 
 ### Versionar Scripts
 
@@ -320,7 +320,7 @@ Mantenha versão e changelog:
 #   1.2.0 - Adicionado suporte a temas
 #   1.1.0 - Corrigido bug de layout
 #   1.0.0 - Versão inicial
-```text
+```
 
 ---
 
@@ -328,4 +328,3 @@ Mantenha versão e changelog:
 
 - [Segurança](security.md)
 - [Resolução de Problemas](troubleshooting.md)
-````

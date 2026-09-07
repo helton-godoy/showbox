@@ -25,7 +25,7 @@ O Showbox Studio é um ambiente de desenvolvimento integrado (IDE) visual para c
 
 ### Estrutura de Diretórios
 
-````text
+```text
 showbox-studio/
 ├── src/                    # Código fonte
 │   ├── main.cpp           # Ponto de entrada
@@ -47,7 +47,7 @@ showbox-studio/
 ├── packaging/           # Scripts de empacotamento
 ├── scripts/             # Utilitários
 └── tests/               # Testes unitários
-```text
+```
 
 ## Diagrama de Classes
 
@@ -122,7 +122,7 @@ classDiagram
     ScriptGenerator --> QWidget : generates from
     ProjectSerializer --> IStudioWidgetFactory : uses
     PreviewManager --> QProcess : executes
-```text
+```
 
 ## Diagrama de Componentes
 
@@ -151,7 +151,7 @@ graph TD
 
     N --> O[Showbox CLI]
     L --> O
-```text
+```
 
 ## Fluxos de Dados
 
@@ -173,7 +173,7 @@ sequenceDiagram
     C->>C: addWidget(widget)
     C->>SC: selectWidget(widget)
     SC->>C: widgetSelected signal
-```text
+```
 
 ### Fluxo de Seleção
 
@@ -190,7 +190,7 @@ sequenceDiagram
     SC->>OI: widgetSelected signal
     PE->>PE: setTargetWidget(widget)
     OI->>OI: selectItemForWidget(widget)
-```text
+```
 
 ### Fluxo de Undo/Redo
 
@@ -210,7 +210,7 @@ sequenceDiagram
     U->>US: undo()
     US->>C: undo()
     C->>C: revert action
-```text
+```
 
 ### Fluxo de Preview
 
@@ -228,7 +228,7 @@ sequenceDiagram
     PM->>SB: execute script via QProcess
     SB->>PM: stdout/stderr
     PM->>MW: previewOutput signal
-```text
+```
 
 ### Fluxo de Save/Load
 
@@ -248,7 +248,7 @@ sequenceDiagram
     PS->>F: createWidget from JSON
     F->>PS: deserialize properties
     PS->>MW: return widget list
-```text
+```
 
 ## Detalhamento de Classes
 
@@ -584,4 +584,3 @@ Utilizado pelo Showbox core para construir widgets complexos passo-a-passo, sepa
 ### Abstract Factory (AbstractToolbox)
 
 Permite diferentes implementações de toolbox (Classic, Tree) intercambiáveis através de interface comum.
-````

@@ -8,7 +8,7 @@ Aprenda a criar interfaces complexas com o sistema de layouts do Showbox.
 
 O Showbox usa um sistema hierárquico de layouts:
 
-````text
+```text
 ┌────────────────────────────────────────────────────────────┐
 │ NÍVEL 1: Layout Vertical Principal (coluna)                │
 │                                                            │
@@ -33,7 +33,7 @@ O Showbox usa um sistema hierárquico de layouts:
 │  │  └──────────────┘                                   │   │
 │  └─────────────────────────────────────────────────────┘   │
 └────────────────────────────────────────────────────────────┘
-```text
+```
 
 ---
 
@@ -49,7 +49,7 @@ step horizontal
 add label "Coluna 2"
 step horizontal
 add label "Coluna 3"
-```text
+```
 
 **Resultado:**
 
@@ -57,7 +57,7 @@ add label "Coluna 3"
 ┌──────────┐ ┌──────────┐ ┌──────────┐
 │ Coluna 1 │ │ Coluna 2 │ │ Coluna 3 │
 └──────────┘ └──────────┘ └──────────┘
-```text
+```
 
 ---
 
@@ -71,7 +71,7 @@ step vertical
 add label "Linha 2"
 step vertical
 add label "Linha 3"
-```text
+```
 
 **Resultado:**
 
@@ -85,7 +85,7 @@ add label "Linha 3"
 ┌──────────┐
 │ Linha 3  │
 └──────────┘
-```text
+```
 
 ---
 
@@ -99,7 +99,7 @@ Container invisível para agrupar widgets.
 add frame frm_nome [vertical|horizontal] [estilo...]
 # ... widgets ...
 end frame
-```text
+```
 
 ### groupbox
 
@@ -109,7 +109,7 @@ Container com título visível.
 add groupbox "Título" grp_nome [vertical|horizontal]
 # ... widgets ...
 end groupbox
-```text
+```
 
 > **Importante:** O layout padrão dentro de containers é **horizontal**.
 > Use `vertical` se quiser empilhar widgets.
@@ -141,7 +141,7 @@ end frame
 
 show
 EOF
-```text
+```
 
 ---
 
@@ -187,7 +187,7 @@ end tabs
 
 show
 EOF
-```text
+```
 
 **Resultado Visual:**
 
@@ -204,7 +204,7 @@ EOF
 │ [Sair]       │                                         │
 │              │                                         │
 └──────────────┴─────────────────────────────────────────┘
-```text
+```
 
 ---
 
@@ -247,7 +247,7 @@ add pushbutton "Fechar" btn_close exit default
 
 show
 EOF
-```text
+```
 
 ---
 
@@ -302,7 +302,7 @@ end frame
 
 show
 EOF
-```text
+```
 
 ---
 
@@ -329,7 +329,7 @@ add frame frm horizontal
 add pushbutton "Botão"
 add stretch
 end frame
-```text
+```
 
 ### 2. Defina Larguras Mínimas
 
@@ -338,7 +338,7 @@ add frame sidebar vertical
 set sidebar stylesheet "min-width: 200px;"
 # ...
 end frame
-```text
+```
 
 ### 3. Use --hidden para Interfaces Complexas
 
@@ -349,7 +349,7 @@ showbox --hidden << 'EOF'
 # Só mostrar quando pronto
 show
 EOF
-```text
+```
 
 ### 4. Evite Aninhamento Excessivo
 
@@ -359,7 +359,7 @@ Prefira:
 add label "Widget 1"
 step horizontal
 add label "Widget 2"
-```text
+```
 
 Em vez de:
 
@@ -372,7 +372,7 @@ add frame inner2 vertical
 add label "Widget 2"
 end frame
 end frame
-```text
+```
 
 ---
 
@@ -401,7 +401,7 @@ step horizontal
 add frame col2 vertical
 add label "Coluna 2"
 end frame
-```text
+```
 
 ---
 
@@ -409,4 +409,3 @@ end frame
 
 - [Funcionalidades Avançadas](advanced-features.md) - Stylesheets, comunicação bidirecional
 - [Resolução de Problemas](troubleshooting.md) - Erros comuns e soluções
-````

@@ -20,7 +20,7 @@ Criar um dashboard com:
 
 ## Código Completo
 
-````bash
+```bash
 #!/bin/bash
 #
 # Tutorial 05: Gráfico Dinâmico
@@ -124,7 +124,7 @@ while IFS='=' read -r widget valor; do
 done < "$FIFO_IN"
 
 echo "Dashboard encerrado"
-```text
+```
 
 ---
 
@@ -135,25 +135,25 @@ echo "Dashboard encerrado"
 ```bash
 add chart "Título" chart_nome
 set chart_nome data "Label1:Valor1;Label2:Valor2;..."
-```text
+```
 
 ### Adicionando Dados Dinamicamente
 
 ```bash
 set chart_nome append "NovaLabel:1500"
-```text
+```
 
 ### Atualizando Todos os Dados
 
 ```bash
 set chart_nome data "Norte:3000;Sul:4000;..."
-```text
+```
 
 ### Exportando como Imagem
 
 ```bash
 set chart_nome export "/caminho/grafico.png"
-```text
+```
 
 ### Detectando Clique em Fatia
 
@@ -161,13 +161,13 @@ Evento emitido:
 
 ```text
 chart_vendas.slice["Norte"]=2500
-```text
+```
 
 Processamento:
 
 ```bash
 REGIAO=$(echo "$widget" | sed 's/.*\["\(.*\)"\].*/\1/')
-```text
+```
 
 ---
 
@@ -180,7 +180,7 @@ Para gráficos de barras ou linha, configure o eixo:
 ```bash
 set chart_nome axis "horizontal"  # Barras
 set chart_nome axis "vertical"    # Linha/Área
-```text
+```
 
 ---
 
@@ -198,11 +198,11 @@ set chart_nome axis "vertical"    # Linha/Área
       │ set chart append...              │ btn_refresh=clicked
       │ set chart export...              │
       ▼                                  ▼
-```text
+```
 
 ---
 
-## Parabéns!
+## Parabéns
 
 Você completou todos os tutoriais básicos e intermediários!
 
@@ -211,4 +211,3 @@ Você completou todos os tutoriais básicos e intermediários!
 - Explore a [Referência de Widgets](../widgets-reference.md) completa
 - Aprenda mais sobre [Stylesheets](../advanced-features.md#stylesheets-qt)
 - Consulte [Boas Práticas](../best-practices.md) para projetos maiores
-````

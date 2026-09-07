@@ -8,13 +8,13 @@ back-end principal, sucessor espiritual do Kommander.
 
 ## Desenvolvimento
 
-````sh
+```sh
 just doctor
 just setup       # Debian/Ubuntu e derivados; instala dependências com sudo
 just build
 just test
 just run-studio
-```text
+```
 
 Em uma máquina sem just, comece com `bash tools/setup/debian.sh`.
 Just é opcional e não é instalado pelo setup.
@@ -39,4 +39,3 @@ Experimente `just demo` ou siga o [guia de ações Bash](docs/user/shell-actions
 - [Trabalho com agentes e worktrees](docs/development/worktrees.md)
 
 O histórico e os créditos GPLv3+ dos projetos de origem são preservados.
-````

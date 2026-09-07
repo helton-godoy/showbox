@@ -58,7 +58,7 @@ install_launcher() {
 		return 0
 	fi
 	printf 'Baixando launcher oficial do Trunk para %s ...\n' "${launcher}"
-	if ! curl -fsSL --max-time 60 --connect-timeout 10 "${LAUNCHER_URL}" -o "${launcher}.tmp"; then
+	if ! curl -fsSL --proto https --proto-redir https --max-time 60 --connect-timeout 10 "${LAUNCHER_URL}" -o "${launcher}.tmp"; then
 		printf 'Falha ao baixar o launcher. Verifique a conexão com %s.\n' "${LAUNCHER_URL}" >&2
 		rm -f "${launcher}.tmp"
 		exit 1

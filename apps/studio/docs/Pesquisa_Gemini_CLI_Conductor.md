@@ -27,7 +27,7 @@ O **Conductor** é um framework de gerenciamento de projetos integrado ao Showbo
 
 ### Uso Básico do Gemini CLI
 
-````bash
+```bash
 # Instalação global via npm
 npm install -g @google/gemini-cli
 
@@ -42,7 +42,7 @@ gemini analyze src/main.cpp
 
 # Geração de testes unitários
 gemini generate tests --file src/core/StudioController.cpp --framework gtest
-```text
+```
 
 ### Integração com Workflows do Conductor
 
@@ -61,7 +61,7 @@ gemini "Implemente o sistema de undo/redo seguindo o padrão Command"
 
 # Fase 4: Verificação de cobertura
 gemini analyze coverage --threshold 80
-```text
+```
 
 ## Opções Avançadas
 
@@ -87,7 +87,7 @@ gemini analyze coverage --threshold 80
     "verbose": true
   }
 }
-```text
+```
 
 ### Workflows Avançados do Conductor
 
@@ -109,7 +109,7 @@ gemini mcp connect git --repo showbox-studio
 
 # Uso em workflows de automação
 gemini "Analise as mudanças no último commit" --context git
-```text
+```
 
 ### Conductor + Ferramentas de Desenvolvimento
 
@@ -120,14 +120,14 @@ gemini "Analise as mudanças no último commit" --context git
 
 ## Limitações
 
-### Gemini CLI
+### Limitações do Gemini CLI
 
 - **Dependência de Rede:** Requer conexão estável com APIs do Google
 - **Limites de Uso:** Restrições de rate limiting (60/min, 1000/dia gratuito)
 - **Contexto Limitado:** Mesmo com 1M tokens, projetos muito grandes podem exceder
 - **Segurança:** Dados enviados para servidores Google (considerar compliance)
 
-### Sistema Conductor
+### Limitações do Sistema Conductor
 
 - **Complexidade Inicial:** Curva de aprendizado para workflows rigorosos
 - **Dependência de Qt6:** Limitado a ecossistemas C++/Qt
@@ -169,7 +169,7 @@ cd /home/helton/git/showbox-studio
 mkdir build && cd build
 cmake .. -DSHOWBOX_ROOT=../showbox
 make -j$(nproc)
-```text
+```
 
 ### 2. Configuração Inicial
 
@@ -183,7 +183,7 @@ gemini config set mcp.enabled true
 
 # Inicializar projeto Conductor
 # (Seguir workflow.md para setup inicial)
-```text
+```
 
 ### 3. Workflow Integrado
 
@@ -202,7 +202,7 @@ gemini generate tests --feature "real_time_preview" --output tests/tst_PreviewMa
 git add .
 git commit -m "feat(ui): Implement real-time preview system"
 git notes add -m "Task: Real-time preview\\nTests: Generated with Gemini CLI\\nCoverage: 85%"
-```text
+```
 
 ## Recomendações de Otimização
 
@@ -220,7 +220,7 @@ git notes add -m "Task: Real-time preview\\nTests: Generated with Gemini CLI\\nC
      run: gemini analyze --coverage --lint
    - name: Conductor Checkpoint
      run: ./conductor/scripts/checkpoint.sh
-````
+   ```
 
 4. **Templates de Prompt:** Crie templates específicos para o ecossistema Showbox:
 

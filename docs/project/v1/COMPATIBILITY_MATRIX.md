@@ -48,12 +48,12 @@ part of the 1.0 compatibility promise.
 Build the historical executable outside the source tree and enable its CTest
 comparison explicitly:
 
-````sh
+```sh
 tests/compatibility/build_legacy_oracle.sh "$PWD" "$PWD/build-legacy-oracle"
 cmake -S . -B build -DSHOWBOX_LEGACY_ORACLE="$PWD/build-legacy-oracle/bin/showbox-legacy"
 cmake --build build --parallel
 ctest --test-dir build -R legacy_golden_contract --output-on-failure
-```text
+```
 
 The stable CMake targets never compile or link legacy sources.
 
@@ -64,4 +64,3 @@ The stable CMake targets never compile or link legacy sources.
 - Table edit: `name[row][column]=value`.
 - Calendar: ISO date in `name=YYYY-MM-DD` form.
 - `query` and apply actions flush stdout before any dialog exit.
-````
