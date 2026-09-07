@@ -29,6 +29,15 @@ jobs:
         run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
       - name: Build
         run: cmake --build build --parallel 2
+      - name: Validate install tree
+        run: |
+          rm -rf /tmp/install
+          DESTDIR=/tmp/install cmake --install build --prefix /usr
+          test -x /tmp/install/usr/bin/showbox
+          test -x /tmp/install/usr/bin/showbox-studio
+          test -f /tmp/install/usr/share/applications/showbox.desktop
+          test -f /tmp/install/usr/share/applications/showbox-studio.desktop
+          test -f /tmp/install/usr/share/icons/hicolor/scalable/apps/showbox-studio.svg
       - name: Unit and integration tests
         env:
           QT_QPA_PLATFORM: offscreen
