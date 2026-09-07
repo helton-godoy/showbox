@@ -25,6 +25,9 @@ Requires:       qt6-qtsvg
 # Enable automatic dependency detection
 AutoReqProv:    yes
 
+# Falhar explicitamente quando algum arquivo instalado ficar sem dono.
+%define _unpackaged_files_terminate_build 1
+
 %description
 ShowBox is a Qt6-based tool that provides GUI widgets for shell scripts.
 It allows creating dialogs, forms, and interactive interfaces directly
@@ -36,22 +39,35 @@ Features:
 - Theme support (light/dark/system)
 - Resizable windows
 
+%package studio
+Summary: Visual editor for ShowBox interfaces
+Requires: showbox
+
+%description studio
+Showbox Studio is a visual editor for designing ShowBox dialogs and
+interfaces for the showbox engine. It provides a canvas, property
+editor, action editor and project files (sbp format).
+
 %prep
 %autosetup
 
 %build
-%cmake -DSHOWBOX_BUILD_STUDIO=OFF
+%cmake
 %cmake_build
 
 %install
 %cmake_install
-install -D -m 644 packaging/rpm/showbox.desktop %{buildroot}%{_datadir}/applications/showbox.desktop
 
 %files
 %license packaging/deb/debian/copyright
 %doc README.md
 %{_bindir}/showbox
 %{_datadir}/applications/showbox.desktop
+
+%files studio
+%{_bindir}/showbox-studio
+%{_datadir}/applications/showbox-studio.desktop
+%{_datadir}/icons/hicolor/scalable/apps/showbox-studio.svg
 
 %changelog
 * Mon Jan 12 2026 Helton Godoy <helton@example.com> - 1.0.0-1
