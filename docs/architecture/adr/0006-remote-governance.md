@@ -31,7 +31,7 @@ true`), conservando seu histórico como referência de arquivo.
 5. **Release nesta etapa**: `release.yml` é exercitado via `workflow_dispatch`
    gerando artefatos e smokes, mas o job `release` só roda em tags — sem tag
    criada, **nenhum release público nem draft** é produzido na SB-006. O primeiro
-   draft associado a uma tag real fica para a SB-007.
+   draft associado a uma tag real fica para a SB-008.
 6. **Transição e arquivamento**: primeiro `main` consolidada e CI verde; depois
    READMEs de redirecionamento nos repositórios antigos e arquivamento por API.
    Branches obsoletas (`develop`, `bugfix/quick-fixes`) são removidas somente

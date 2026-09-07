@@ -41,7 +41,7 @@ operacionalizadas por proteções configuradas no GitHub (ver ADR 0006 e
 - Regra de proteção de tags com padrão `v*`: proíbe sobrescrita
   (`non_fast_forward`) e exclusão (`deletion`), aplicada por ruleset
   `tags-v-protection` (validação em `just doctor`).
-- O primeiro release é um **draft** (nada é publicado publicamente) até a SB-007
+- O primeiro release é um **draft** (nada é publicado publicamente) até a SB-008
   decidir a primeira versão pública com tag real.
 
 ## Proibição de force-push

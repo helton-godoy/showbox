@@ -68,7 +68,15 @@ install_launcher() {
 		exit 1
 	fi
 	local actual_sha256
-	actual_sha256="$(sha256sum "${launcher}.tmp" | cut -d' ' -f1)"
+	if command -v sha256sum >/dev/null 2>&1; then
+		actual_sha256="$(sha256sum "${launcher}.tmp" | awk '{print $1}')"
+	elif command -v shasum >/dev/null 2>&1; then
+		actual_sha256="$(shasum -a 256 "${launcher}.tmp" | awk '{print $1}')"
+	else
+		printf 'Nenhuma ferramenta SHA-256 disponível (sha256sum ou shasum).\n' >&2
+		rm -f "${launcher}.tmp"
+		exit 1
+	fi
 	if [[ ${actual_sha256} != "${EXPECTED_LAUNCHER_SHA256}" ]]; then
 		printf 'ERRO: checksum do launcher não corresponde ao esperado.\n' >&2
 		printf '  Esperado: %s\n' "${EXPECTED_LAUNCHER_SHA256}" >&2
