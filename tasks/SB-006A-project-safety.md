@@ -73,10 +73,13 @@ Estado: concluída.
 
 ## Handoff
 
-- Base: `a966cb5`. Final da branch: `889ed81`.
+- Base: `a966cb5`. Final da branch: `a94c43d`.
 - Commits:
   - `889ed81` — fix(project): validação recursiva, abertura segura e save
     atômico (SB-006A) [código + testes].
+  - `6b9bba0` — docs(tasks): encerra SB-006A com handoff, testes e limitações.
+  - `a94c43d` — fix(project): rastreia alterações pelo estado limpo real da
+    pilha (SB-006A) [commit corretivo pós-revisão].
 - Arquivos alterados:
   - `libs/project/src/ProjectModel.cpp` — `validateActions`/`validateQueryTargets`
     recursam `children` no início (os `return` internos não pulam a descida);
@@ -99,10 +102,20 @@ Estado: concluída.
   diz que há comandos e quando `ActionEditor::actionsChanged` dispara (ações não
   geram comandos de undo); reset em save/open/demo. Critério mais preciso que o
   descrito inicialmente e sem modal espúrio na janela recém-aberta.
+- Revisão [#comentário P1]: o flag único zerado em save deixava a pilha ainda
+  não limpa, então uma nova edição não emitia `cleanChanged(false)` e o descarte
+  seguinte perdia a alteração. Corrigido em `a94c43d`:
+  - `hasUnsavedChanges()` = `m_actionsModified || !undoStack()->isClean()`.
+  - `markDocumentSaved()` = `undoStack()->setClean()` + zera `m_actionsModified`.
+  - Confirmação consulta as duas fontes reais; `closeEvent`/Open/Demo usam
+    `confirmDiscardIfModified()` (que chama `hasUnsavedChanges`).
+  - Teste novo `modifiedTrackingAcrossSaveAndEdit` cobre a sequência
+    editar→salvar→editar→fechar/abrir (e Undo de volta ao ponto salvo).
 - Testes executados (worktree SB-006A-project-safety):
   - `just build` — verde.
-  - `just test` — 23/23 verdes (incluindo 5 casos novos; o
-    `tst_ActionEditor::demoIsAvailableInStudio` roda sem modal graças ao flag).
+  - `just test` — 23/23 verdes (incluindo 5 casos novos de modelo/serializer e
+    o `modifiedTrackingAcrossSaveAndEdit` da sequência editar→salvar→editar;
+    o `tst_ActionEditor::demoIsAvailableInStudio` roda sem modal).
   - `just check` — verde (`git diff --check`, `bash -n`, ShellCheck).
   - Oráculo legado: não executado — não houve mudança de protocolo/runtime;
     `fromJson` v2 valida tipos porém preserva a forma do JSON emitido.
