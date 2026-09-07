@@ -1,0 +1,7 @@
+# LeakSanitizer suppressions para o CI (job sanitizers).
+#
+# Leaks de fontconfig (libfontconfig) reportados ao final do processo quando o
+# Qt renderiza fontes offscreen (ex.: exportação de QChart em tst_parser). São
+# leaks de terceiros do próprio fontconfig/Qt no shutdown, não do código da
+# suíte; o teste passa e o vazamento é atribuído ao FcFontMatch.
+leak:FcFontMatch

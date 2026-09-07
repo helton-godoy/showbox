@@ -4,9 +4,9 @@
 # Reproduz a interface completa de demonstração de widgets
 #
 
-SHOWBOX_BIN="${SHOWBOX_BIN:-./src/code/showbox/bin/showbox}"
+SHOWBOX_BIN="${SHOWBOX_BIN:-./apps/runtime/bin/showbox}"
 
-$SHOWBOX_BIN -r <<EODEMO
+${SHOWBOX_BIN} -r <<EODEMO
 # === Tabs principais (laterais à esquerda) ===
 add tabs "Main Tabs" maintabs left
 

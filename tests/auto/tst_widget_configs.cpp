@@ -1,5 +1,5 @@
 #include <QtTest>
-// We expect this header to exist in libs/showbox-ui/include
+// We expect this header to exist in libs/ui/include
 #include <WidgetConfigs.h>
 
 class TestWidgetConfigs : public QObject

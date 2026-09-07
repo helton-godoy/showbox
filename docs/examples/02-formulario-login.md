@@ -10,6 +10,7 @@ Criando um formulário com campos de entrada e validação.
 ## Objetivo
 
 Criar um formulário de login com:
+
 - Campo de usuário
 - Campo de senha (oculto)
 - Checkbox "Lembrar-me"
@@ -64,18 +65,18 @@ case $? in
     1)
         # Usuário clicou em "Entrar"
         eval "$OUTPUT"
-        
+
         echo "==== Dados Recebidos ===="
         echo "Usuário: $txt_user"
         echo "Senha: (${#txt_pass} caracteres)"
         echo "Lembrar: $( [ "$chk_remember" = "1" ] && echo "Sim" || echo "Não" )"
-        
+
         # Validação simples
         if [ -z "$txt_user" ] || [ -z "$txt_pass" ]; then
             echo "Erro: Campos obrigatórios não preenchidos"
             exit 1
         fi
-        
+
         echo "Login processado com sucesso!"
         ;;
     *)

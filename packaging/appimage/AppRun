@@ -1,0 +1,12 @@
+#!/bin/bash
+set -eo pipefail
+
+HERE="$(dirname "$(readlink -f "${0}")")"
+
+export QT_PROPORTIONAL_FONTS=1
+export QT_QPA_PLATFORMTHEME="xdgdesktopportal"
+
+export LD_LIBRARY_PATH="$HERE/usr/lib:$LD_LIBRARY_PATH"
+export QT_PLUGIN_PATH="$HERE/usr/plugins"
+
+exec "$HERE/usr/bin/showbox-studio" "$@"

@@ -1,51 +1,19 @@
-# Status da Implementação - Showbox
+# Status da implementação
 
-> Relatório detalhado do status de implementação do Showbox comparado com a referência do Dialogbox.
+**Atualizado em:** 16/08/2026
+**Linha de integração:** `integration/showbox-v1`
 
-**Data:** 15/01/2026  
-**Versão:** 1.1 (em refatoração)
+| Área | Estado atual |
+| --- | --- |
+| Build moderno | CMake explícito; compila biblioteca, core, CLI e testes |
+| Parser | Moderno ativo; quoting, aliases e comandos principais cobertos |
+| Widgets | Catálogo documentado criado por `showbox-ui` |
+| Runtime | stdin no event loop Qt; widgets manipulados na thread GUI |
+| Testes | 9 suítes unitárias, contrato CLI e comparação dourada opcional com o legado |
+| Backends | Smoke tests aprovados em X11/Xvfb e Wayland/Weston |
+| Pacotes | DEB, RPM e AppImage gerados; plugins Wayland incluídos no AppImage |
 
----
-
-## Resumo Executivo
-
-| Categoria              | Status          | Progresso |
-|------------------------|-----------------|-----------|
-| **Parser V1**          | 🟡 Quarentena   | 100% (Legado)|
-| **Parser V2**          | 🔴 Deprecado    | Incompleto|
-| **Target Arch**        | 🟢 Iniciado     | 10%       |
-| **Widgets Padrão**     | 🟡 Migração     | 5% (PushButton)|
-| **Testes**             | 🟢 Iniciado     | 10%       |
-
-**Legenda:** 🟢 Completo/Ativo | 🟡 Parcial/Legado | 🔴 Deprecado/Ausente
-
----
-
-## 1. Arquitetura
-
-### Legacy V1 (Dialogbox Monolith)
-- **Status:** 🟡 Mantido para referência em `src/code/showbox/legacy/v1_monolith`
-- **Build:** Target `showbox-legacy` (QMake)
-
-### Legacy V2 (Tentativa anterior)
-- **Status:** 🔴 Deprecado em `src/code/showbox/legacy/v2_incomplete`
-- **Nota:** Código incompleto, não deve ser usado como referência.
-
-### Target Architecture (Golden Sample)
-- **Status:** 🟢 Ativo em `src/code/showbox/core` e `libs/showbox-ui`
-- **Padrões:**
-  - **Builder Pattern:** `CLIBuilder` (implementado)
-  - **Passive View:** `PushButtonWidget` (implementado)
-  - **Modular Parser:** `ParserMain` (implementado)
-
----
-
-## 2. Widgets (Migração para Lib)
-
-| Widget        | Passive View | Builder | Testes | Status |
-|---------------|--------------|---------|--------|--------|
-| `pushbutton`  | ✓            | ✓       | ✓      | 🟢     |
-| `label`       | 🔴           | 🔴      | 🔴     | Pendente |
-| ...           | ...          | ...     | ...    | Pendente |
-
----
+Os diretórios `legacy/v1_monolith` e `legacy/v2_incomplete` permanecem somente
+como referência histórica e não participam do alvo moderno. O status detalhado,
+gates restantes e regras para múltiplos agentes ficam em
+[`project/v1/STATUS.md`](project/v1/STATUS.md).

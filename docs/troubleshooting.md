@@ -74,14 +74,14 @@ end frame
 **Causas possíveis:**
 
 1. **Falta `show`:**
-   
+
    ```bash
    # Adicione no final do script
    show
    ```
 
 2. **Widget dentro de container fechado:**
-   
+
    ```bash
    add groupbox "Grupo" grp
    add label "Dentro"
@@ -90,7 +90,7 @@ end frame
    ```
 
 3. **Widget oculto:**
-   
+
    ```bash
    # Verificar se não há hide
    show nome_widget
@@ -340,7 +340,7 @@ add label "/path/to/image.svg" lbl_logo picture
 Não há modo verbose nativo. Para debug:
 
 1. **Teste comandos interativamente:**
-   
+
    ```bash
    showbox
    # Digite comandos manualmente e veja o resultado
@@ -349,13 +349,13 @@ Não há modo verbose nativo. Para debug:
    ```
 
 2. **Log de comandos:**
-   
+
    ```bash
    tee /tmp/showbox_debug.log | showbox
    ```
 
 3. **Verifique saída:**
-   
+
    ```bash
    showbox < comandos.txt 2>&1 | tee /tmp/output.log
    ```

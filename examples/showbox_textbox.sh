@@ -4,24 +4,24 @@
 # Demonstrates the textbox widget with normal, password and placeholder modes
 #
 
-SHOWBOX_BIN="${SHOWBOX_BIN:-./src/code/showbox/bin/showbox}"
+#SHOWBOX_BIN="${SHOWBOX_BIN:-./apps/runtime/bin/showbox}"
 
-while IFS=$'=' read key value
-do
-    case $key in
-        username)
-            echo "Username: $value"
-            ;;
-        password)
-            echo "Password: [hidden]"
-            ;;
-        email)
-            echo "Email: $value"
-            ;;
-    esac
+while IFS=$'=' read key value; do
+	case ${key} in
+	username)
+		echo "Username: ${value}"
+		;;
+	password)
+		echo "Password: [hidden]"
+		;;
+	email)
+		echo "Email: ${value}"
+		;;
+	esac
 done < <(
 
-$SHOWBOX_BIN <<EODEMO
+#	${SHOWBOX_BIN} <<EODEMO
+showbox <<EODEMO
 add label "<b>Login Form</b>" title
 set title stylesheet "qproperty-textInteractionFlags: NoTextInteraction;"
 

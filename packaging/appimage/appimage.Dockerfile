@@ -7,13 +7,20 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update -qq && apt-get install -qqy --no-install-recommends \
     # Build tools
     build-essential \
-    qmake6 \
+    cmake \
+    git \
+    python3 \
     wget \
+    ca-certificates \
     file \
+    xvfb \
+    xauth \
+    weston \
     # FUSE for AppImage
     libfuse2 \
     # Qt6 development packages
     qt6-base-dev \
+    qt6-wayland \
     qt6-charts-dev \
     libqt6charts6-dev \
     libqt6svg6-dev \
@@ -40,9 +47,6 @@ RUN wget -q https://github.com/linuxdeploy/linuxdeploy/releases/download/continu
     && chmod +x linuxdeploy-plugin-qt-x86_64.AppImage
 
 # Set environment for Qt
-ENV QMAKE=/usr/bin/qmake6
-ENV QT_SELECT=qt6
-
 WORKDIR /build
 
 # Default command: build AppImage

@@ -4,9 +4,10 @@
 # Demonstrates horizontal and vertical separators
 #
 
-SHOWBOX_BIN="${SHOWBOX_BIN:-./src/code/showbox/bin/showbox}"
+# SHOWBOX_BIN="${SHOWBOX_BIN:-./apps/runtime/bin/showbox}"
 
-$SHOWBOX_BIN <<EODEMO
+# ${SHOWBOX_BIN} <<EODEMO
+showbox <<EODEMO
 add label "<b>Separator Demo</b>" title
 set title stylesheet "qproperty-textInteractionFlags: NoTextInteraction;"
 

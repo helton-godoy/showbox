@@ -47,13 +47,13 @@ echo 'add label "Olá, Showbox!" | add pushbutton "Fechar" exit' | showbox
 
 ## ✨ Por que Showbox?
 
-| Característica               | Showbox       | zenity      | kdialog        |
-| ---------------------------- | ------------- | ----------- | -------------- |
-| **Widgets Avançados**        | ✅ 20 tipos    | ⚠️ Limitado | ⚠️ Limitado    |
-| **Layouts Flexíveis**        | ✅ 3 níveis    | ❌           | ❌              |
-| **Abas e Páginas**           | ✅             | ❌           | ❌              |
-| **Tabelas Editáveis**        | ✅             | ❌           | ❌              |
-| **Gráficos**                 | ✅             | ❌           | ❌              |
+| Característica               | Showbox        | zenity      | kdialog        |
+| ---------------------------- | -------------- | ----------- | -------------- |
+| **Widgets Avançados**        | ✅ 22 tipos    | ⚠️ Limitado | ⚠️ Limitado    |
+| **Layouts Flexíveis**        | ✅ 3 níveis    | ❌          | ❌             |
+| **Abas e Páginas**           | ✅             | ❌          | ❌             |
+| **Tabelas Editáveis**        | ✅             | ❌          | ❌             |
+| **Gráficos**                 | ✅             | ❌          | ❌             |
 | **Stylesheets CSS**          | ✅             | ⚠️ GTK      | ⚠️ Qt limitado |
 | **Comunicação Bidirecional** | ✅ Pipes/FIFOs | ⚠️ Limitado | ⚠️ Limitado    |
 
@@ -78,7 +78,7 @@ echo 'add label "Olá, Showbox!" | add pushbutton "Fechar" exit' | showbox
 
 ## 🔗 Links Úteis
 
-- **Código-fonte**: [GitHub](https://github.com/seu-usuario/showbox)
+- **Código-fonte**: [GitHub](https://github.com/helton-godoy/showbox)
 - **Exemplos**: [examples/](../examples/)
 - **Man page**: `man showbox`
 
@@ -90,4 +90,4 @@ Showbox é software livre distribuído sob a [GNU GPL v3](../COPYING).
 
 ---
 
-*Documentação versão 1.0 | Atualizada em Janeiro 2026*
+_Documentação versão 1.0 | Atualizada em Janeiro 2026_

@@ -22,7 +22,7 @@ graph TD
     end
 
     subgraph "Showbox Shared Ecosystem"
-        Lib[libs/showbox-ui]
+        Lib[libs/ui]
     end
 
     CLI --> Lib
@@ -36,25 +36,25 @@ graph TD
 Para manter a compatibilidade com o sistema de empacotamento existente (`packaging/deb`, `packaging/rpm`, etc.), adotamos uma abordagem de build duplo durante a transição:
 
 1.  **Build Legado (QMake):**
-    *   Mantido em `src/code/showbox/showbox.pro`.
-    *   Configurado para incluir arquivos fonte (`SOURCES`) e cabeçalhos (`HEADERS`) diretamente da pasta `libs/showbox-ui` usando caminhos relativos (`../../../libs/...`).
-    *   **Garante:** Que os pacotes `.deb`, `.rpm`, `.AppImage` continuem sendo gerados sem alteração nos scripts de CI/CD.
+    - Mantido em `apps/runtime/showbox.pro`.
+    - Configurado para incluir arquivos fonte (`SOURCES`) e cabeçalhos (`HEADERS`) diretamente da pasta `libs/ui` usando caminhos relativos (`../../../libs/...`).
+    - **Garante:** Que os pacotes `.deb`, `.rpm`, `.AppImage` continuem sendo gerados sem alteração nos scripts de CI/CD.
 
 2.  **Build Moderno (CMake):**
-    *   Configurado na raiz (`CMakeLists.txt`) e em `libs/showbox-ui`.
-    *   Trata `showbox-ui` como uma biblioteca estática real.
-    *   Usado para o desenvolvimento do **Showbox Studio** e testes unitários.
+    - Configurado na raiz (`CMakeLists.txt`) e em `libs/ui`.
+    - Trata `showbox-ui` como uma biblioteca estática real.
+    - Usado para o desenvolvimento do **Showbox Studio** e testes unitários.
 
 ---
 
 ## 3. Log de Migração de Componentes
 
-Este registro rastreia quais componentes foram movidos do monólito (`src/code/showbox`) para a biblioteca (`libs/showbox-ui`).
+Este registro rastreia quais componentes foram movidos do monólito (`apps/runtime`) para a biblioteca (`libs/ui`).
 
-| Componente | Data | Motivo da Migração | Dependências |
-| :--- | :--- | :--- | :--- |
-| **IconHelper** | 14/01/2026 | Utilitário independente necessário para UI. | `Logger` (Moveu junto) |
-| **Logger** | 14/01/2026 | Dependência direta de `IconHelper` e usada globalmente. | Nenhuma (Qt Core) |
+| Componente     | Data       | Motivo da Migração                                      | Dependências           |
+| :------------- | :--------- | :------------------------------------------------------ | :--------------------- |
+| **IconHelper** | 14/01/2026 | Utilitário independente necessário para UI.             | `Logger` (Moveu junto) |
+| **Logger**     | 14/01/2026 | Dependência direta de `IconHelper` e usada globalmente. | Nenhuma (Qt Core)      |
 
 ---
 
@@ -66,11 +66,11 @@ Atualmente, o Showbox constrói widgets "on-the-fly" enquanto lê o texto. Isso 
 
 **Solução:** Implementar o `ShowboxBuilder`.
 
-*   **Intenção:** Separar a construção de um objeto complexo da sua representação.
-*   **Aplicação:**
-    *   O CLI lê `add pushbutton "OK" btn_ok` -> Chama `builder->createButton("OK", "btn_ok")`.
-    *   O Studio recebe um Drag & Drop -> Chama `builder->createButton("OK", "btn_ok")`.
-*   **Benefício:** Garante que a inicialização de propriedades, estilos padrão e conexões de sinais internos sejam idênticas em ambos os apps.
+- **Intenção:** Separar a construção de um objeto complexo da sua representação.
+- **Aplicação:**
+  - O CLI lê `add pushbutton "OK" btn_ok` -> Chama `builder->createButton("OK", "btn_ok")`.
+  - O Studio recebe um Drag & Drop -> Chama `builder->createButton("OK", "btn_ok")`.
+- **Benefício:** Garante que a inicialização de propriedades, estilos padrão e conexões de sinais internos sejam idênticas em ambos os apps.
 
 ### 4.2. Passive View (MVP - Model View Presenter)
 
@@ -78,10 +78,10 @@ Os Widgets Qt atuais contêm lógica de execução de shell script (ex: `system(
 
 **Solução:** Tornar os Widgets "Passivos".
 
-*   **View (Widget):** Apenas exibe dados e emite sinais Qt puros (`signal: clicked()`). Não sabe o que é "Shell Script".
-*   **Presenter (Controller):**
-    *   No **CLI**: O Presenter conecta `clicked()` a uma função que escreve no stdout ou executa um comando.
-    *   No **Studio**: O Presenter conecta `clicked()` a uma função que seleciona o widget no Property Editor.
+- **View (Widget):** Apenas exibe dados e emite sinais Qt puros (`signal: clicked()`). Não sabe o que é "Shell Script".
+- **Presenter (Controller):**
+  - No **CLI**: O Presenter conecta `clicked()` a uma função que escreve no stdout ou executa um comando.
+  - No **Studio**: O Presenter conecta `clicked()` a uma função que seleciona o widget no Property Editor.
 
 ---
 

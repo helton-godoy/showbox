@@ -1,0 +1,3 @@
+**Diretório `man`:**
+
+O diretório `man` é dedicado ao armazenamento do manual gerado pelo `pandoc`, permitindo seu acesso posterior por meio do comando `man showbox` no terminal do sistema operacional. Além disso, uma versão em formato Markdown será mantida, proporcionando um formato acessível e editável para revisão pelos desenvolvedores, que servirá como entrada para futuras iterações do manual exibido pelo comando `man`. Esse diretório garante a disponibilidade do manual para consultas rápidas e eficientes, facilitando a integração da documentação técnica no ambiente de desenvolvimento e promovendo uma experiência de usuário mais produtiva.

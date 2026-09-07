@@ -10,6 +10,7 @@ Criando uma interface com sidebar e abas.
 ## Objetivo
 
 Criar um painel de controle profissional com:
+
 - Menu lateral (sidebar) fixo
 - Área principal com abas
 - Layout responsivo

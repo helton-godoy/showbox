@@ -1,57 +1,79 @@
+#include <CLIBuilder.h>
+#include <ParserMain.h>
 #include <QApplication>
+#include <QThread>
 #include <QTimer>
-#include <ShowboxBuilder.h>
-#include <WidgetConfigs.h>
-#include <QLayout>
 #include <QWidget>
+#include <ShowboxBuilder.h>
+#include <iostream>
+#include <string>
 
-using namespace Showbox::Models;
+// Thread dedicada apenas para ler do STDIN sem bloquear a GUI
+class StdinReader : public QThread {
+  Q_OBJECT
+signals:
+  void lineRead(const QString &line);
+  void finishedReading();
 
-int main(int argc, char *argv[])
-{
-    QApplication app(argc, argv);
-
-    ShowboxBuilder builder;
-
-    // 1. Criar a Janela Principal
-    WindowConfig winConfig;
-    winConfig.title = "Showbox Modern CLI PoC";
-    winConfig.width = 600;
-    winConfig.height = 400;
-    QWidget *window = builder.buildWindow(winConfig);
-
-    // 2. Configurar o Layout Vertical Principal
-    // buildWindow já cria um QVBoxLayout padrão.
-    QLayout *layout = window->layout();
-    if (layout) {
-        layout->setSpacing(10);
-        layout->setContentsMargins(20, 20, 20, 20);
+public:
+  void run() override {
+    std::string line;
+    while (std::getline(std::cin, line)) {
+      emit lineRead(QString::fromStdString(line));
     }
+    emit finishedReading();
+  }
+};
 
-    // 3. Adicionar Widgets
-    LabelConfig lblConfig;
-    lblConfig.text = "<b>Bem-vindo à Nova Arquitetura Showbox</b>";
-    layout->addWidget(builder.buildLabel(lblConfig));
+int main(int argc, char *argv[]) {
+  QApplication app(argc, argv);
 
-    LineEditConfig leConfig;
-    leConfig.placeholder = "Digite algo aqui...";
-    layout->addWidget(builder.buildLineEdit(leConfig));
-
-    ButtonConfig btnConfig;
-    btnConfig.text = "Executar Ação";
-    btnConfig.name = "btn_action";
-    layout->addWidget(builder.buildButton(btnConfig));
-    
-    ProgressBarConfig pbConfig;
-    pbConfig.value = 75;
-    layout->addWidget(builder.buildProgressBar(pbConfig));
-
-    // O PoC deve fechar após 2 segundos se em modo CI para não travar o build
-    if (qEnvironmentVariableIsSet("CI")) {
-        QObject::connect(&app, &QApplication::aboutToQuit, [](){});
-        QTimer::singleShot(2000, &app, &QApplication::quit);
+  bool keepOpen = false;
+  for (int i = 1; i < argc; ++i) {
+    if (QString(argv[i]) == "--keep-open") {
+      keepOpen = true;
     }
+  }
 
-    window->show();
-    return app.exec();
+  ShowboxBuilder builder;
+  ParserMain parser(&builder);
+
+  // Conectar showRequested para mostrar janelas
+  QObject::connect(&parser, &ParserMain::showRequested, [&]() {
+    for (QWidget *widget : QApplication::topLevelWidgets()) {
+      if (!widget->isHidden()) {
+        widget->raise();
+        widget->activateWindow();
+      } else {
+        widget->show();
+      }
+    }
+  });
+
+  StdinReader reader;
+
+  // Conectar leitura (Thread) -> Processamento (Main Thread)
+  // O Qt::QueuedConnection (padrão entre threads) garante que o lambda
+  // rode na thread principal, onde 'parser' vive.
+  QObject::connect(&reader, &StdinReader::lineRead, &parser,
+                   [&](const QString &line) {
+                     QString qline = line.trimmed();
+                     if (!qline.isEmpty() && !qline.startsWith("#")) {
+                       parser.processLine(qline);
+                     }
+                   });
+
+  QObject::connect(&reader, &StdinReader::finishedReading, [&]() {
+    if (!keepOpen) {
+      app.quit();
+    }
+  });
+
+  reader.start();
+
+  int ret = app.exec();
+  reader.wait(); // Join thread to avoid destructive crash
+  return ret;
 }
+
+#include "poc_modern_cli.moc"

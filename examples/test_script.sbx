@@ -1,0 +1,36 @@
+# Teste de Integração Showbox V1 -> Modern Architecture
+
+# 1. Janela Principal
+add window "Integration Test" main_win width 400 height 600
+
+# 2. Tabs
+add tabs "MainTabs" tabs1
+  
+  # Page 1: Inputs
+  add page "Inputs" p1
+    add label "User Data" lbl1
+    add textbox "John Doe" username placeholder "Name"
+    add spinbox "Age" age minimum 18 maximum 99 value 30
+    add checkbox "Subscribe to newsletter" newsletter checked
+  end
+
+  # Page 2: Controls
+  add page "Controls" p2 horizontal
+    add button "Save" btn_save
+    add button "Cancel" btn_cancel
+  end
+
+end
+
+# 3. Runtime Interaction
+set text lbl1 "Modified Label"
+unset checked newsletter
+set value age 40
+
+# 4. Queries (Output to stdout)
+query username
+query age
+query newsletter
+
+# 5. Show Window
+show

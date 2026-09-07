@@ -7,9 +7,10 @@
 #
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-SHOWBOX_BIN="${SHOWBOX_BIN:-./src/code/showbox/bin/showbox}"
+# SHOWBOX_BIN="${SHOWBOX_BIN:-./apps/runtime/bin/showbox}"
 
-$SHOWBOX_BIN --resizable << 'EODEMO'
+# ${SHOWBOX_BIN} --resizable <<'EODEMO'
+showbox <<EODEMO
 set title "ShowBox - Painel de Controle"
 
 # === SIDEBAR ESQUERDA ===

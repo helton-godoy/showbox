@@ -8,6 +8,8 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update -qq && apt-get install -qqy \
     build-essential \
     cmake \
+    git \
+    python3 \
     qmake6 \
     qt6-base-dev \
     qt6-charts-dev \
@@ -42,6 +44,8 @@ RUN apt-get update -qq && apt-get install -qqy \
     curl \
     wget \
     pandoc \
+    clang-format \
+    doxygen \
     debhelper \
     && rm -rf /var/lib/apt/lists/*
 

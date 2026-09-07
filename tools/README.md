@@ -1,0 +1,3 @@
+**Diretório `tools`:**
+
+Este diretório é dedicado exclusivamente ao armazenamento de artefatos auxiliares essenciais para o ambiente de desenvolvimento. Ele abriga scripts especializados para a construção e configuração do ambiente de desenvolvimento, incluindo a criação de contêineres Docker, além de scripts para a construção, otimização e iniciação de ambientes de compilação e empacotamento nos formatos suportados pelo projeto. Adicionalmente, inclui outros scripts utilitários que atuam como ferramentas de suporte interno, com foco principal na manutenção e infraestrutura do ambiente de desenvolvimento, garantindo eficiência, automação e consistência nos processos de build e deploy.

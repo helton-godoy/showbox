@@ -4,19 +4,19 @@
 # Demonstrates the table widget with editable cells, headers and search
 #
 
-SHOWBOX_BIN="${SHOWBOX_BIN:-./src/code/showbox/bin/showbox}"
+# SHOWBOX_BIN="${SHOWBOX_BIN:-./apps/runtime/bin/showbox}"
 
-while IFS=$'=' read key value
-do
-    # Table cell edits are reported as table1[row][col]=value
-    if [[ "$key" =~ ^table1\[([0-9]+)\]\[([0-9]+)\]$ ]]; then
-        row="${BASH_REMATCH[1]}"
-        col="${BASH_REMATCH[2]}"
-        echo "Cell [$row][$col] changed to: $value"
-    fi
+while IFS=$'=' read key value; do
+	# Table cell edits are reported as table1[row][col]=value
+	if [[ ${key} =~ ^table1\[([0-9]+)\]\[([0-9]+)\]$ ]]; then
+		row="${BASH_REMATCH[1]}"
+		col="${BASH_REMATCH[2]}"
+		echo "Cell [${row}][${col}] changed to: ${value}"
+	fi
 done < <(
 
-$SHOWBOX_BIN <<EODEMO
+#	${SHOWBOX_BIN} <<EODEMO
+showbox <<EODEMO
 add label "<b>Data Table</b>" title
 set title stylesheet "qproperty-textInteractionFlags: NoTextInteraction;"
 

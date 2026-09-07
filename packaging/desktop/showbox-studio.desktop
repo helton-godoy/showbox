@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Showbox Studio
+Comment=Visual Editor for Showbox Dialogs
+Exec=showbox-studio
+Icon=showbox-studio
+Categories=Development;IDE;GUIDesigner;
+Terminal=false

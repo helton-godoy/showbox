@@ -3,14 +3,14 @@ Section: x11
 Priority: optional
 Maintainer: Helton Godoy <helton@example.com>
 Build-Depends: debhelper-compat (= 13),
-               qmake6,
+               cmake,
+               git,
+               python3 (>= 3.9),
                qt6-base-dev,
                qt6-charts-dev,
                libqt6charts6-dev,
                libqt6svg6-dev,
-               libqt6opengl6-dev,
-               libgl-dev,
-               libopengl-dev
+               libqt6opengl6-dev
 Standards-Version: 4.6.2
 Homepage: https://github.com/helton-godoy/showbox
 Rules-Requires-Root: no
@@ -30,3 +30,11 @@ Description: GUI widgets for shell scripts
   - Theme support (light/dark/system)
   - Resizable windows
   - Event-driven communication with scripts
+
+Package: showbox-studio
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, showbox
+Description: Visual editor for ShowBox interfaces
+ Showbox Studio is a visual editor for designing ShowBox dialogs and
+ interfaces for the showbox engine. It provides a canvas, property
+ editor, action editor and project files (sbp format).

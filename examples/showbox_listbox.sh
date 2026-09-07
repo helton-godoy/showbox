@@ -4,9 +4,10 @@
 # Demonstrates the listbox widget with items, selection and activation
 #
 
-SHOWBOX_BIN="${SHOWBOX_BIN:-./src/code/showbox/bin/showbox}"
+#SHOWBOX_BIN="${SHOWBOX_BIN:-./apps/runtime/bin/showbox}"
 
-$SHOWBOX_BIN <<EODEMO
+#${SHOWBOX_BIN} <<EODEMO
+showbox <<EODEMO
 add label "<b>Select items from the list:</b>" title
 set title stylesheet "qproperty-textInteractionFlags: NoTextInteraction;"
 

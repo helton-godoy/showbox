@@ -10,6 +10,7 @@ Criando gráficos interativos com atualização em tempo real.
 ## Objetivo
 
 Criar um dashboard com:
+
 - Gráfico de pizza interativo
 - Atualização dinâmica de dados
 - Exportação de imagem
@@ -157,11 +158,13 @@ set chart_nome export "/caminho/grafico.png"
 ### Detectando Clique em Fatia
 
 Evento emitido:
+
 ```
 chart_vendas.slice["Norte"]=2500
 ```
 
 Processamento:
+
 ```bash
 REGIAO=$(echo "$widget" | sed 's/.*\["\(.*\)"\].*/\1/')
 ```
@@ -173,6 +176,7 @@ REGIAO=$(echo "$widget" | sed 's/.*\["\(.*\)"\].*/\1/')
 O widget `chart` suporta automaticamente gráficos de pizza. Dados são interpretados como pares `label:valor`.
 
 Para gráficos de barras ou linha, configure o eixo:
+
 ```bash
 set chart_nome axis "horizontal"  # Barras
 set chart_nome axis "vertical"    # Linha/Área
