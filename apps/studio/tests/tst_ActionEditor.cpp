@@ -51,6 +51,7 @@ private slots:
         QVERIFY(editor);
         QVERIFY(editor->getActionsJson().contains("showbox_get VALUE entry"));
         QVERIFY(window.findChild<QPushButton *>("run"));
+        QVERIFY(window.hasUnsavedChanges());
     }
     void modifiedTrackingAcrossSaveAndEdit() {
         MainWindow window;

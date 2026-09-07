@@ -549,5 +549,6 @@ void MainWindow::onDemoClicked() {
   }
   m_inspector->updateHierarchy(m_canvas);
   m_controller->selectWidget(button);
+  m_actionsModified = true;
   statusBar()->showMessage("Demonstração criada. Use Executar aplicação ou Prévia visual.");
 }
