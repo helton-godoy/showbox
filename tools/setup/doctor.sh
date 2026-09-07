@@ -33,7 +33,7 @@ fi
 
 # --- Repositório remoto (helton-godoy/showbox) ---------------------------------
 repo="helton-godoy/showbox"
-expected_checks=("Showbox CI / build-test" "Showbox CI / sanitizers")
+expected_checks=("build-test" "sanitizers")
 check_protection() {
 	local branch="$1"
 	local payload

@@ -22,10 +22,10 @@ remotas dependiam de autorização do mantenedor (único usuário, conta única)
    preservando os SHAs da cadeia; tarefas entram por branches `feat/SB-*`
    integradas sequencialmente. Não há push direto de agentes.
 3. **Proteção de branches**: `main` e `integration/showbox-v1` com PR
-   obrigatório, branch atualizada antes do merge, required status checks do
-   `Showbox CI` (build-test e sanitizers), enforce admins, sem force-push e sem
-   exclusão. Aprovação humana em zero (repositório de conta única; garantia
-   técnica por PR + checks).
+   obrigatório, branch atualizada antes do merge, required status checks
+   `build-test` e `sanitizers` vinculados ao GitHub Actions (app_id 15368),
+   enforce admins, sem force-push e sem exclusão. Aprovação humana em zero
+   (repositório de conta única; garantia técnica por PR + checks).
 4. **Tags `v*`**: protegidas contra sobrescrita/exclusão; releases criados
    somente pelo fluxo do `release.yml`.
 5. **Release nesta etapa**: `release.yml` é exercitado via `workflow_dispatch`
