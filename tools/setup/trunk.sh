@@ -62,8 +62,7 @@ install_launcher() {
 		return 0
 	fi
 	printf 'Baixando launcher oficial do Trunk para %s ...\n' "${launcher}"
-	# NOSONAR S6506: --proto https --proto-redir https já impede redirecionamento para HTTP.
-	if ! curl -fsSL --proto https --proto-redir https --max-time 60 --connect-timeout 10 "${LAUNCHER_URL}" -o "${launcher}.tmp"; then
+	if ! curl -fsSL --proto https --proto-redir https --max-time 60 --connect-timeout 10 "${LAUNCHER_URL}" -o "${launcher}.tmp"; then # NOSONAR S6506: --proto https impede redirecionamento para HTTP (transporte já fixado)
 		printf 'Falha ao baixar o launcher. Verifique a conexão com %s.\n' "${LAUNCHER_URL}" >&2
 		rm -f "${launcher}.tmp"
 		exit 1
