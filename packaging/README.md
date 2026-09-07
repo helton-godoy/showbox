@@ -1,112 +1,80 @@
 # ShowBox Packaging
 
-Este diretório contém os scripts e configurações para empacotar o ShowBox em diferentes formatos de distribuição.
+Empacotamento do ShowBox em formatos de distribuição. Cada formato produz **dois
+pacotes**: `showbox` (motor) e `showbox-studio` (editor visual), evitando
+conflito de caminho e refletindo a dependência de execução do Studio pelo motor.
 
 ## Formatos Suportados
 
-| Formato                        | Diretório   | Detecção de Dependências             |
-| ------------------------------ | ----------- | ------------------------------------ |
-| **DEB** (Debian/Ubuntu)        | `deb/`      | Automática via `dpkg-shlibdeps`      |
-| **RPM** (Fedora/RHEL/openSUSE) | `rpm/`      | Automática via `AutoReqProv`         |
-| **Flatpak**                    | `flatpak/`  | Runtime KDE Platform 6.6             |
-| **AppImage**                   | `appimage/` | Bundle via `linuxdeploy` + Qt plugin |
+| Formato                        | Diretório   | Detecção de Dependências             | Saída                     |
+| ------------------------------ | ----------- | ------------------------------------ | ------------------------- |
+| **DEB** (Debian/Ubuntu)        | `deb/`      | Automática via `dpkg-shlibdeps`      | `dist/ubuntu/`, `dist/debian/` |
+| **RPM** (Fedora)               | `rpm/`      | Automática via `AutoReqProv`         | `dist/`                   |
+| **AppImage** (Studio)          | `appimage/` | Bundle via `linuxdeploy` + Qt plugin | `dist/ShowBox-Studio-*.AppImage` |
+| **Flatpak**                    | `flatpak/`  | Runtime KDE Platform 6.6             | — (não na pipeline)       |
 
-## Dependências Runtime
+Os debs são separados por distro porque o `dpkg-shlibdeps` registra dependências
+diferentes por imagem base (ex.: `libqt6core6t64` no Ubuntu 24.04 vs
+`libqt6core6` no Debian Trixie).
 
-O ShowBox requer as seguintes bibliotecas Qt6:
+## Requisitos
 
-- `libqt6core6` - Core Qt6
-- `libqt6gui6` - GUI Qt6
-- `libqt6widgets6` - Widgets Qt6
-- `libqt6charts6` - Charts (para gráficos)
-- `libqt6svg6` - SVG (para ícones)
-- `libqt6opengl6` - OpenGL
+- `just` (receitas `pkg-deb`, `pkg-rpm`, `pkg-appimage`, `pkg-install-smoke`);
+- podman ou docker (padrão podman; configure com `CONTAINER_ENGINE=docker`).
+
+As receitas constroem os artefatos **em container**, portanto o host não precisa
+de tools do formato. Para validar o ambiente local: `just doctor` e `just setup`.
 
 ## Como Construir
 
-### DEB (Debian/Ubuntu)
+Todos os comandos rodam da raiz do repositório:
 
 ```bash
-cd packaging/deb
-./build.sh
-# Pacote gerado em: dist/showbox_1.0.0-1_amd64.deb
+just pkg-deb        # deb: ubuntu e debian em dist/ubuntu e dist/debian
+just pkg-rpm        # rpm: showbox e showbox-studio em dist/
+just pkg-appimage   # appimage do Studio em dist/ShowBox-Studio-1.0.0-x86_64.AppImage
 ```
 
-### RPM (Fedora/RHEL)
+## Smoke de Instalação
+
+Instala os artefatos em container limpo como usuário da distro e valida o motor
+(`--version`, `--help` com "stdin") e o Studio (`--version`), além da separação
+dos pacotes (o do motor não contém o binário do Studio):
 
 ```bash
-cd packaging/rpm
-./build.sh
-# Pacote gerado em: dist/showbox-1.0.0-1.x86_64.rpm
+just pkg-install-smoke deb dist/ubuntu ubuntu
+just pkg-install-smoke deb dist/debian debian
+just pkg-install-smoke rpm dist
+just pkg-install-smoke appimage dist/ShowBox-Studio-1.0.0-x86_64.AppImage
 ```
 
-### Flatpak
-
-```bash
-cd packaging/flatpak
-./build.sh
-# Bundle gerado em: dist/showbox.flatpak
-```
-
-### AppImage
-
-```bash
-cd packaging/appimage
-./build.sh
-# AppImage gerado em: dist/ShowBox-1.0.0-x86_64.AppImage
-```
-
-## Instalação
-
-### DEB
-
-```bash
-sudo dpkg -i dist/showbox_1.0.0-1_amd64.deb
-sudo apt-get install -f  # Instala dependências faltantes
-```
-
-### RPM
-
-```bash
-sudo dnf install dist/showbox-1.0.0-1.x86_64.rpm
-```
-
-### Flatpak
-
-```bash
-flatpak install dist/showbox.flatpak
-flatpak run io.github.showbox
-```
-
-### AppImage
-
-```bash
-chmod +x dist/ShowBox-1.0.0-x86_64.AppImage
-./dist/ShowBox-1.0.0-x86_64.AppImage
-```
+`install_smoke.sh` exige podman (padrão) ou docker em `CONTAINER_ENGINE`.
+`INSTALL_SMOKE_DEBUG=1` imprime o script enviado ao container.
 
 ## Estrutura
 
 ```
 packaging/
-├── README.md           # Este arquivo
+├── README.md
+├── desktop/           # Desktop entries canônicos (motor e Studio)
+├── icon/              # Ícones canônicos
 ├── deb/
-│   ├── build.sh        # Script de build DEB
-│   └── debian/         # Arquivos de controle Debian
-│       ├── control     # Metadados e dependências
-│       ├── rules       # Regras de build
-│       ├── changelog   # Histórico de versões
-│       ├── copyright   # Licença
-│       └── compat      # Nível de compatibilidade
+│   ├── build.sh       # Build dentro do container
+│   ├── start-pkg-deb.sh   # Orquestra; argumentos: ubuntu | debian | all
+│   ├── ubuntu.Dockerfile
+│   ├── debian.Dockerfile
+│   └── debian/        # control, rules, showbox.install, showbox-studio.install
 ├── rpm/
-│   ├── build.sh        # Script de build RPM
-│   └── showbox.spec    # Spec file
-├── flatpak/
-│   ├── build.sh        # Script de build Flatpak
-│   ├── io.github.showbox.yaml      # Manifest
-│   ├── io.github.showbox.desktop   # Desktop entry
-│   └── io.github.showbox.metainfo.xml  # AppStream metadata
+│   ├── build.sh
+│   ├── start-pkg-rpm.sh
+│   ├── fedora.Dockerfile
+│   └── showbox.spec   # Subpacotes showbox e showbox-studio
 └── appimage/
-    ├── build.sh        # Script de build AppImage
-    └── showbox.desktop # Desktop entry
+    ├── AppRun         # Entrypoint do Studio no AppImage
+    ├── build.sh
+    ├── start-pkg-appimage.sh
+    └── appimage.Dockerfile
 ```
+
+Os artefatos em `dist/` e as ferramentas baixadas pelo linuxdeploy
+(`packaging/appimage/tools/`) ficam fora do Git.

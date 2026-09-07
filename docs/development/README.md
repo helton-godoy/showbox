@@ -31,3 +31,20 @@ são verificações adicionais de release, não substituídos por offscreen.
 
 Para compilar somente o motor: `cmake --preset dev -DSHOWBOX_BUILD_STUDIO=OFF`.
 Reativar o Studio antes da validação de integração.
+
+## Empacotamento e release
+
+Os artefatos (deb por distro, rpm, appimage) são construídos em container com
+podman (padrão) ou docker (`CONTAINER_ENGINE=docker`):
+
+```sh
+just pkg-deb          # deb do motor e do Studio em dist/ubuntu e dist/debian
+just pkg-rpm          # rpms em dist/
+just pkg-appimage     # AppImage do Studio em dist/
+```
+
+O smoke de instalação valida os artefatos em container limpo como usuário da
+distro — ver `packaging/README.md` para os comandos. A verificação de instalação
+via CMake (`cmake --install`) também roda no CI diário. A release em tag `v*`
+é gerenciada por `.github/workflows/release.yml` (build, smoke por artefato e
+draft de release com os arquivos).
