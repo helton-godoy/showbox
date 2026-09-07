@@ -1,5 +1,5 @@
 #include "ProjectNode.h"
-#include <QSet>
+#include "Catalog.h"
 
 namespace {
 bool hasChildren(const ProjectNode &node) { return !node.children.isEmpty(); }
@@ -25,11 +25,7 @@ QList<ProjectNode> childrenFromJson(const QJsonArray &array) {
 } // namespace
 
 bool ProjectNode::isContainer() const {
-    static const QSet<QString> containers = {
-        "groupbox", "frame",      "page",     "tabs",
-        "scrollarea", "hboxlayout", "vboxlayout", "gridlayout",
-        "formlayout"};
-    return containers.contains(type);
+    return showbox::catalog::isContainer(type);
 }
 
 QJsonObject ProjectNode::toJson() const {

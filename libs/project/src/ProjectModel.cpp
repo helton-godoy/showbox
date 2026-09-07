@@ -1,4 +1,5 @@
 #include "ProjectModel.h"
+#include "Catalog.h"
 #include <QHash>
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -16,20 +17,10 @@ bool isReservedName(const QString &value) {
     return value == "main" || value == "showbox";
 }
 
-QString normalizedType(const QString &type) {
-    if (type == "pushbutton" || type == "button") {
-        return "button";
-    }
-    if (type == "tabwidget") {
-        return "tabs";
-    }
-    if (type == "lineedit") {
-        return "textbox";
-    }
-    if (type == "textedit") {
-        return "textview";
-    }
-    return type;
+// Nome canônico do componente conforme o catálogo compartilhado. Vazio para
+// tipos desconhecidos (a validação de estrutura reporta isso).
+QString canonical(const QString &type) {
+    return showbox::catalog::canonicalType(type);
 }
 
 bool nodeIsCheckable(const ProjectNode &node) {
@@ -52,11 +43,9 @@ void validateActions(const ProjectNode &node, const QSet<QString> &names,
         return;
     }
 
-    const QString type = normalizedType(node.type);
-    const bool button = type == "button";
-    const bool toggle = button && nodeIsCheckable(node);
-    const bool changed = type == "slider";
-    const bool bar = type == "progressbar";
+    const QString type = canonical(node.type);
+    const bool isButton = type == "button";
+    const bool toggle = isButton && nodeIsCheckable(node);
 
     const QJsonObject events = document.object();
     for (auto event = events.begin(); event != events.end(); ++event) {
@@ -72,10 +61,17 @@ void validateActions(const ProjectNode &node, const QSet<QString> &names,
             continue;
         }
 
-        if (!((button && !toggle && event.key() == "clicked") ||
-              (toggle && (event.key() == "pressed" || event.key() == "released")) ||
-              (changed && event.key() == "changed") ||
-              (bar && event.key() == "changed"))) {
+        // Botão alternável restringe a pressed/released; demais tipos usam a
+        // tabela de eventos do catálogo compartilhado.
+        bool allowed = false;
+        if (isButton) {
+            allowed = toggle ? (event.key() == "pressed" ||
+                                event.key() == "released")
+                             : event.key() == "clicked";
+        } else {
+            allowed = showbox::catalog::isValidEvent(type, event.key());
+        }
+        if (!allowed) {
             issues->append(QString("Evento %1 não suportado para %2.")
                                .arg(event.key(), node.name));
             return;
@@ -157,11 +153,9 @@ void validateQueryTargets(const ProjectNode &node,
                 continue;
             }
             const QString target = action["target"].toString();
-            const QString targetType =
-                normalizedType(typesByName.value(target));
+            const QString targetType = typesByName.value(target);
             const bool queryable =
-                targetType == "textbox" || targetType == "slider" ||
-                targetType == "checkbox" || targetType == "radiobutton";
+                showbox::catalog::isQueryable(canonical(targetType));
             if (!typesByName.contains(target)) {
                 continue; // Já notificado.
             }
@@ -205,8 +199,9 @@ void collectNames(const ProjectNode &node, QSet<QString> *names,
                            .arg(node.type, node.name));
     }
 
-    if (node.type == "button" || node.type == "pushbutton") {
-        typesByName->insert(node.name, "button");
+    const QString canonicalType = canonical(node.type);
+    if (!canonicalType.isEmpty()) {
+        typesByName->insert(node.name, canonicalType);
     } else {
         typesByName->insert(node.name, node.type);
     }
@@ -241,16 +236,7 @@ void validateStructure(const ProjectNode &node, QStringList *issues) {
 } // namespace
 
 bool ProjectModel::isKnownType(const QString &type) {
-    static const QSet<QString> knownTypes = {
-        "button",      "pushbutton",  "label",      "textbox",
-        "lineedit",    "textview",    "textedit",   "checkbox",
-        "radiobutton", "spinbox",     "slider",     "progressbar",
-        "combobox",    "listbox",     "table",      "calendar",
-        "chart",       "separator",   "groupbox",   "frame",
-        "tabs",        "tabwidget",   "page",       "scrollarea",
-        "hboxlayout",  "vboxlayout",  "gridlayout", "formlayout",
-        "horizontalspacer", "verticalspacer"};
-    return knownTypes.contains(type);
+    return showbox::catalog::isKnownType(type);
 }
 
 QJsonObject ProjectModel::toJson() const {
@@ -366,11 +352,12 @@ ProjectNode ProjectModel::migrateV1Node(const QJsonObject &legacy) {
     node.properties = properties;
 
     // O v1 serializava a árvore sem posições (ordem do layout linear).
-    if (node.type == "tabs" || node.type == "tabwidget") {
+    const QString canonicalType = canonical(node.type);
+    if (canonicalType == "tabs") {
         node.layoutType = "tabs";
-    } else if (node.type == "gridlayout") {
+    } else if (canonicalType == "gridlayout") {
         node.layoutType = "grid";
-    } else if (node.type == "formlayout") {
+    } else if (canonicalType == "formlayout") {
         node.layoutType = "form";
     } else if (node.isContainer()) {
         node.layoutType = "box";

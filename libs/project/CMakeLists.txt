@@ -17,6 +17,7 @@ target_include_directories(showbox-project PUBLIC
 
 target_link_libraries(showbox-project PUBLIC
     Qt6::Core
+    showbox-catalog
 )
 
 target_compile_options(showbox-project PRIVATE -Wall -Wextra -Wpedantic)
