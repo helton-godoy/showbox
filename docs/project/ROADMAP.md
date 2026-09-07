@@ -12,7 +12,8 @@ Somente o integrador altera esta tabela.
 | SB-005 | Pacotes separados, pipeline de release e testes de instalação | SB-001, SB-002 | Concluída localmente |
 | SB-006 | Proteção Git remota e transição dos repositórios antigos | SB-005 | Concluída |
 | SB-006A | Correção: segurança de abertura/salvamento e validação de projeto | SB-005 | Concluída e integrada |
-| SB-007 | Trunk como ferramenta central de validação (lint, formatação, segredos) | SB-006 | Proposta |
+| SB-007 | Trunk como ferramenta central de validação (lint, formatação, segredos) | SB-006 | Em execução |
+| SB-008 | Primeiro release candidato e validação dos artefatos | SB-005, SB-007 | Proposta |
 
 ## Marco de produto
 Criar campo, botão e rótulo; associar ação Bash; clicar e atualizar o rótulo;
