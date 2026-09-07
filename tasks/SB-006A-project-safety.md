@@ -1,6 +1,6 @@
 # SB-006A — Correção de segurança de projeto: abertura, salvamento e validação
 
-Estado: em execução.
+Estado: concluída.
 
 - Objetivo: corrigir os problemas de segurança de dados e validação apontados
   na revisão da linha integrada antes de a SB-006 prosseguir com push/proteção
@@ -70,3 +70,51 @@ Estado: em execução.
 - Handoff ao final com SHA base/final, arquivos alterados, testes executados e
   limitações (fluxo de confirmação GUI validado por testes de modelo/estado,
   não por automação de UI).
+
+## Handoff
+
+- Base: `a966cb5`. Final da branch: `889ed81`.
+- Commits:
+  - `889ed81` — fix(project): validação recursiva, abertura segura e save
+    atômico (SB-006A) [código + testes].
+- Arquivos alterados:
+  - `libs/project/src/ProjectModel.cpp` — `validateActions`/`validateQueryTargets`
+    recursam `children` no início (os `return` internos não pulam a descida);
+    `fromJson` v2 exige `format == "showbox"`, `widgets` sendo array de objetos.
+  - `libs/project/tests/tst_ProjectModel.cpp` — 3 casos novos
+    (`rejectMissingFormatInV2`, `rejectMissingOrInvalidWidgetsInV2`,
+    `validateDescendsIntoChildren` — ações inválidas em tabs→page→button).
+  - `apps/studio/src/core/ProjectSerializer.cpp` — `QSaveFile` + `commit()`;
+    retorna falso em falha de open/escrita sem tocar o arquivo anterior.
+  - `apps/studio/tests/tst_ProjectSerializer.cpp` — 2 casos novos
+    (`rejectsInvalidV2Structure`, `saveToUnwritablePathFails`).
+  - `apps/studio/src/gui/MainWindow.{h,cpp}` — abertura segura (load antes de
+    `m_canvas->clear()`; em falha preserva documento, histórico e seleção;
+    novo documento zera undo stack e seleção), helper
+    `confirmDiscardIfModified()` aplicado em Nova demonstração/Open/`closeEvent`,
+    rastreio de documento modificado e reset em open/save/demo.
+- Implementação da confirmação: em vez de inferir pelo canvas vazio (o estado
+  inicial traz o rótulo de boas-vindas criado sem comandos de undo), usei um
+  flag explícito `m_documentModified`, marcado quando `QUndoStack::cleanChanged`
+  diz que há comandos e quando `ActionEditor::actionsChanged` dispara (ações não
+  geram comandos de undo); reset em save/open/demo. Critério mais preciso que o
+  descrito inicialmente e sem modal espúrio na janela recém-aberta.
+- Testes executados (worktree SB-006A-project-safety):
+  - `just build` — verde.
+  - `just test` — 23/23 verdes (incluindo 5 casos novos; o
+    `tst_ActionEditor::demoIsAvailableInStudio` roda sem modal graças ao flag).
+  - `just check` — verde (`git diff --check`, `bash -n`, ShellCheck).
+  - Oráculo legado: não executado — não houve mudança de protocolo/runtime;
+    `fromJson` v2 valida tipos porém preserva a forma do JSON emitido.
+- Limitações:
+  - A falha de escrita do `QSaveFile` não é simulável de forma confiável em
+    ambiente de teste; a integridade vem da garantia do Qt (abrir + commit) e o
+    teste cobre open em diretório inexistente + round-trip normal. A atomicidade
+    do arquivo anterior em erro é o comportamento documentado do `QSaveFile`.
+  - Fluxo de confirmação GUI validado por testes de modelo/estado, não por
+    automação de UI (sem servidor gráfico) — teste do demo confirma que a
+    janela não trava no caminho limpo.
+- Fora do escopo (não tocado): protocolo/runtime do motor, `AppImage`/CI,
+  migração de dados, repositórios antigos e qualquer ação remota da SB-006.
+- Próximo: integrar esta branch (fast-forward) em `integration/showbox-v1` e
+  atualizar o ROADMAP conforme decisão do integrador; depois prosseguir a SB-006.
