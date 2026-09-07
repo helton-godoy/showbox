@@ -30,3 +30,11 @@ Description: GUI widgets for shell scripts
   - Theme support (light/dark/system)
   - Resizable windows
   - Event-driven communication with scripts
+
+Package: showbox-studio
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, showbox
+Description: Visual editor for ShowBox interfaces
+ Showbox Studio is a visual editor for designing ShowBox dialogs and
+ interfaces for the showbox engine. It provides a canvas, property
+ editor, action editor and project files (sbp format).

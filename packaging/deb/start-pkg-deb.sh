@@ -48,14 +48,15 @@ build_deb() {
 		"${image_name}" \
 		bash -c "./packaging/deb/build.sh"
 
-	# Rename output with distro suffix
+	# Rename outputs with distro suffix
 	local version=$(head -1 "${SCRIPT_DIR}/debian/changelog" | grep -oP '\(.*?\)' | tr -d '()')
-	local deb_file="${DIST_DIR}/showbox_${version}_amd64.deb"
-	if [[ -f ${deb_file} ]]; then
-		local new_name="${DIST_DIR}/showbox_${version}_${distro}_amd64.deb"
-		mv "${deb_file}" "${new_name}" 2>/dev/null || true
-		log_info "Package created: ${new_name}"
-	fi
+	for deb_file in "${DIST_DIR}"/showbox*"_${version}_amd64.deb"; do
+		if [[ -f ${deb_file} ]]; then
+			local new_name="${deb_file/_${version}_amd64/_${version}_${distro}_amd64}"
+			mv "${deb_file}" "${new_name}" 2>/dev/null || true
+			log_info "Package created: ${new_name}"
+		fi
+	done
 }
 
 mkdir -p "${DIST_DIR}"
