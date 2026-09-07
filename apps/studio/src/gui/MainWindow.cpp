@@ -1,6 +1,7 @@
 #include "MainWindow.h"
 #include "ActionEditor.h"
 #include "Canvas.h"
+#include "Catalog.h"
 #include "ObjectInspector.h"
 #include "PropertyEditor.h"
 #include "core/PreviewManager.h"
@@ -440,27 +441,14 @@ void MainWindow::createToolbox(int style) {
 }
 
 void MainWindow::populateToolbox(AbstractToolbox *toolbox) {
-  // 0. Layouts
-  toolbox->addCategory(
-      "Layouts", {"HBoxLayout", "VBoxLayout", "GridLayout", "FormLayout"});
-
-  // 1. Spacers
-  toolbox->addCategory("Spacers", {"HorizontalSpacer", "VerticalSpacer"});
-
-  // 2. Controles Básicos (usando nomes CLI)
-  toolbox->addCategory("Básico", {"Label", "Button", "CheckBox",
-                                  "RadioButton", "Separator"});
-
-  // 3. Entrada de Dados (usando nomes CLI)
-  toolbox->addCategory("Entrada", {"TextBox", "TextView", "SpinBox", "Slider",
-                                   "ComboBox", "Calendar"});
-
-  // 4. Dados & Visualização
-  toolbox->addCategory("Dados", {"ListBox", "Table", "ProgressBar", "Chart"});
-
-  // 5. Containers (usando nomes CLI)
-  toolbox->addCategory("Containers",
-                       {"GroupBox", "Frame", "Tabs", "Page", "ScrollArea"});
+  // Categorias e itens vêm do catálogo compartilhado, na ordem declarada.
+  for (const QString &group : showbox::catalog::toolboxGroups()) {
+    QStringList items;
+    for (const auto &info : showbox::catalog::widgetCatalog()) {
+      if (info.toolboxGroup == group) items << info.displayName;
+    }
+    toolbox->addCategory(group, items);
+  }
 }
 
 void MainWindow::onToolboxStyleChanged(int style) {

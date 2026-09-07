@@ -2,6 +2,7 @@
 #include "../core/IStudioWidgetFactory.h"
 #include "../core/StudioCommands.h"
 #include "../core/StudioController.h"
+#include "Catalog.h"
 #include <QDebug>
 #include <QListWidget>
 #include <QMenu>
@@ -43,7 +44,7 @@ void Canvas::contextMenuEvent(QContextMenuEvent *event) {
     if (selected.size() == 1) {
       QWidget *w = selected.first();
       QString showboxType = w->property("showbox_type").toString();
-      if (showboxType == "tabwidget") {
+      if (showbox::catalog::canonicalType(showboxType) == "tabs") {
         menu.addAction("Add Tab Page", [this, w]() { emit requestAddPage(w); });
         menu.addAction("Remove Current Page",
                        [this, w]() { emit requestRemovePage(w); });
@@ -328,9 +329,7 @@ QWidget *Canvas::findContainerAtPos(const QPoint &pos) {
   while (child && child != this) {
     QString showboxType = child->property("showbox_type").toString();
 
-    if (showboxType.contains("layout") || showboxType == "groupbox" ||
-        showboxType == "frame" || showboxType == "scrollarea" ||
-        showboxType == "tabs" || showboxType == "page") {
+    if (showbox::catalog::isContainer(showboxType)) {
       return child;
     }
     child = child->parentWidget();

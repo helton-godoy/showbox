@@ -120,6 +120,10 @@ void ObjectInspector::dropEvent(QDropEvent *event) {
 
   if (widget && newParentWidget) {
     // --- VALIDAÇÃO DE CONTAINER ---
+    // Política de UI para destino de drop na árvore, mantida explícita (ADR
+    // 0004): só os containers que aceitam aninhamento direto. Tabs,
+    // scrollarea e layouts têm caminhos próprios no Canvas e não são alvo de
+    // drop aqui.
     QString type = newParentWidget->property("showbox_type").toString();
     bool isContainer = (type == "window" || type == "groupbox" ||
                         type == "frame" || type == "page");
@@ -234,7 +238,8 @@ void ObjectInspector::addWidgetToTree(QWidget *widget,
 
   if (typeVar.isValid()) {
     QString type = typeVar.toString();
-    // Lista explícita de containers
+    // Apresentação da árvore: apenas os containers com filhos expostos ganham
+    // expandir, política de UI explícita (ADR 0004).
     isContainer = (type == "window" || type == "groupbox" || type == "frame" ||
                    type == "tabs" || type == "page");
   }

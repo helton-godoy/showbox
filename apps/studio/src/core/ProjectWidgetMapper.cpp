@@ -1,4 +1,5 @@
 #include "ProjectWidgetMapper.h"
+#include "Catalog.h"
 #include "IStudioWidgetFactory.h"
 #include "custom_table_widget.h"
 
@@ -21,19 +22,7 @@
 namespace {
 
 QString resolvedType(const ProjectNode &node) {
-    if (node.type == "pushbutton") {
-        return "button";
-    }
-    if (node.type == "tabwidget") {
-        return "tabs";
-    }
-    if (node.type == "lineedit") {
-        return "textbox";
-    }
-    if (node.type == "textedit") {
-        return "textview";
-    }
-    return node.type;
+    return showbox::catalog::canonicalType(node.type);
 }
 
 void appendFormItem(ProjectNode *node, QLayoutItem *item, int row,

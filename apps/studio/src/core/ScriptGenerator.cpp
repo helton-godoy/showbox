@@ -1,4 +1,5 @@
 #include "ScriptGenerator.h"
+#include "Catalog.h"
 #include <QAbstractButton>
 #include <QCheckBox>
 #include <QCryptographicHash>
@@ -95,12 +96,13 @@ QString ScriptGenerator::generate(QWidget *root) {
 
 void ScriptGenerator::processWidget(QWidget *widget, QStringList &lines, bool actions) {
     if (!m_error.isEmpty() || widget->property("showbox_ignore").toBool()) return;
-    QString type = widget->property("showbox_type").toString().toLower();
-    if (type == "button") type = "pushbutton";
-    const QSet<QString> supported{"pushbutton", "label", "textbox", "checkbox", "radiobutton",
-        "slider", "progressbar", "groupbox", "frame", "tabs", "page"};
+    // Nome CLI a partir do catálogo compartilhado; tipos desconhecidos ou não
+    // exportáveis são recusados abaixo.
+    QString type = showbox::catalog::cliType(
+        widget->property("showbox_type").toString());
     const QString name = widget->objectName();
-    if (!supported.contains(type)) {
+    if (!showbox::catalog::isScriptable(
+            showbox::catalog::canonicalType(widget->property("showbox_type").toString()))) {
         m_error = QString("Componente ainda não exportável: %1 (%2).").arg(name, type);
         return;
     }
@@ -180,12 +182,17 @@ void ScriptGenerator::collectActions(QWidget *widget, const QString &type) {
         if (!event.value().isArray()) { m_error = "Ações devem formar uma lista."; return; }
         const auto actions = event.value().toArray();
         if (actions.isEmpty()) continue;
-        const bool button = type == "pushbutton";
+        const QString canonicalType = showbox::catalog::canonicalType(type);
+        const bool button = canonicalType == "button";
         const bool toggle = button && widget->property("checkable").toBool();
-        const bool changed = type == "slider";
-        if (!((button && !toggle && event.key() == "clicked") ||
-              (toggle && (event.key() == "pressed" || event.key() == "released")) ||
-              (changed && event.key() == "changed"))) {
+        bool allowed;
+        if (button) {
+            allowed = toggle ? (event.key() == "pressed" || event.key() == "released")
+                             : event.key() == "clicked";
+        } else {
+            allowed = showbox::catalog::isValidEvent(canonicalType, event.key());
+        }
+        if (!allowed) {
             m_error = QString("Evento %1 não suportado para %2.").arg(event.key(), widget->objectName()); return;
         }
         const QString callback = QString("_sb_action_%1").arg(m_functions.size());
@@ -225,6 +232,7 @@ void ScriptGenerator::collectActions(QWidget *widget, const QString &type) {
         function += "}\n";
         m_functions.append(function);
         const QString name = widget->objectName();
+        const bool changed = canonicalType == "slider";
         const QString pattern = shellQuote(name + "=" + (changed ? "" : event.key())) + (changed ? "*" : "");
         m_dispatch.append("        " + pattern + ") _sb_launch " + callback + " " + shellQuote(name) +
             " " + shellQuote(event.key()) + " \"${1#*=}\" ;; ");

@@ -2,6 +2,7 @@
 #define STUDIOWIDGETFACTORY_H
 
 #include "IStudioWidgetFactory.h"
+#include "Catalog.h"
 #include <QComboBox>
 #include <QFormLayout>
 #include <QGridLayout>
@@ -261,18 +262,10 @@ private:
     // Atributo para garantir que o widget aceite eventos mas possa ser
     // "gerenciado" pelo Studio
     widget->setAttribute(Qt::WA_TransparentForMouseEvents, false);
-    
-    // Anotar o tipo para o ScriptGenerator usando nomes CLI
-    QString cliName = type.toLower();
-    // Normalizar para CLI names
-    if (cliName == "pushbutton") cliName = "button";
-    else if (cliName == "lineedit") cliName = "textbox";
-    else if (cliName == "textedit") cliName = "textview";
-    else if (cliName == "tabwidget") cliName = "tabs";
-    else if (cliName == "dropdownlist") cliName = "combobox";
-    else if (cliName == "line") cliName = "separator";
-    
-    widget->setProperty("showbox_type", cliName);
+
+    // Anotar o tipo canônico (nome showbox_type) conforme o catálogo.
+    widget->setProperty("showbox_type",
+                        showbox::catalog::canonicalType(type));
   }
 };
 

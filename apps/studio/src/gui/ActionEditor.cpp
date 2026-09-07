@@ -1,4 +1,5 @@
 #include "ActionEditor.h"
+#include "Catalog.h"
 #include <QComboBox>
 #include <QFile>
 #include <QFileDialog>
@@ -117,10 +118,11 @@ void ActionEditor::setTargetWidget(QWidget *widget) {
     m_event->clear();
     if (widget) {
         const auto type = widget->property("showbox_type").toString();
-        if (type == "button" || type == "pushbutton") {
+        const auto canonicalType = showbox::catalog::canonicalType(type);
+        if (canonicalType == "button") {
             if (widget->property("checkable").toBool()) m_event->addItems({"pressed", "released"});
             else m_event->addItem("clicked");
-        } else if (type == "slider") m_event->addItem("changed");
+        } else if (canonicalType == "slider") m_event->addItem("changed");
     }
     // Preserva eventos importados para que possam ser inspecionados/removidos.
     for (auto it = m_actions.begin(); it != m_actions.end(); ++it)

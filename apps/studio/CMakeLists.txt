@@ -65,6 +65,7 @@ target_link_libraries(showbox-studio-components PUBLIC
     Qt6::Svg
     showbox-ui
     showbox-project
+    showbox-catalog
 )
 
 add_executable(showbox-studio src/main.cpp)
