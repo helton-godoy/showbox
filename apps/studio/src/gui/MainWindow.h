@@ -16,12 +16,16 @@ class QTextEdit;
 class QDockWidget;
 class QActionGroup;
 class QTabWidget;
+class QCloseEvent;
 
 class MainWindow : public QMainWindow {
   Q_OBJECT
 public:
   explicit MainWindow(QWidget *parent = nullptr);
   ~MainWindow();
+
+protected:
+  void closeEvent(QCloseEvent *event) override;
 
 private slots:
   void onRunClicked();
@@ -42,6 +46,7 @@ private:
   void createSampleWidgets();
   void createToolbox(int style);
   void populateToolbox(AbstractToolbox *toolbox);
+  bool confirmDiscardIfModified();
 
   Canvas *m_canvas;
   IStudioWidgetFactory *m_factory;
@@ -56,6 +61,7 @@ private:
   int m_toolboxStyle; // 0 = Classic, 1 = Tree
 
   QString m_projectDirectory;
+  bool m_documentModified = false;
 
   // Live Preview
   PreviewManager *m_previewManager;

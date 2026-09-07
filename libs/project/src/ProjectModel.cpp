@@ -31,6 +31,9 @@ bool nodeIsCheckable(const ProjectNode &node) {
 // script (eventos por tipo, destino existente e ações bem formadas).
 void validateActions(const ProjectNode &node, const QSet<QString> &names,
                      QStringList *issues) {
+    for (const ProjectNode &child : node.children) {
+        validateActions(child, names, issues);
+    }
     if (node.actions.isEmpty()) {
         return;
     }
@@ -136,6 +139,9 @@ void validateActions(const ProjectNode &node, const QSet<QString> &names,
 void validateQueryTargets(const ProjectNode &node,
                           const QHash<QString, QString> &typesByName,
                           QStringList *issues) {
+    for (const ProjectNode &child : node.children) {
+        validateQueryTargets(child, typesByName, issues);
+    }
     if (node.actions.isEmpty()) {
         return;
     }
@@ -285,7 +291,30 @@ bool ProjectModel::fromJson(const QJsonObject &json, ProjectModel *out,
     }
 
     if (versionString == "2") {
-        for (const QJsonValue &value : json["widgets"].toArray()) {
+        const QString format = json["format"].toString();
+        if (format != "showbox") {
+            if (error) {
+                *error = "O campo 'format' deve ser \"showbox\".";
+            }
+            return false;
+        }
+
+        const QJsonValue widgetsValue = json["widgets"];
+        if (!widgetsValue.isArray()) {
+            if (error) {
+                *error = "O campo 'widgets' deve ser uma lista de componentes.";
+            }
+            return false;
+        }
+        const QJsonArray widgetsArray = widgetsValue.toArray();
+        for (const QJsonValue &value : widgetsArray) {
+            if (!value.isObject()) {
+                if (error) {
+                    *error = "Cada componente em 'widgets' precisa ser um "
+                             "objeto.";
+                }
+                return false;
+            }
             out->widgets.append(ProjectNode::fromJson(value.toObject()));
         }
         out->version = CurrentVersion;

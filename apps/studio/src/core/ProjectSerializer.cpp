@@ -4,6 +4,7 @@
 
 #include <QFile>
 #include <QJsonDocument>
+#include <QSaveFile>
 
 ProjectSerializer::ProjectSerializer() {}
 
@@ -15,14 +16,17 @@ bool ProjectSerializer::save(const QString &filename, QWidget *root,
 
   const ProjectModel model = ProjectWidgetMapper::toModel(root);
 
-  QFile file(filename);
+  QSaveFile file(filename);
   if (!file.open(QIODevice::WriteOnly)) {
     return false;
   }
 
   const QByteArray payload =
       QJsonDocument(model.toJson()).toJson(QJsonDocument::Indented);
-  return file.write(payload) == payload.size();
+  if (file.write(payload) != payload.size()) {
+    return false;
+  }
+  return file.commit();
 }
 
 bool ProjectSerializer::load(const QString &filename,

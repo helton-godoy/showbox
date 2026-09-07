@@ -20,6 +20,8 @@ private slots:
     void openV1ExampleMigratesToV2();
     void rejectsUnknownVersion();
     void rejectsMalformedJson();
+    void rejectsInvalidV2Structure();
+    void saveToUnwritablePathFails();
 
 private:
     StudioWidgetFactory *m_factory;
@@ -180,6 +182,39 @@ void tst_ProjectSerializer::rejectsMalformedJson()
     QList<QWidget *> widgets;
     QVERIFY(!serializer.load(filename, m_factory, widgets));
     QVERIFY(!serializer.errors().isEmpty());
+}
+
+void tst_ProjectSerializer::rejectsInvalidV2Structure()
+{
+    const auto writeAndLoad = [this](const char *content) {
+        QTemporaryFile tempFile;
+        QVERIFY(tempFile.open());
+        const QString filename = tempFile.fileName();
+        tempFile.close();
+
+        QFile file(filename);
+        QVERIFY(file.open(QIODevice::WriteOnly));
+        file.write(content);
+        file.close();
+
+        ProjectSerializer serializer;
+        QList<QWidget *> widgets;
+        QVERIFY(!serializer.load(filename, m_factory, widgets));
+        QCOMPARE(widgets.size(), 0);
+    };
+
+    writeAndLoad(R"({"format":"showbox","version":2})");
+    writeAndLoad(R"({"format":"showbox","version":2,"widgets":"inválido"})");
+    writeAndLoad(R"({"version":2,"widgets":[]})");
+    writeAndLoad(R"({"format":"showbox","version":2,"widgets":["não objeto"]})");
+}
+
+void tst_ProjectSerializer::saveToUnwritablePathFails()
+{
+    QWidget *root = new QWidget();
+    ProjectSerializer serializer;
+    QVERIFY(!serializer.save("/nao-existe/showbox/x.sbxproj", root, m_factory));
+    delete root;
 }
 
 QTEST_MAIN(tst_ProjectSerializer)

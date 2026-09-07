@@ -11,12 +11,15 @@ private slots:
     void roundTrip();
     void rejectUnknownVersion();
     void rejectUnknownFormat();
+    void rejectMissingFormatInV2();
+    void rejectMissingOrInvalidWidgetsInV2();
     void migrateV1();
     void migrateV1KeepsActionsVerbatim();
     void validateRejectsBadNamesAndTypes();
     void validateRejectsBadReferences();
     void validateRejectsBadEvents();
     void validateRejectsStructureBreaks();
+    void validateDescendsIntoChildren();
     void migratesGridAndFormNodes();
 
 private:
@@ -207,6 +210,75 @@ void tst_ProjectModel::validateRejectsStructureBreaks() {
     QVERIFY(!issues.isEmpty());
     QVERIFY(std::any_of(issues.begin(), issues.end(), [](const QString &issue) {
         return issue.contains("não aceita filhos");
+    }));
+}
+
+void tst_ProjectModel::rejectMissingFormatInV2() {
+    QJsonObject json = basicProject();
+    json.remove("format");
+
+    ProjectModel loaded;
+    QString error;
+    QVERIFY(!ProjectModel::fromJson(json, &loaded, &error));
+    QVERIFY(error.contains("format"));
+}
+
+void tst_ProjectModel::rejectMissingOrInvalidWidgetsInV2() {
+    QJsonObject noWidgets = basicProject();
+    noWidgets.remove("widgets");
+
+    QJsonObject wrongTypeWidgets = basicProject();
+    wrongTypeWidgets["widgets"] = "inválido";
+
+    QJsonObject nonObjectItems = basicProject();
+    nonObjectItems["widgets"] = QJsonArray{"um", 2};
+
+    ProjectModel loaded;
+    QString error;
+    QVERIFY(!ProjectModel::fromJson(noWidgets, &loaded, &error));
+    QVERIFY(error.contains("widgets"));
+    QVERIFY(!ProjectModel::fromJson(wrongTypeWidgets, &loaded, &error));
+    QVERIFY(error.contains("widgets"));
+    QVERIFY(!ProjectModel::fromJson(nonObjectItems, &loaded, &error));
+    QVERIFY(error.contains("objeto"));
+}
+
+void tst_ProjectModel::validateDescendsIntoChildren() {
+    ProjectNode abas;
+    abas.type = "tabs";
+    abas.name = "abas";
+
+    ProjectNode page1;
+    page1.type = "page";
+    page1.name = "p1";
+    ProjectNode run;
+    run.type = "button";
+    run.name = "run";
+    run.actions =
+        "{\"clicked\": [{\"type\": \"shell\", \"command\": \"   \"}]}";
+    page1.children.append(run);
+
+    ProjectNode page2;
+    page2.type = "page";
+    page2.name = "p2";
+    ProjectNode lost;
+    lost.type = "button";
+    lost.name = "b2";
+    lost.actions = "{\"clicked\": [{\"type\": \"query\", \"target\": "
+                   "\"fantasma\", \"variable\": \"VAL\"}]}";
+    page2.children.append(lost);
+
+    abas.children = {page1, page2};
+
+    ProjectModel model;
+    model.widgets = {abas};
+
+    const QStringList issues = model.validate();
+    QVERIFY(std::any_of(issues.begin(), issues.end(), [](const QString &issue) {
+        return issue.contains("Ação shell vazia");
+    }));
+    QVERIFY(std::any_of(issues.begin(), issues.end(), [](const QString &issue) {
+        return issue.contains("Destino inexistente");
     }));
 }
 

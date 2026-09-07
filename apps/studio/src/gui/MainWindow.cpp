@@ -13,6 +13,7 @@
 #include "toolbox/ToolboxClassic.h"
 #include "toolbox/ToolboxTree.h"
 #include <QActionGroup>
+#include <QCloseEvent>
 #include <QDockWidget>
 #include <QFile>
 #include <QDir>
@@ -65,6 +66,18 @@ MainWindow::MainWindow(QWidget *parent)
     }
     m_inspector->updateHierarchy(m_canvas);
   });
+
+  // Rastrear modificações do documento: qualquer comando que suje o undo
+  // stack marca o projeto como modificado.
+  connect(m_controller->undoStack(), &QUndoStack::cleanChanged, this,
+          [this](bool clean) {
+            if (!clean)
+              m_documentModified = true;
+          });
+
+  // Edições de ações não geram comandos de undo; marcar diretamente.
+  connect(m_actionEditor, &ActionEditor::actionsChanged, this,
+          [this]() { m_documentModified = true; });
 
   // Sincronizar seleção: Canvas -> Inspector & Property Editor
 
@@ -354,6 +367,7 @@ void MainWindow::onSaveClicked() {
 
   ProjectSerializer serializer;
   if (serializer.save(fileName, m_canvas, m_factory)) {
+    m_documentModified = false;
     m_projectDirectory = QFileInfo(fileName).absolutePath();
     statusBar()->showMessage("Projeto salvo com sucesso: " + fileName);
   } else {
@@ -367,13 +381,19 @@ void MainWindow::onOpenClicked() {
   if (fileName.isEmpty())
     return;
 
-  m_canvas->clear();
-  m_inspector->updateHierarchy(nullptr);
+  if (!confirmDiscardIfModified())
+    return;
 
   ProjectSerializer serializer;
   QList<QWidget *> widgets;
 
   if (serializer.load(fileName, m_factory, widgets)) {
+    m_documentModified = false;
+    m_controller->selectWidget(nullptr);
+    m_controller->undoStack()->clear();
+    m_canvas->clear();
+    m_inspector->updateHierarchy(nullptr);
+
     for (QWidget *w : widgets) {
       m_canvas->addWidget(w);
       m_controller->manageWidget(w);
@@ -393,6 +413,25 @@ void MainWindow::onOpenClicked() {
     QMessageBox::warning(this, "Showbox Studio", message);
     statusBar()->showMessage("Não foi possível carregar o projeto.");
   }
+}
+
+bool MainWindow::confirmDiscardIfModified() {
+  if (!m_documentModified)
+    return true;
+
+  const QMessageBox::StandardButton answer = QMessageBox::question(
+      this, "Showbox Studio",
+      "O projeto atual tem alterações não salvas. Descartar?",
+      QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+  return answer == QMessageBox::Yes;
+}
+
+void MainWindow::closeEvent(QCloseEvent *event) {
+  if (!confirmDiscardIfModified()) {
+    event->ignore();
+    return;
+  }
+  event->accept();
 }
 
 void MainWindow::onAddPageRequested(QWidget *tabs) {
@@ -489,9 +528,12 @@ void MainWindow::onExportClicked() {
 }
 
 void MainWindow::onDemoClicked() {
+  if (!confirmDiscardIfModified())
+    return;
   m_controller->selectWidget(nullptr);
   m_controller->undoStack()->clear();
   m_canvas->clear();
+  m_documentModified = false;
   auto *entry = m_factory->createWidget("textbox", "entry");
   auto *button = m_factory->createWidget("pushbutton", "run");
   auto *result = m_factory->createWidget("label", "result");
