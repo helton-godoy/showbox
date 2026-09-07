@@ -8,7 +8,8 @@ Estado: em execução.
   os repositórios antigos (`dialogbox`, `SHantilly`, `SHantilly-Studio`,
   `showbox-studio`) com redirecionamento para o monorepo — sem publicar release
   final nem alterar serviços fora dos repositórios do produto.
-- Base: integration/showbox-v1 (c25a9ae, encerramento da SB-005).
+- Base: integration/showbox-v1 (8929724, encerramento da SB-006A; base efetiva
+  atualizada após fast-forward nesta worktree).
 - Branch prevista: feat/SB-006-protecao-remota.
 - Responsável: integrador desta sessão (mantenedor do repositório).
 - Dependências: SB-005 (packaging, `release.yml` e smoke prontos).
@@ -16,8 +17,12 @@ Estado: em execução.
   1. Arquivar os 4 repositórios antigos no GitHub;
   2. Proteger `main` e `integration/showbox-v1` com PR obrigatório + status
      checks do CI, **sem exigir aprovação humana** (repositório de conta única);
-  3. Incluir nesta tarefa: primeiro push, CI remoto ativo e execução do
-     `release.yml` em draft via `workflow_dispatch`.
+  3. Incluir nesta tarefa: primeiro push, CI remoto ativo e exercício manual do
+     `release.yml` via `workflow_dispatch`, **sem tag e sem draft**. O
+     `workflow_dispatch` constrói/testa os artefatos, mas o job que cria o
+     release só roda em tags; a lacuna do contrato original foi ajustada para
+     não criar tag temporária. O primeiro draft associado a uma tag real fica
+     para a SB-007, após esta tarefa publicar e proteger o canônico.
 - Escopo:
   - Governança local: criar `docs/development/GIT_REMOTE.md` (política de
     branches protegidas, PRs obrigatórios, tags `v*`, descontinuação do ciclo
@@ -35,8 +40,9 @@ Estado: em execução.
     pattern `v*` (bloqueia sobrescrita/exclusão). Aplicar somente após os runs
     do CI existirem; verificar o resultado via API e documentar na ADR 0006.
   - CI remoto e pipeline: primeira execução dos jobs do `ci.yml` e exercício do
-    `release.yml` via `workflow_dispatch` gerando **draft** (jobs de artefato e
-    instalação/smoke em container; o job `release` fica inativo sem tag).
+    `release.yml` via `workflow_dispatch` **sem tag** (jobs de artefato e
+    instalação/smoke em container; o job `release` fica inativo sem tag e o
+    primeiro draft fica para a SB-007).
   - Transição dos repositórios antigos: adicionar README de redirecionamento no
     default branch de cada um (`dialogbox`, `SHantilly`, `SHantilly-Studio`,
     `showbox-studio`) apontando para `helton-godoy/showbox` e arquivar
@@ -55,7 +61,8 @@ Estado: em execução.
     `integration/showbox-v1` (push direto rejeitado; PR com status checks
     obrigatórios); tags `v*` protegidas.
   - `ci.yml` e `release.yml` executados no remoto: jobs de build/test/smoke
-    verdes e draft de release criado (sem publicar).
+    verdes, artefatos validados; **nenhum release público nem draft criado** na
+    SB-006 (primeiro draft fica para SB-007 com tag real).
   - Repositórios antigos com README de redirecionamento e `archived: true`.
   - `just doctor` verde (inclui verificação de proteção remota);
     `just build`/`just test` verde.
