@@ -121,10 +121,21 @@ appimage)
 	fi
 	run "ubuntu:24.04" "$(cat <<-'EOF'
 	set -euo pipefail
+	export DEBIAN_FRONTEND=noninteractive
 	export APPIMAGE_EXTRACT_AND_RUN=1
-	chmod +x "/pkg/${SMOKE_APPIMAGE}"
-	"/pkg/${SMOKE_APPIMAGE}" --version
-	"/pkg/${SMOKE_APPIMAGE}" --help | grep -qi 'editor'
+	apt-get update -qq >/dev/null
+	apt-get install -y -qq --no-install-recommends libegl1 libgl1 libfontconfig1 \
+		libxkbcommon0 libxcb-cursor0 libdbus-1-3 libharfbuzz0b libxrender1 \
+		libxext6 libxi6 libxcomposite1 libxdamage1 libxrandr2 libxtst6 \
+		libx11-xcb1 libopengl0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 \
+		libxcb-randr0 libxcb-render-util0 libxcb-shape0 libxcb-sync1 \
+		libxcb-xfixes0 libxcb-xinerama0 libxcb-xkb1 libxkbcommon-x11-0 \
+		libsm6 >/dev/null
+	mkdir -p /tmp/appimg
+	cp "/pkg/${SMOKE_APPIMAGE}" /tmp/appimg/
+	chmod +x "/tmp/appimg/${SMOKE_APPIMAGE}"
+	"/tmp/appimg/${SMOKE_APPIMAGE}" --version
+	"/tmp/appimg/${SMOKE_APPIMAGE}" --help | grep -qi 'editor'
 	echo "smoke appimage: OK"
 	EOF
 	)" "SMOKE_APPIMAGE=${APPIMAGE_NAME}"
