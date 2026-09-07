@@ -6,6 +6,10 @@ set -euo pipefail
 readonly LAUNCHER_URL="https://trunk.io/releases/trunk"
 readonly EXPECTED_CLI="1.25.0"
 readonly TRUNK_YAML=".trunk/trunk.yaml"
+# SHA-256 do launcher oficial auditado em 2026-09-07.
+# Se o upstream publicar um launcher novo, este hash deve ser atualizado
+# somente após revisão manual do script baixado.
+readonly EXPECTED_LAUNCHER_SHA256="89fbdd8c7b63649eeb1479415757b898903c041e73b49b78028dbd64eca3087a"
 
 resolve_install_dir() {
 	if [[ -n ${TRUNK_INSTALL_DIR-} ]]; then
@@ -60,6 +64,16 @@ install_launcher() {
 	printf 'Baixando launcher oficial do Trunk para %s ...\n' "${launcher}"
 	if ! curl -fsSL --proto https --proto-redir https --max-time 60 --connect-timeout 10 "${LAUNCHER_URL}" -o "${launcher}.tmp"; then
 		printf 'Falha ao baixar o launcher. Verifique a conexão com %s.\n' "${LAUNCHER_URL}" >&2
+		rm -f "${launcher}.tmp"
+		exit 1
+	fi
+	local actual_sha256
+	actual_sha256="$(sha256sum "${launcher}.tmp" | cut -d' ' -f1)"
+	if [[ ${actual_sha256} != "${EXPECTED_LAUNCHER_SHA256}" ]]; then
+		printf 'ERRO: checksum do launcher não corresponde ao esperado.\n' >&2
+		printf '  Esperado: %s\n' "${EXPECTED_LAUNCHER_SHA256}" >&2
+		printf '  Obtido:   %s\n' "${actual_sha256}" >&2
+		printf 'O launcher em %s pode ter sido alterado. Não execute sem revisão manual.\n' "${LAUNCHER_URL}" >&2
 		rm -f "${launcher}.tmp"
 		exit 1
 	fi
