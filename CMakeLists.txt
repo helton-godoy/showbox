@@ -22,6 +22,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 add_subdirectory(libs/ui)
 add_subdirectory(apps/runtime)
 enable_testing()
+add_subdirectory(libs/catalog)
 add_subdirectory(tests)
 add_subdirectory(libs/project)
 
