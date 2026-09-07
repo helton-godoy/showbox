@@ -1,6 +1,6 @@
 # SB-007 — Trunk como ferramenta central de validação
 
-Estado: em execução.
+Estado: concluída.
 
 - Objetivo: tornar o Trunk a ferramenta central de todas as checagens do
   projeto. Todo conteúdo presente no repositório que tenha suporte pelo Trunk
@@ -130,6 +130,31 @@ Estado: em execução.
     futura).
   - Documentar em `docs/development/` e `justfile` (`just check` passa a
     invocar o Trunk ou mantém os passos locais equivalentes + Trunk).
+- Handoff (2026-09-07):
+  - SHA base: `0e59cb4` (main) → SHA final: `186ee01` (feat/SB-007-trunk),
+    integrado em `main` via PR #6 (merge commit `b46f2ad`).
+  - Comandos executados: `trunk check --all --no-fix --cache=false` (0 issues
+    em 325 arquivos), `just check`, `just test` (23/23), oráculo legado
+    (`tests/compatibility/build_legacy_oracle.sh`) e contrato golden
+    (`tests/compatibility/golden_contract.sh` — diferença de locale
+    decimal vírgula/ponto pré-existente no main, sem relação com a SB-007),
+    `tests/integration/cli_contract.sh`, build podman de
+    `packaging/deb/debian.Dockerfile` e `packaging/rpm/fedora.Dockerfile`.
+  - CI: run real verde do job `trunk-check` (app `github-actions`, app_id 15368) junto com `build-test`, `sanitizers` e SonarCloud no PR #6.
+  - Proteção aplicada em `main` e `integration/showbox-v1`: required checks
+    `build-test`, `sanitizers` e `trunk-check` (app_id 15368, strict).
+  - Prova de bloqueio: PR #8 (canário com SC2086 deliberado) → `trunk-check`
+    falhou e o GitHub reportou `mergeStateStatus: BLOCKED`; canário fechado
+    sem merge. PR #7 (canário sobre main antiga, sem o job) validou que a
+    ausência do check também bloqueia.
+  - Integridade do launcher: SHA-256 `89fbdd8c...` fixado em
+    `tools/setup/trunk.sh` e validado antes da execução (rejeição testada com
+    hash inválido).
+  - Limitações: diferença de locale no golden contract (pré-existente);
+    smoke de instalação em container não executado (exige imagens de distro
+    completas — build das imagens de empacotamento validado).
+  - Auto-merge nativo: não habilitado neste PR, conforme decisão de revisão
+    manual; avaliar na SB-008.
 - Fora do escopo: alterações de produto sem tarefa própria, publicação de
   release (primeiro draft fica para a SB-008), Merge Queue do Trunk, mudança de
   protocolo do motor.
