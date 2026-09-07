@@ -1,7 +1,7 @@
 BUILD_DIR ?= build
 CMAKE ?= cmake
 
-.PHONY: all build configure test clean install pkg-deb pkg-rpm pkg-appimage help
+.PHONY: all build configure test clean install pkg-deb pkg-rpm pkg-appimage pkg-install-smoke help
 
 all: build
 
@@ -29,5 +29,8 @@ pkg-rpm:
 pkg-appimage:
 	./packaging/appimage/start-pkg-appimage.sh
 
+pkg-install-smoke:
+	./tests/installation/install_smoke.sh $(ARGS)
+
 help:
-	@echo "Targets: configure build test clean install pkg-deb pkg-rpm pkg-appimage"
+	@echo "Targets: configure build test clean install pkg-deb pkg-rpm pkg-appimage pkg-install-smoke"

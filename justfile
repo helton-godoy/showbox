@@ -34,3 +34,18 @@ worktree id topic:
 # Executa a demonstração contra o motor desta worktree.
 demo: build
     SHOWBOX_BIN="$PWD/build/dev/bin/showbox" bash examples/hello-world/run.sh
+
+# Pacotes separados do motor e do Studio (deb ubuntu+debian, rpm fedora,
+# AppImage do Studio). Exigem um engine de container (podman/docker).
+pkg-deb:
+    bash packaging/deb/start-pkg-deb.sh all
+
+pkg-rpm:
+    bash packaging/rpm/start-pkg-rpm.sh
+
+pkg-appimage:
+    bash packaging/appimage/start-pkg-appimage.sh
+
+# Smoke de instalação: install_smoke.sh deb <deb> ubuntu|debian | rpm <rpm>
+pkg-install-smoke args:
+    bash tests/installation/install_smoke.sh {{args}}
