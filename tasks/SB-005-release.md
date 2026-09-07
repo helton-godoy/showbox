@@ -23,14 +23,17 @@ Estado: em execução.
     `packaging/appimage/build.sh` e desktop entry.
   - Unificar os `start-pkg-*.sh` (saída em `dist/` com versão do changelog),
     atualizar `packaging/README.md` e adicionar receitas `just` (`pkg-deb`,
-    `pkg-rpm`, `pkg-appimage` e `pkg-install-smoke` quando houver engine de
-    container).
+    `pkg-rpm`, `pkg-appimage` e `pkg-install-smoke`).
+  - Ambiente de empacotamento: ampliar `tools/setup/debian.sh` (instala
+    `debhelper`, `dpkg-dev`, `fakeroot` e `podman`) e `tools/setup/doctor.sh`
+    (valida `dpkg-buildpackage`, `dpkg-deb`, `fakeroot`, `debhelper` e o engine
+    de container). `dist/` entra no `.gitignore`.
   - Teste de instalação/smoke: script `tests/installation/install_smoke.sh`
     que instala o pacote em imagem limpa da mesma distro e valida motor
     (`--version`, `--help` com "stdin") e Studio (presença e lançamento
-    offscreen; adicionar `--version` ao Studio se ausente). Localmente, sem
-    engine, o equivalente é `cmake --install` em diretório de staging +
-    smoke offscreen.
+    offscreen; adicionar `--version` ao Studio se ausente). O equivalente
+    local sem container é `cmake --install` em diretório de staging com build
+    Release + smoke offscreen.
   - Pipeline: `.github/workflows/release.yml` — gatilhos tags `v*` e
     `workflow_dispatch`; jobs de build dos pacotes (ubuntu+debian, fedora,
     appimage), testes de instalação em container por formato e criação de
@@ -47,9 +50,9 @@ Estado: em execução.
     `showbox` e `showbox-studio`; smoke offscreen OK para ambos.
   - `debian/control` e `showbox.spec` declaram os dois pacotes; Studio não é
     mais desligado no build de pacote.
-  - Teste de instalação em container implementado e executado localmente na
-    medida que o ambiente permitir (sem engine: verificação pendente
-    registrada no handoff, não declarada como testada).
+  - Teste de instalação em container implementado e **executado com podman**
+    para DEB (ubuntu e debian) e RPM (fedora), com smoke verde.
+  - `just doctor` valida as ferramentas de empacotamento locais.
   - Sem push e sem publicação externa.
 - Handoff ao final com SHA base/final, comandos executados e limitações
-  (ambiente sem container e CI remoto).
+  (execução do pipeline remoto depende de push/CI, decidido nas SB-006/SB-007).

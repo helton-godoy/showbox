@@ -31,4 +31,11 @@ if(SHOWBOX_WARNINGS_AS_ERRORS)
     target_compile_options(showbox PRIVATE -Werror)
 endif()
 
-install(TARGETS showbox RUNTIME DESTINATION bin)
+include(GNUInstallDirs)
+
+install(TARGETS showbox RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+
+# Entry de desktop do motor (consome o arquivo canônico em packaging/desktop).
+install(FILES ${CMAKE_SOURCE_DIR}/packaging/desktop/showbox.desktop
+    DESTINATION ${CMAKE_INSTALL_DATADIR}/applications
+)

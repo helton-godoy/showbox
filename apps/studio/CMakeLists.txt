@@ -92,7 +92,7 @@ install(FILES packaging/icon/showbox-studio.svg
     RENAME showbox-studio.svg
 )
 
-# Instala o arquivo .desktop
-install(FILES packaging/appimage/showbox-studio.desktop
+# Instala o .desktop (canônico em packaging/desktop)
+install(FILES ${CMAKE_SOURCE_DIR}/packaging/desktop/showbox-studio.desktop
     DESTINATION ${CMAKE_INSTALL_DATADIR}/applications
 )
