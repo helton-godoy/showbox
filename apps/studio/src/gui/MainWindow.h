@@ -50,6 +50,7 @@ private:
   void createToolbox(int style);
   void populateToolbox(AbstractToolbox *toolbox);
   bool confirmDiscardIfModified();
+  void onUndoIndexChanged();
 
   Canvas *m_canvas;
   IStudioWidgetFactory *m_factory;

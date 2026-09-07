@@ -60,12 +60,8 @@ MainWindow::MainWindow(QWidget *parent)
   createSampleWidgets();
 
   // Sincronizar UI com Undo/Redo
-  connect(m_controller->undoStack(), &QUndoStack::indexChanged, [this]() {
-    if (m_controller->selectedWidget()) {
-      m_propEditor->setTargetWidget(m_controller->selectedWidget());
-    }
-    m_inspector->updateHierarchy(m_canvas);
-  });
+  connect(m_controller->undoStack(), &QUndoStack::indexChanged, this,
+          &MainWindow::onUndoIndexChanged);
 
   // Edições de ações não geram comandos de undo; rastreá-las à parte.
   connect(m_actionEditor, &ActionEditor::actionsChanged, this,
@@ -127,7 +123,23 @@ MainWindow::MainWindow(QWidget *parent)
   m_inspector->updateHierarchy(m_canvas);
 }
 
-MainWindow::~MainWindow() { delete m_previewManager; delete m_factory; }
+MainWindow::~MainWindow() {
+  // O QUndoStack é destruído por último (filho do controller, criado cedo);
+  // desconectar antecipa as notificações que tocariam editores já liberados.
+  if (m_controller && m_controller->undoStack()) {
+    disconnect(m_controller->undoStack(), &QUndoStack::indexChanged, this,
+               &MainWindow::onUndoIndexChanged);
+  }
+  delete m_previewManager;
+  delete m_factory;
+}
+
+void MainWindow::onUndoIndexChanged() {
+  if (m_controller->selectedWidget()) {
+    m_propEditor->setTargetWidget(m_controller->selectedWidget());
+  }
+  m_inspector->updateHierarchy(m_canvas);
+}
 
 void MainWindow::setupUI() {
   statusBar()->showMessage("Pronto");

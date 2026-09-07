@@ -365,6 +365,9 @@ void TestParser::testDocumentedWidgetOptions()
     QVERIFY(series);
     QCOMPARE(series->count(), 2);
     realParser.processLine("set chart_1 append Central:50");
+    // A reconstrução substitui a série; recapturar o ponteiro atual.
+    series = qobject_cast<QPieSeries *>(chart->chart()->series().first());
+    QVERIFY(series);
     QCOMPARE(series->count(), 3);
 
     realParser.processLine("set chart_1 axis horizontal");
