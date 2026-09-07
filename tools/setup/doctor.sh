@@ -11,23 +11,55 @@ for tool in git cmake ninja c++ bash python3 qmake6; do
 done
 # Ferramentas de empacotamento (packaging/) em sistemas Debian/Ubuntu.
 . /etc/os-release
-case " ${ID:-} ${ID_LIKE:-} " in
-	*debian*|*ubuntu*|*neon*)
-		for tool in dpkg-buildpackage dpkg-deb fakeroot dh; do
-			if command -v "$tool" >/dev/null 2>&1; then
-				printf 'OK: %s\n' "$tool"
-			else
-				printf 'Ausente: %s\n' "$tool" >&2
-				missing=1
-			fi
-		done
-		;;
+case " ${ID-} ${ID_LIKE-} " in
+*debian* | *ubuntu* | *neon*)
+	for tool in dpkg-buildpackage dpkg-deb fakeroot dh; do
+		if command -v "$tool" >/dev/null 2>&1; then
+			printf 'OK: %s\n' "$tool"
+		else
+			printf 'Ausente: %s\n' "$tool" >&2
+			missing=1
+		fi
+	done
+	;;
 esac
 engine="$(command -v podman || command -v docker || true)"
-if [[ -n "${engine}" ]]; then
+if [[ -n ${engine} ]]; then
 	printf 'OK: container (%s)\n' "$(basename "${engine}")"
 else
 	printf 'Ausente: podman|docker (necessário para os testes de instalação)\n' >&2
+	missing=1
+fi
+
+# --- Trunk (validação central; instalar com tools/setup/trunk.sh) --------------
+expected_trunk="1.25.0"
+if command -v trunk >/dev/null 2>&1; then
+	printf 'OK: trunk\n'
+	trunk_version="$(trunk --version 2>/dev/null | head -n1 | tr -d '[:space:]')"
+	if [[ ${trunk_version} == "${expected_trunk}" ]]; then
+		printf 'OK: trunk %s (versão fixada em .trunk/trunk.yaml)\n' "${trunk_version}"
+	else
+		printf 'Falha: versão do trunk %s != esperada %s\n' "${trunk_version:-vazia}" "${expected_trunk}" >&2
+		missing=1
+	fi
+	if [[ -f .trunk/trunk.yaml ]]; then
+		if trunk check list >/dev/null 2>&1; then
+			printf 'OK: configuração Trunk carregada (trunk check list)\n'
+		else
+			printf 'Falha: configuração Trunk inválida (trunk check list)\n' >&2
+			missing=1
+		fi
+	else
+		printf 'Ausente: .trunk/trunk.yaml (configuração do Trunk)\n' >&2
+		missing=1
+	fi
+	# Instalação do GitHub App do Trunk não é consultável com o token atual
+	# (`/user/installations` retorna 403); a política (GIT_REMOTE.md, SB-007) é
+	# manter o app desinstalado. Conferir manualmente em
+	# https://github.com/settings/installations se houver suspeita.
+	printf 'OK: GitHub App do Trunk desinstalado (verificável apenas manualmente)\n'
+else
+	printf 'Ausente: trunk (execute bash tools/setup/trunk.sh)\n' >&2
 	missing=1
 fi
 
