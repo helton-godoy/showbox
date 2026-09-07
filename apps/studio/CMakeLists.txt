@@ -82,7 +82,7 @@ include(GNUInstallDirs)
 # Instala o binário em usr/bin
 install(TARGETS showbox-studio
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-    BUNDLE DESTINATION .
+    COMPONENT showbox-studio
 )
 
 # Instala o ícone SVG (Scalable) para garantir alta definição
@@ -90,9 +90,11 @@ install(TARGETS showbox-studio
 install(FILES packaging/icon/showbox-studio.svg
     DESTINATION ${CMAKE_INSTALL_DATADIR}/icons/hicolor/scalable/apps
     RENAME showbox-studio.svg
+    COMPONENT showbox-studio
 )
 
 # Instala o .desktop (canônico em packaging/desktop)
 install(FILES ${CMAKE_SOURCE_DIR}/packaging/desktop/showbox-studio.desktop
     DESTINATION ${CMAKE_INSTALL_DATADIR}/applications
+    COMPONENT showbox-studio
 )

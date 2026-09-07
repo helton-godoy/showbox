@@ -33,9 +33,13 @@ endif()
 
 include(GNUInstallDirs)
 
-install(TARGETS showbox RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+# Instalação por componente permite empacotar apenas o motor ou Studio.
+install(TARGETS showbox RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    COMPONENT showbox-engine
+)
 
 # Entry de desktop do motor (consome o arquivo canônico em packaging/desktop).
 install(FILES ${CMAKE_SOURCE_DIR}/packaging/desktop/showbox.desktop
     DESTINATION ${CMAKE_INSTALL_DATADIR}/applications
+    COMPONENT showbox-engine
 )

@@ -31,14 +31,11 @@ done
 cmake -S "${PROJECT_ROOT}" -B "${BUILD_DIR}" -DCMAKE_BUILD_TYPE=Release
 cmake --build "${BUILD_DIR}" --parallel
 
-# Instalação completa via CMake (binário, desktop e ícone canônicos).
+# Instala apenas o componente do Studio (binário, desktop e ícone canônicos).
 rm -rf "${APPDIR}"
 mkdir -p "${APPDIR}"
-DESTDIR="${APPDIR}" cmake --install "${BUILD_DIR}" --prefix /usr --strip
-
-# AppRun customizado com os portais XDG.
-cp "${SCRIPT_DIR}/AppRun" "${APPDIR}/AppRun"
-chmod +x "${APPDIR}/AppRun"
+DESTDIR="${APPDIR}" cmake --install "${BUILD_DIR}" --prefix /usr --strip \
+	--component showbox-studio
 
 # Plugins Wayland são carregados dinamicamente e precisam ser semeados.
 QT_PLUGIN_DIR="$(qtpaths6 --plugin-dir)"
@@ -63,7 +60,9 @@ cd "${SCRIPT_DIR}"
 	--appdir "${APPDIR}" \
 	--plugin qt \
 	--output appimage \
-	--custom-apprun "${APPDIR}/AppRun"
+	--custom-apprun "${SCRIPT_DIR}/AppRun" \
+	--desktop-file "${APPDIR}/usr/share/applications/showbox-studio.desktop" \
+	--icon-file "${APPDIR}/usr/share/icons/hicolor/scalable/apps/showbox-studio.svg"
 
 # Move para dist com nome determinístico.
 shopt -s nullglob
