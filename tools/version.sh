@@ -27,7 +27,7 @@ readonly SEMVER_PATTERN='^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-([0
 readonly STAGE_PATTERN='^(alpha|beta|rc)\.([1-9][0-9]*)$'
 
 main() {
-	local root version core prerelease suffix stage sequence deb rpm_release
+	local root version core prerelease suffix stage sequence stage_rank deb rpm_release
 
 	root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
@@ -68,8 +68,19 @@ main() {
 		sequence="${BASH_REMATCH[2]}"
 		# Debian pré-ordena antes do final via "~": rc.3 -> 1.0.0~rc3-1.
 		deb="${core}~${stage}${sequence}-1"
-		# RPM: 0.<N>.<stage><N> (ex.: rc.3 -> 0.3.rc3).
-		rpm_release="0.${sequence}.${stage}${sequence}"
+		# RPM: 0.<rank>.<stage><N> com rank fixo por estágio (alpha=1, beta=2,
+		# rc=3); estável vira release "1". O rank garante a ordem independe da
+		# sequência: alpha.9 < beta.1 < rc.1 < estável.
+		case "${stage}" in
+		alpha) stage_rank=1 ;;
+		beta) stage_rank=2 ;;
+		rc) stage_rank=3 ;;
+		*)
+			echo "Pré-release não suportado: ${stage}. Suporte: alpha.N, beta.N ou rc.N." >&2
+			exit 1
+			;;
+		esac
+		rpm_release="0.${stage_rank}.${stage}${sequence}"
 	else
 		deb="${core}-1"
 		rpm_release="1"
