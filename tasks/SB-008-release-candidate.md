@@ -1,6 +1,6 @@
 # SB-008 — Primeiro release candidato e validação dos artefatos
 
-Estado: em execução (corretivo P1, 2026-09-08).
+Estado: concluída (corretivo P1 aplicado, 2026-09-08).
 
 - Objetivo: produzir o primeiro release candidato da suíte Showbox a partir de
   uma tag real `v*`, validar os artefatos (deb ubuntu/debian, rpm, AppImage) e
@@ -62,10 +62,27 @@ Estado: em execução (corretivo P1, 2026-09-08).
   3. **Draft sem `prerelease`**: o `release.yml` agora calcula
      `prerelease: true` quando a tag tem sufixo (ex.: `v1.0.0-rc.3`), preservando
      `v1.0.0` como estável no futuro.
-  - Plano: branch `fix/SB-008-p1-version-single-source` → PR; validação pré-tag
-    via dispatch; tag `v1.0.0-rc.3`; validar draft (6 assets: 2 deb ubuntu +
-    2 deb debian + 2 rpm + 1 AppImage, todos com versão candidata); remover draft
-    `rc.2` após validação do novo candidato.
+  - Corretivo executado (todos os P1 validados):
+    - PR #14 (`9b417d8` → `fix/SB-008-p1-version-single-source`, gates
+      build-test/sanitizers/trunk-check/SonarCloud verdes) implementou a fonte
+      única `VERSION`/`tools/version.sh`, nomes DEB com distribuição,
+      `prerelease` calculado pela tag e a validação tag == `v$VERSION` com
+      checagem de basenames únicos no `release.yml`.
+    - Validação pré-tag: `workflow_dispatch` do `release.yml` em `main` (run 34177126323) → 4 artefatos + install-smoke verdes; job `release` pulado
+      (sem tag), como previsto.
+    - Validação local: 23/23 testes; `showbox --version` e
+      `showbox-studio --version` reportam `1.0.0-rc.3`; smokes deb ubuntu e
+      debian, rpm e AppImage verdes; 7 artefatos com basenames únicos.
+    - Tag **`v1.0.0-rc.3`** (SHA `9b417d8`): run 34177442699 com 6/6 jobs
+      verdes → draft `ShowBox v1.0.0-rc.3` (`draft: true`, `prerelease: true`)
+      com 7 assets — 2 debs ubuntu, 2 debs debian, 2 rpms e o AppImage do
+      Studio, todos com a versão candidata (deb interno `1.0.0~rc3-1`; rpm
+      `1.0.0-0.3.rc3.fc46`; AppImage `1.0.0-rc.3`).
+    - Draft `rc.2` removido após a validação do `rc.3` (tags preservadas; a
+      proteção `tags-v-protection` continua validando criação sem sobrescrita).
+    - Observação: o GitHub normaliza `~` → `.` apenas **no nome do asset**
+      (ex.: `showbox_1.0.0.rc3-1_ubuntu24.04_amd64.deb`); a versão interna do
+      pacote mantém `1.0.0~rc3-1`, correta para ordenação no apt.
 - Fora do escopo: release público/promovido, assinatura/notarização de pacotes,
   GPG, distribuição em repositórios de terceiros (PPA etc.), Merge Queue do
   Trunk. A promoção do realease (de draft para público) é decisão do
