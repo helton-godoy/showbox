@@ -46,14 +46,19 @@ formato via `tools/version.sh`:
   metadados `+build`.
 - Sem espaços e sem conteúdo vazio.
 - Pré-releases somente nos estágios `alpha.N`, `beta.N` ou `rc.N` com `N >= 1`.
-  Conversões: Debian `${core}~${stage}${N}-1` e RPM `0.${N}.${stage}${N}`
-  (ex.: `1.0.0-rc.3` → `1.0.0~rc3-1` e `0.3.rc3`); estável vira
-  `${core}-1`/`1`.
+  Conversões: Debian `${core}~${stage}${N}-1` e RPM `0.${rank}.${stage}${N}`,
+  em que `rank` é fixo por estágio (`alpha`=1, `beta`=2, `rc`=3); estável vira
+  Debian `${core}-1` e RPM release `1`. O rank garante a ordem
+  `alpha.N < beta.N < rc.N < estável` independente da sequência
+  (ex.: `alpha.9 < beta.1`; `1.0.0-rc.3` → `1.0.0~rc3-1` e `0.3.rc3`).
 
 Entradas inválidas são rejeitadas com `exit != 0` e mensagem em stderr; o
-contrato `tests/integration/version_contract.sh` cobre as conversões, entradas
-inválidas e a ordenação (`dpkg --compare-versions`; `rpmdev-vercmp` quando
-instalado) e roda em `just test` (CTest) e no `build-test` de todo PR.
+contrato `tests/integration/version_contract.sh` cobre conversões, entradas
+inválidas e a ordenação (`dpkg --compare-versions`; RPM via o port
+`tests/integration/rpmvercmp.py`, sempre, com cross-check no `rpmdev-vercmp`
+real quando disponível) e roda em `just test` (CTest) e no `build-test` de
+todo PR; o smoke Fedora (`install_smoke.sh rpm`) confere as relações cruzadas
+com o `rpmdevtools` real do container.
 
 ### Como incrementar
 
