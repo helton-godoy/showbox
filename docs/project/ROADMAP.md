@@ -13,7 +13,7 @@ Somente o integrador altera esta tabela.
 | SB-006  | Proteção Git remota e transição dos repositórios antigos                | SB-005         | Concluída             |
 | SB-006A | Correção: segurança de abertura/salvamento e validação de projeto       | SB-005         | Concluída e integrada |
 | SB-007  | Trunk como ferramenta central de validação (lint, formatação, segredos) | SB-006         | Concluída             |
-| SB-008  | Primeiro release candidato e validação dos artefatos                    | SB-005, SB-007 | Pronta para iniciar   |
+| SB-008  | Primeiro release candidato e validação dos artefatos                    | SB-005, SB-007 | Concluída             |
 
 ## Marco de produto
 
