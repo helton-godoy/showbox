@@ -1,6 +1,6 @@
 # SB-009B — Correção: testes de ordenação ligados à saída real do conversor
 
-Estado: em execução (2026-09-08).
+Estado: concluída (2026-09-08).
 
 - Objetivo: vincular os testes de ordenação RPM à saída real de
   `tools/version.sh`. Hoje `version_contract.sh` e o smoke Fedora comparam
@@ -37,3 +37,19 @@ Estado: em execução (2026-09-08).
   - `just test` verde, smoke rpm podman OK, gates verdes no PR.
   - Documentado no ROADMAP e no handoff.
 - Handoff ao final com SHA base/final, casos gerados e limitações.
+- Handoff (2026-09-08):
+  - Base `a0629dd`; trabalho na worktree SB-009B-version-order-tests.
+  - `version_contract.sh`: `rpm_evr_for()` gera version+release pelos
+    `tools/version.sh` da cópia temporária (via `set_version`); os 6 pares
+    agora são SemVer (`alpha.9 < beta.1`, `beta.9 < rc.1`, `rc.2 < rc.10`,
+    `rc.10 < estável`, `rc.3 < estável`, `alpha.1 < rc.3`) e cada lado sai do
+    conversor. 5 conversões positivas explícitas (rank desacoplado) antes da
+    comparação falham em regressão de rank.
+  - Smoke Fedora: NEVR do build gerado por `tools/version.sh` no host passado
+    como `SMOKE_RPM_NEVR`; container confere com rpmdev-vercmp real que o
+    candidato precede o estável, além das relações do esquema.
+  - Validações: contrato 63 casos 0 falhas; smoke rpm podman OK; just test
+    24/24; trunk check limpo; gates 4 verdes no PR.
+  - Limitação: as relações literais restantes no smoke validam o comparador
+    real sobre o esquema (não a saída do conversor — coberta pelo contrato,
+    que roda no build-test de todo PR). Sem impacto em conversão/draft.

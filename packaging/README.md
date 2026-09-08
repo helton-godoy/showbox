@@ -56,9 +56,11 @@ Entradas inválidas são rejeitadas com `exit != 0` e mensagem em stderr; o
 contrato `tests/integration/version_contract.sh` cobre conversões, entradas
 inválidas e a ordenação (`dpkg --compare-versions`; RPM via o port
 `tests/integration/rpmvercmp.py`, sempre, com cross-check no `rpmdev-vercmp`
-real quando disponível) e roda em `just test` (CTest) e no `build-test` de
-todo PR; o smoke Fedora (`install_smoke.sh rpm`) confere as relações cruzadas
-com o `rpmdevtools` real do container.
+real quando disponível), gerando os pares de ordenação pelo próprio
+`tools/version.sh`; roda em `just test` (CTest) e no `build-test` de todo PR;
+o smoke Fedora (`install_smoke.sh rpm`) confere com o `rpmdevtools` real do
+container o NEVR do build gerado precedendo o estável e as relações cruzadas
+do esquema.
 
 ### Como incrementar
 
