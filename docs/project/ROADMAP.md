@@ -14,6 +14,7 @@ Somente o integrador altera esta tabela.
 | SB-006A | Correção: segurança de abertura/salvamento e validação de projeto       | SB-005         | Concluída e integrada          |
 | SB-007  | Trunk como ferramenta central de validação (lint, formatação, segredos) | SB-006         | Concluída                      |
 | SB-008  | Primeiro release candidato e validação dos artefatos                    | SB-005, SB-007 | Concluída (rc.3, corretivo P1) |
+| SB-009  | Contrato e validação da versão única (testes do conversor)              | SB-008         | Concluída                      |
 
 ## Marco de produto
 
