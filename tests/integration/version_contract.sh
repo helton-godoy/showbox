@@ -105,6 +105,13 @@ expect_ok 'rc.3' '1.0.0-rc.3' '1.0.0-rc.3' '1.0.0~rc3-1' '1.0.0' '0.3.rc3' 'true
 expect_ok 'beta.2' '2.1.0-beta.2' '2.1.0-beta.2' '2.1.0~beta2-1' '2.1.0' '0.2.beta2' 'true'
 expect_ok 'alpha.1' '1.2.3-alpha.1' '1.2.3-alpha.1' '1.2.3~alpha1-1' '1.2.3' '0.1.alpha1' 'true'
 expect_ok 'patch inicial 0.0.1' '0.0.1' '0.0.1' '0.0.1-1' '0.0.1' '1' 'false'
+# Conversões positivas que desacoplam estágio e sequência: a regressão do rank
+# fixo falha aqui, antes da comparação de ordenação.
+expect_ok 'alpha.9 (rank fixo)' '1.0.0-alpha.9' '1.0.0-alpha.9' '1.0.0~alpha9-1' '1.0.0' '0.1.alpha9' 'true'
+expect_ok 'beta.1 (rank fixo)' '1.0.0-beta.1' '1.0.0-beta.1' '1.0.0~beta1-1' '1.0.0' '0.2.beta1' 'true'
+expect_ok 'beta.9 (rank fixo)' '1.0.0-beta.9' '1.0.0-beta.9' '1.0.0~beta9-1' '1.0.0' '0.2.beta9' 'true'
+expect_ok 'rc.1 (rank fixo)' '1.0.0-rc.1' '1.0.0-rc.1' '1.0.0~rc1-1' '1.0.0' '0.3.rc1' 'true'
+expect_ok 'rc.10 (rank fixo)' '1.0.0-rc.10' '1.0.0-rc.10' '1.0.0~rc10-1' '1.0.0' '0.3.rc10' 'true'
 
 # Casos negativos: SemVer inválido, prefixo v, build, espaços, estágio errado.
 expect_fail 'arquivo vazio'
@@ -148,19 +155,21 @@ else
 	echo 'SKIP: dpkg ausente; ordenação Debian não verificada'
 fi
 
-# Ordenação RPM: casos que desacoplam estágio e sequência (alpha.9 < beta.1,
-# beta.9 < rc.1, rc.2 < rc.10, rc.10 < estável). O port
-# tests/integration/rpmvercmp.py (espelho do rpmvercmp upstream do RPM) roda
-# sempre — sem SKIP; quando o binário real rpmdev-vercmp existir, as mesmas
-# relações são conferidas com ele.
-rpm_pairs=(
-	'1.0.0-0.1.alpha9 1.0.0-0.2.beta1'
-	'1.0.0-0.2.beta9 1.0.0-0.3.rc1'
-	'1.0.0-0.3.rc2 1.0.0-0.3.rc10'
-	'1.0.0-0.3.rc10 1.0.0-1'
-	'1.0.0-0.3.rc3 1.0.0-1'
-	'1.0.0-0.1.alpha1 1.0.0-0.3.rc3'
-)
+# Ordenação RPM: os pares são **gerados** pelo conversor (via cópia temporária
+# do script e do VERSION), não escritos à mão — um retrocesso no rank ou a
+# volta ao algoritmo antigo é detectado. Casos que desacoplam estágio e
+# sequência: alpha.9 < beta.1, beta.9 < rc.1, rc.2 < rc.10, rc.10 < estável.
+# O port tests/integration/rpmvercmp.py (espelho do rpmvercmp upstream do RPM)
+# compara sempre — sem SKIP; quando o binário real rpmdev-vercmp existir, as
+# mesmas saídas geradas são conferidas com ele.
+
+rpm_evr_for() { # semver -> EVR (version-release) conforme o conversor
+	local version="$1" rpm_version rpm_release
+	set_version "${version}"
+	rpm_version="$(bash "${work}/tools/version.sh" --rpm-version)"
+	rpm_release="$(bash "${work}/tools/version.sh" --rpm-release)"
+	printf '%s-%s\n' "${rpm_version}" "${rpm_release}"
+}
 
 check_rpm_lt() { # título ferramenta a b
 	local title="$1" tool="$2" a="$3" b="$4" status
@@ -179,15 +188,32 @@ check_rpm_lt() { # título ferramenta a b
 	fi
 }
 
-for pair in "${rpm_pairs[@]}"; do
-	read -r a b <<<"${pair}"
-	check_rpm_lt 'rpmvercmp' port "${a}" "${b}"
+check_versions_lt() { # título ferramenta semver_older semver_newer
+	local title="$1" tool="$2" older="$3" newer="$4"
+	local older_evr newer_evr
+	older_evr="$(rpm_evr_for "${older}")"
+	newer_evr="$(rpm_evr_for "${newer}")"
+	check_rpm_lt "${title} (${older} < ${newer})" "${tool}" "${older_evr}" "${newer_evr}"
+}
+
+version_pairs=(
+	'1.0.0-alpha.9 1.0.0-beta.1'
+	'1.0.0-beta.9 1.0.0-rc.1'
+	'1.0.0-rc.2 1.0.0-rc.10'
+	'1.0.0-rc.10 1.0.0'
+	'1.0.0-rc.3 1.0.0'
+	'1.0.0-alpha.1 1.0.0-rc.3'
+)
+
+for pair in "${version_pairs[@]}"; do
+	read -r older newer <<<"${pair}"
+	check_versions_lt 'rpmvercmp' port "${older}" "${newer}"
 done
 
 if command -v rpmdev-vercmp >/dev/null 2>&1; then
-	for pair in "${rpm_pairs[@]}"; do
-		read -r a b <<<"${pair}"
-		check_rpm_lt 'rpmdev-vercmp real' rpmdev-vercmp "${a}" "${b}"
+	for pair in "${version_pairs[@]}"; do
+		read -r older newer <<<"${pair}"
+		check_versions_lt 'rpmdev-vercmp real' rpmdev-vercmp "${older}" "${newer}"
 	done
 else
 	echo 'nota: rpmdev-vercmp ausente; cross-check real opcional não executado'
