@@ -7,8 +7,9 @@
 #   - conversões de estável, rc.N, beta.N e alpha.N;
 #   - rejeição de versões inválidas (vazio, prefixo v, espaços, +build,
 #     estágios fora de alpha/beta/rc e sufixo malformado);
-#   - ordenação dos gerenciadores (dpkg sempre; rpmdev-vercmp se instalado),
-#     exigindo que o candidato preceda a versão final.
+#   - ordenação dos gerenciadores: dpkg (sempre) e RPM com o port
+#     tests/integration/rpmvercmp.py (sempre, sem SKIP), com cross-check no
+#     binário real rpmdev-vercmp quando disponível.
 set -euo pipefail
 
 repo="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -147,28 +148,49 @@ else
 	echo 'SKIP: dpkg ausente; ordenação Debian não verificada'
 fi
 
+# Ordenação RPM: casos que desacoplam estágio e sequência (alpha.9 < beta.1,
+# beta.9 < rc.1, rc.2 < rc.10, rc.10 < estável). O port
+# tests/integration/rpmvercmp.py (espelho do rpmvercmp upstream do RPM) roda
+# sempre — sem SKIP; quando o binário real rpmdev-vercmp existir, as mesmas
+# relações são conferidas com ele.
+rpm_pairs=(
+	'1.0.0-0.1.alpha9 1.0.0-0.2.beta1'
+	'1.0.0-0.2.beta9 1.0.0-0.3.rc1'
+	'1.0.0-0.3.rc2 1.0.0-0.3.rc10'
+	'1.0.0-0.3.rc10 1.0.0-1'
+	'1.0.0-0.3.rc3 1.0.0-1'
+	'1.0.0-0.1.alpha1 1.0.0-0.3.rc3'
+)
+
+check_rpm_lt() { # título ferramenta a b
+	local title="$1" tool="$2" a="$3" b="$4" status
+	set +e
+	if [[ ${tool} == port ]]; then
+		python3 "${repo}/tests/integration/rpmvercmp.py" "${a}" "${b}" >/dev/null 2>&1
+	else
+		"${tool}" "${a}" "${b}" >/dev/null 2>&1
+	fi
+	status=$?
+	set -e
+	if ((status == 12)); then
+		ok
+	else
+		fail "${title} (${tool}): ${a} deve preceder ${b} (status ${status})"
+	fi
+}
+
+for pair in "${rpm_pairs[@]}"; do
+	read -r a b <<<"${pair}"
+	check_rpm_lt 'rpmvercmp' port "${a}" "${b}"
+done
+
 if command -v rpmdev-vercmp >/dev/null 2>&1; then
-	# rpmdev-vercmp: 0 igual, 11 primeiro mais novo, 12 primeiro mais antigo.
-	set +e
-	rpmdev-vercmp '1.0.0-0.3.rc3' '1.0.0-1' >/dev/null 2>&1
-	status=$?
-	set -e
-	if ((status == 12)); then
-		ok
-	else
-		fail "rpmdev-vercmp: rc.3 < estável (status ${status})"
-	fi
-	set +e
-	rpmdev-vercmp '1.0.0-0.1.alpha1' '1.0.0-0.3.rc3' >/dev/null 2>&1
-	status=$?
-	set -e
-	if ((status == 12)); then
-		ok
-	else
-		fail "rpmdev-vercmp: alpha.1 < rc.3 (status ${status})"
-	fi
+	for pair in "${rpm_pairs[@]}"; do
+		read -r a b <<<"${pair}"
+		check_rpm_lt 'rpmdev-vercmp real' rpmdev-vercmp "${a}" "${b}"
+	done
 else
-	echo 'SKIP: rpmdev-vercmp ausente; ordenação RPM não verificada'
+	echo 'nota: rpmdev-vercmp ausente; cross-check real opcional não executado'
 fi
 
 printf 'version_contract: %d casos, %d falhas\n' "${checks}" "${failures}"

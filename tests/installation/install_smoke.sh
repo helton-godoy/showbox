@@ -123,6 +123,25 @@ rpm)
 				echo "FALHA: showbox-studio dentro do pacote do motor" >&2
 				exit 1
 			fi
+			# Ordenação RPM com o comparador real (rpmdevtools): o release
+			# candidato 0.<rank>.<stage><N> deve preceder o estável (rank fixo
+			# por estágio, ver tools/version.sh). rpmdev-vercmp: 0 igual,
+			# 11 primeiro mais novo, 12 primeiro mais antigo.
+			dnf install -y -q rpmdevtools >/dev/null
+			cmplt() {
+				set +e
+				rpmdev-vercmp "$1" "$2" >/dev/null 2>&1
+				rc=$?
+				set -e
+				if ((rc != 12)); then
+					echo "FALHA: $1 deve preceder $2 (rpmdev-vercmp=$rc)" >&2
+					exit 1
+				fi
+			}
+			cmplt '1.0.0-0.1.alpha9' '1.0.0-0.2.beta1'
+			cmplt '1.0.0-0.2.beta9' '1.0.0-0.3.rc1'
+			cmplt '1.0.0-0.3.rc2' '1.0.0-0.3.rc10'
+			cmplt '1.0.0-0.3.rc10' '1.0.0-1'
 			echo "smoke rpm: OK"
 		EOF
 	)" ""
