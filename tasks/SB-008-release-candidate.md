@@ -1,6 +1,6 @@
 # SB-008 — Primeiro release candidato e validação dos artefatos
 
-Estado: proposta.
+Estado: em execução.
 
 - Objetivo: produzir o primeiro release candidato da suíte Showbox a partir de
   uma tag real `v*`, validar os artefatos (deb ubuntu/debian, rpm, AppImage) e
@@ -9,8 +9,8 @@ Estado: proposta.
 - Origem: desmembrada da SB-007 (2026-09-07). O handoff da SB-006 transferia o
   primeiro draft para a SB-007, mas a SB-007 ficou concentrada em lint,
   formatação, segurança e segredos; o draft passou a ter tarefa própria.
-- Base: após a SB-007 (Trunk integrado ao fluxo local e ao CI como check
-  obrigatório; `main` consolidada).
+- Base: `c4a1148` (main consolidada da SB-007, com Trunk integrado ao fluxo
+  local e ao CI como check obrigatório).
 - Branch prevista: feat/SB-008-release-candidate.
 - Responsável: integrador desta sessão.
 - Dependências: SB-005 (packaging e `release.yml` prontos), SB-007 (validação
