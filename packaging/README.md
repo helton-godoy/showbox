@@ -40,6 +40,28 @@ formato via `tools/version.sh`:
 | RPM                | `--rpm-version`/`--rpm-release` | `1.0.0` / `0.3.rc3`  |
 | Release            | `--prerelease`                  | `true`               |
 
+### Regras do `VERSION`
+
+- SemVer **estrito**, sem prefixo `v` (o prefixo pertence só à tag Git) e sem
+  metadados `+build`.
+- Sem espaços e sem conteúdo vazio.
+- Pré-releases somente nos estágios `alpha.N`, `beta.N` ou `rc.N` com `N >= 1`.
+  Conversões: Debian `${core}~${stage}${N}-1` e RPM `0.${N}.${stage}${N}`
+  (ex.: `1.0.0-rc.3` → `1.0.0~rc3-1` e `0.3.rc3`); estável vira
+  `${core}-1`/`1`.
+
+Entradas inválidas são rejeitadas com `exit != 0` e mensagem em stderr; o
+contrato `tests/integration/version_contract.sh` cobre as conversões, entradas
+inválidas e a ordenação (`dpkg --compare-versions`; `rpmdev-vercmp` quando
+instalado) e roda em `just test` (CTest) e no `build-test` de todo PR.
+
+### Como incrementar
+
+1. Editar apenas `VERSION` (ex.: `1.0.0-rc.3` → `1.0.0-rc.4` ou `1.0.0`).
+2. Rodar `tools/version.sh` e conferir as conversões.
+3. A próxima tag de release será `v$(tools/version.sh --app)`; o CI rejeita
+   tag divergente do `VERSION` antes de publicar.
+
 As tags de release seguem `v$(tools/version.sh --app)`; o CI valida que a tag
 corresponde ao `VERSION` antes de publicar.
 

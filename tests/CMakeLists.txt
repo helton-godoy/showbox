@@ -135,6 +135,14 @@ set_tests_properties(cli_contract PROPERTIES
     TIMEOUT 5
 )
 
+add_test(
+    NAME version_contract
+    COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/integration/version_contract.sh
+)
+set_tests_properties(version_contract PROPERTIES
+    TIMEOUT 30
+)
+
 if(SHOWBOX_LEGACY_ORACLE)
     if(NOT EXISTS "${SHOWBOX_LEGACY_ORACLE}")
         message(FATAL_ERROR
