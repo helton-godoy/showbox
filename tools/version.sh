@@ -2,8 +2,8 @@
 #
 # Fonte única de versão da suíte Showbox.
 #
-# Lê o arquivo VERSION (raiz do monorepo), em SemVer, e emite a versão na
-# sintaxe de cada consumidor:
+# Lê o arquivo VERSION (raiz do monorepo), em SemVer estrito, e emite a versão
+# na sintaxe de cada consumidor:
 #
 #   version.sh                 # SemVer da aplicação (ex.: 1.0.0-rc.3)
 #   version.sh --app           # idem
@@ -12,38 +12,64 @@
 #   version.sh --rpm-version   # parcela de versão do RPM (ex.: 1.0.0)
 #   version.sh --rpm-release   # parcela de release do RPM (ex.: 0.3.rc3)
 #
+# Regras de VERSION:
+#   - SemVer sem prefixo "v" (o prefixo pertence à tag Git) e sem metadados
+#     "+build";
+#   - sem espaços e sem conteúdo vazio;
+#   - pré-releases apenas nos estágios alpha.N|beta.N|rc.N com N >= 1.
+#
 # A tag de release deve ser "v$(version.sh --app)"; os scripts de packaging e o
 # CI derivam tudo daqui. Nunca editar versões em múltiplos arquivos.
 
 set -euo pipefail
 
+readonly SEMVER_PATTERN='^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-([0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*))?$'
+readonly STAGE_PATTERN='^(alpha|beta|rc)\.([1-9][0-9]*)$'
+
 main() {
-	local root version core prerelease suffix deb rpm_release
+	local root version core prerelease suffix stage sequence deb rpm_release
 
 	root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-	version="$(tr -d '[:space:]' <"${root}/VERSION")"
-	version="${version#v}"
 
-	# SemVer sem sufixo de build: core [(-prerelease)].
+	if [[ ! -f "${root}/VERSION" ]]; then
+		echo "VERSION não encontrado em ${root}" >&2
+		exit 1
+	fi
+	version="$(<"${root}/VERSION")"
+
+	if [[ -z ${version} ]]; then
+		echo "VERSION vazio: informe SemVer, por exemplo 1.0.0 ou 1.0.0-rc.3." >&2
+		exit 1
+	fi
+	if [[ ${version} =~ [[:space:]] ]]; then
+		echo "VERSION inválido (contém espaços): ${version}. Use SemVer sem espaços." >&2
+		exit 1
+	fi
+	if [[ ! ${version} =~ ${SEMVER_PATTERN} ]]; then
+		echo "VERSION inválido: ${version}. Use SemVer, por exemplo 1.0.0 ou 1.0.0-rc.3." >&2
+		exit 1
+	fi
+
+	core="${version%%-*}"
 	if [[ ${version} == *-* ]]; then
-		core="${version%%-*}"
 		prerelease=true
 		suffix="${version#*-}"
 	else
-		core="${version}"
 		prerelease=false
 		suffix=""
 	fi
 
 	if [[ ${prerelease} == true ]]; then
-		# Debian pré-ordena antes do final via "~"; pontos são removidos: rc.3 -> rc3.
-		deb="$(printf '%s~%s-1' "${core}" "${suffix//[.:]/}")"
-		# RPM: prerelease rc.N vira 0.<N>.rc<N> (ex.: 0.3.rc3); demais: 0.<pre>.
-		if [[ ${suffix} =~ ^(rc)\.([0-9]+)$ ]]; then
-			rpm_release="0.${BASH_REMATCH[2]}.${BASH_REMATCH[1]}${BASH_REMATCH[2]}"
-		else
-			rpm_release="0.${suffix//-/.}"
+		if [[ ! ${suffix} =~ ${STAGE_PATTERN} ]]; then
+			echo "Pré-release não suportado: ${suffix}. Suporte: alpha.N, beta.N ou rc.N (N >= 1)." >&2
+			exit 1
 		fi
+		stage="${BASH_REMATCH[1]}"
+		sequence="${BASH_REMATCH[2]}"
+		# Debian pré-ordena antes do final via "~": rc.3 -> 1.0.0~rc3-1.
+		deb="${core}~${stage}${sequence}-1"
+		# RPM: 0.<N>.<stage><N> (ex.: rc.3 -> 0.3.rc3).
+		rpm_release="0.${sequence}.${stage}${sequence}"
 	else
 		deb="${core}-1"
 		rpm_release="1"
