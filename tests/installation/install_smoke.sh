@@ -26,6 +26,7 @@ format="$1"
 source_dir="$2"
 distro="${3-}"
 engine="${CONTAINER_ENGINE:-podman}"
+repo="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
 [[ -d ${source_dir} ]] || [[ -f ${source_dir} ]] || {
 	echo "Caminho não encontrado: ${source_dir}" >&2
@@ -103,6 +104,11 @@ deb)
 	)" "SMOKE_DISTRO=${distro}"
 	;;
 rpm)
+	# NEVR (version-release) gerado pelo conversor para este build; o
+	# container confere com o rpmdev-vercmp real que ele precede o estável.
+	rpm_version="$(bash "${repo}/tools/version.sh" --rpm-version)"
+	rpm_release="$(bash "${repo}/tools/version.sh" --rpm-release)"
+	rpm_nevr="${rpm_version}-${rpm_release}"
 	run "fedora:latest" "$(
 		# shellcheck disable=SC2312  # heredoc no argumento; status do cat intencionalmente ignorado
 		cat <<-'EOF'
@@ -123,9 +129,10 @@ rpm)
 				echo "FALHA: showbox-studio dentro do pacote do motor" >&2
 				exit 1
 			fi
-			# Ordenação RPM com o comparador real (rpmdevtools): o release
-			# candidato 0.<rank>.<stage><N> deve preceder o estável (rank fixo
-			# por estágio, ver tools/version.sh). rpmdev-vercmp: 0 igual,
+			# Ordenação RPM com o comparador real (rpmdevtools). O NEVR do build
+			# (gerado por tools/version.sh --rpm-version/-release) deve preceder
+			# o estável, e as relações do esquema (rank fixo por estágio,
+			# ver tools/version.sh) seguem a ordem. rpmdev-vercmp: 0 igual,
 			# 11 primeiro mais novo, 12 primeiro mais antigo.
 			dnf install -y -q rpmdevtools >/dev/null
 			cmplt() {
@@ -138,13 +145,14 @@ rpm)
 					exit 1
 				fi
 			}
+			cmplt "${SMOKE_RPM_NEVR}" "${SMOKE_RPM_NEVR%%-*}-1"
 			cmplt '1.0.0-0.1.alpha9' '1.0.0-0.2.beta1'
 			cmplt '1.0.0-0.2.beta9' '1.0.0-0.3.rc1'
 			cmplt '1.0.0-0.3.rc2' '1.0.0-0.3.rc10'
 			cmplt '1.0.0-0.3.rc10' '1.0.0-1'
 			echo "smoke rpm: OK"
 		EOF
-	)" ""
+	)" "SMOKE_RPM_NEVR=${rpm_nevr}"
 	;;
 appimage)
 	if [[ ! -f ${source_dir} ]]; then

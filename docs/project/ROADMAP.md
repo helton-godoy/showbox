@@ -16,6 +16,7 @@ Somente o integrador altera esta tabela.
 | SB-008  | Primeiro release candidato e validação dos artefatos                    | SB-005, SB-007 | Concluída (rc.3, corretivo P1) |
 | SB-009  | Contrato e validação da versão única (testes do conversor)              | SB-008         | Concluída                      |
 | SB-009A | Correção: ordenação RPM da versão única entre estágios                  | SB-009         | Concluída                      |
+| SB-009B | Testes de ordenação ligados à saída real do conversor                   | SB-009A        | Concluída                      |
 
 ## Marco de produto
 
