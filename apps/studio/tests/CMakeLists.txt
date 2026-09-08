@@ -8,6 +8,7 @@ endforeach()
 
 add_executable(showbox_test_driver runtime_driver.cpp)
 target_link_libraries(showbox_test_driver PRIVATE showbox-core Qt6::Test)
+target_compile_definitions(showbox_test_driver PRIVATE SHOWBOX_VERSION="${SHOWBOX_VERSION}")
 target_compile_definitions(tst_ShellFlow PRIVATE DRIVER_PATH="$<TARGET_FILE:showbox_test_driver>")
 add_dependencies(tst_ShellFlow showbox_test_driver showbox)
 

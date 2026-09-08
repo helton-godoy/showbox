@@ -11,6 +11,8 @@
 #
 
 set -e
+# Falhas dentro de command substitutions propagam com set -e (bash >= 4.4).
+shopt -s inherit_errexit
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
@@ -51,15 +53,35 @@ build_deb() {
 	# Each distro gets its own artifact directory: the shlibdeps recorded by
 	# dpkg-shlibdeps (e.g. libqt6core6t64 vs libqt6gui6) differ per base image.
 	mkdir -p "${DIST_DIR}/${distro}"
-	local version
-	# shellcheck disable=SC2312  # pipe de extração da versão: falha vira versão vazia, tratada pelo glob
-	version=$(head -1 "${SCRIPT_DIR}/debian/changelog" | grep -oP '\(.*?\)' | tr -d '()')
+	local version label
+	# Versão derivada da fonte única VERSION (mesma usada de dentro do container).
+	# inherit_errexit propaga falha do version.sh; o `||` falha o build explicitamente.
+	version="$("${PROJECT_ROOT}/tools/version.sh" --deb)" || {
+		log_error "Não foi possível derivar a versão a partir de VERSION."
+		exit 1
+	}
+	label="$(_distro_label "${distro}")"
 	for deb_file in "${DIST_DIR}"/showbox*"_${version}_amd64.deb"; do
 		if [[ -f ${deb_file} ]]; then
-			mv "${deb_file}" "${DIST_DIR}/${distro}/$(basename "${deb_file}")"
-			log_info "Package created: ${DIST_DIR}/${distro}/$(basename "${deb_file}")"
+			local new_name
+			new_name="$(basename "${deb_file/_amd64.deb/_${label}_amd64.deb}")"
+			mv "${deb_file}" "${DIST_DIR}/${distro}/${new_name}"
+			log_info "Package created: ${DIST_DIR}/${distro}/${new_name}"
 		fi
 	done
+}
+
+# Rótulo de distribuição embutido no nome do pacote mantém Ubuntu e Debian
+# únicos no mesmo draft (showbox_*_amd64.deb colidia entre os dois builds).
+_distro_label() {
+	case "$1" in
+	ubuntu) echo "ubuntu24.04" ;;
+	debian) echo "debian13" ;;
+	*)
+		log_error "Distro sem rótulo: $1"
+		exit 1
+		;;
+	esac
 }
 
 mkdir -p "${DIST_DIR}"

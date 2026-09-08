@@ -31,7 +31,7 @@ int main(int argc, char *argv[]) {
         Qt::HighDpiScaleFactorRoundingPolicy::PassThrough);
     QApplication app(argc, argv);
     QApplication::setApplicationName("showbox");
-    QApplication::setApplicationVersion("1.0.0");
+    QApplication::setApplicationVersion(SHOWBOX_VERSION);
 
     QCommandLineParser commandLine;
     commandLine.setApplicationDescription(

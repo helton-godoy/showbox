@@ -2,6 +2,12 @@ cmake_minimum_required(VERSION 3.16)
 
 project(showbox-suite LANGUAGES CXX)
 
+# Versão única da suíte: VERSION (SemVer) é a fonte de verdade; os scripts de
+# packaging e o CI derivam dela a sintaxe de cada formato.
+file(READ "${CMAKE_CURRENT_SOURCE_DIR}/VERSION" _showbox_version_raw)
+string(STRIP "${_showbox_version_raw}" SHOWBOX_VERSION)
+message(STATUS "ShowBox version: ${SHOWBOX_VERSION}")
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)

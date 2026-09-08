@@ -8,7 +8,10 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 DIST_DIR="${PROJECT_ROOT}/dist"
-VERSION="1.0.0"
+# Versão derivada da fonte única VERSION (o spec é um template renderizado aqui).
+RPM_VERSION="$("${PROJECT_ROOT}/tools/version.sh" --rpm-version)"
+RPM_RELEASE="$("${PROJECT_ROOT}/tools/version.sh" --rpm-release)"
+VERSION="${RPM_VERSION}"
 RPMBUILD_ROOT="${RPMBUILD_ROOT:-/tmp/showbox-rpmbuild}"
 
 echo "=== ShowBox RPM Package Builder ==="
@@ -28,7 +31,13 @@ tar \
 	-C "${PROJECT_ROOT}" .
 
 # Copy spec file
-cp "${SCRIPT_DIR}/showbox.spec" "${RPMBUILD_ROOT}/SPECS/"
+cp "${SCRIPT_DIR}/showbox.spec" "${RPMBUILD_ROOT}/SPECS/showbox.spec"
+
+# Renderiza os placeholders do template com a versão única derivada acima.
+sed -i \
+	-e "s/@@RPM_VERSION@@/${RPM_VERSION}/g" \
+	-e "s/@@RPM_RELEASE@@/${RPM_RELEASE}/g" \
+	"${RPMBUILD_ROOT}/SPECS/showbox.spec"
 
 # Build RPM
 rpmbuild --define "_topdir ${RPMBUILD_ROOT}" \

@@ -25,11 +25,11 @@ Este guia cobre todas as formas de instalar o Showbox no seu sistema.
 A forma mais fácil para sistemas baseados em Debian.
 
 ```bash
-# Baixar o pacote mais recente
-wget https://github.com/helton-godoy/showbox/releases/latest/download/showbox_1.0.0_amd64.deb
+# Baixar o pacote mais recente (variante Ubuntu 24.04)
+wget https://github.com/helton-godoy/showbox/releases/latest/download/showbox_1.0.0-1_ubuntu24.04_amd64.deb
 
 # Instalar
-sudo dpkg -i showbox_1.0_amd64.deb
+sudo dpkg -i showbox_1.0.0-1_ubuntu24.04_amd64.deb
 
 # Resolver dependências (se necessário)
 sudo apt-get install -f
@@ -49,17 +49,17 @@ sudo apt-get install -f
 Executável portátil que funciona em qualquer distribuição Linux moderna.
 
 ```bash
-# Baixar
-wget https://github.com/helton-godoy/showbox/releases/latest/download/showbox-1.0.0-x86_64.AppImage
+# Baixar o AppImage do Studio
+wget https://github.com/helton-godoy/showbox/releases/latest/download/ShowBox-Studio-1.0.0-x86_64.AppImage
 
 # Tornar executável
-chmod +x showbox-1.0-x86_64.AppImage
+chmod +x ShowBox-Studio-1.0.0-x86_64.AppImage
 
 # Executar diretamente
-./showbox-1.0-x86_64.AppImage
+./ShowBox-Studio-1.0.0-x86_64.AppImage
 
 # Ou mover para o PATH
-sudo mv showbox-1.0-x86_64.AppImage /usr/local/bin/showbox
+sudo mv ShowBox-Studio-1.0.0-x86_64.AppImage /usr/local/bin/showbox-studio
 ```
 
 > **Nota**: AppImage inclui todas as dependências Qt6 embutidas.

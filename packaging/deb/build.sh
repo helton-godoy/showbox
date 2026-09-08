@@ -27,6 +27,11 @@ rm -rf "${PROJECT_ROOT}/debian"
 # Copy debian directory to project root (required by dpkg-buildpackage)
 cp -r "${SCRIPT_DIR}/debian" "${PROJECT_ROOT}/"
 
+# A versão do pacote vem da fonte única VERSION; o cabeçalho do changelog é
+# regenerado para o pacote nunca carregar versão divergente da fonte de verdade.
+deb_version="$("${PROJECT_ROOT}/tools/version.sh" --deb)"
+sed -i "1s/([^)]*)/(${deb_version})/" "${PROJECT_ROOT}/debian/changelog"
+
 cd "${PROJECT_ROOT}"
 
 # Make rules executable
