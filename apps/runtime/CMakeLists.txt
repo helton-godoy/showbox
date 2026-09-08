@@ -26,6 +26,7 @@ endif()
 
 add_executable(showbox main.cpp)
 target_link_libraries(showbox PRIVATE showbox-core)
+target_compile_definitions(showbox PRIVATE SHOWBOX_VERSION="${SHOWBOX_VERSION}")
 target_compile_options(showbox PRIVATE -Wall -Wextra -Wpedantic)
 if(SHOWBOX_WARNINGS_AS_ERRORS)
     target_compile_options(showbox PRIVATE -Werror)

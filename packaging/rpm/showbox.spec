@@ -1,6 +1,6 @@
 Name:           showbox
-Version:        1.0.0
-Release:        1%{?dist}
+Version:        @@RPM_VERSION@@
+Release:        @@RPM_RELEASE@@%{?dist}
 Summary:        GUI widgets for shell scripts
 
 License:        GPL-3.0-or-later
@@ -70,7 +70,7 @@ editor, action editor and project files (sbp format).
 %{_datadir}/icons/hicolor/scalable/apps/showbox-studio.svg
 
 %changelog
-* Mon Jan 12 2026 Helton Godoy <helton@example.com> - 1.0.0-1
+* Mon Jan 12 2026 Helton Godoy <helton@example.com> - @@RPM_VERSION@@-@@RPM_RELEASE@@
 - Initial release
 - Qt6-based GUI widgets for shell scripts
 - Standard and extended widgets support

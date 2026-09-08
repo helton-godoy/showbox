@@ -1,6 +1,6 @@
 # SB-008 — Primeiro release candidato e validação dos artefatos
 
-Estado: concluída.
+Estado: em execução (corretivo P1, 2026-09-08).
 
 - Objetivo: produzir o primeiro release candidato da suíte Showbox a partir de
   uma tag real `v*`, validar os artefatos (deb ubuntu/debian, rpm, AppImage) e
@@ -48,6 +48,24 @@ Estado: concluída.
     em nativas das distros.
   - Proteção de tags validada em produção: `tags-v-protection` permitiu a
     criação de `v1.0.0-rc.1`/`rc.2` sem sobrescrita.
+- Corretivo P1 (2026-09-08) — parecer de revisão bloqueando a promoção do rc.2:
+  1. **Pacotes não carregam a versão candidata**: todo o ecossistema estava fixo
+     em `1.0.0` (changelog, spec, AppImage, binários), o que levaria
+     gerenciadores a tratar o RC como estável. Corrigido com **fonte única**
+     `VERSION` (SemVer) → `tools/version.sh` converte para cada formato:
+     Debian `1.0.0~rc3-1`, RPM `Version 1.0.0`/`Release 0.3.rc3`, AppImage e
+     binários `1.0.0-rc.3`.
+  2. **Colisão de basenames DEB Ubuntu/Debian no draft**: os dois builds geravam
+     `showbox_*_amd64.deb` idênticos; apenas uma variante sobrevivia. Nomes agora
+     carregam a distribuição (`_ubuntu24.04_`, `_debian13_`) e o job `release`
+     valida basenames únicos antes do upload.
+  3. **Draft sem `prerelease`**: o `release.yml` agora calcula
+     `prerelease: true` quando a tag tem sufixo (ex.: `v1.0.0-rc.3`), preservando
+     `v1.0.0` como estável no futuro.
+  - Plano: branch `fix/SB-008-p1-version-single-source` → PR; validação pré-tag
+    via dispatch; tag `v1.0.0-rc.3`; validar draft (6 assets: 2 deb ubuntu +
+    2 deb debian + 2 rpm + 1 AppImage, todos com versão candidata); remover draft
+    `rc.2` após validação do novo candidato.
 - Fora do escopo: release público/promovido, assinatura/notarização de pacotes,
   GPG, distribuição em repositórios de terceiros (PPA etc.), Merge Queue do
   Trunk. A promoção do realease (de draft para público) é decisão do

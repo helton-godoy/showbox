@@ -15,7 +15,9 @@ conflito de caminho e refletindo a dependência de execução do Studio pelo mot
 
 Os debs são separados por distro porque o `dpkg-shlibdeps` registra dependências
 diferentes por imagem base (ex.: `libqt6core6t64` no Ubuntu 24.04 vs
-`libqt6core6` no Debian Trixie).
+`libqt6core6` no Debian Trixie). O nome do DEB carrega a distribuição
+(`..._ubuntu24.04_amd64.deb` vs `..._debian13_amd64.deb`) para que as variantes
+não colidam no mesmo release.
 
 ## Requisitos
 
@@ -24,6 +26,22 @@ diferentes por imagem base (ex.: `libqt6core6t64` no Ubuntu 24.04 vs
 
 As receitas constroem os artefatos **em container**, portanto o host não precisa
 de tools do formato. Para validar o ambiente local: `just doctor` e `just setup`.
+
+## Versão
+
+A versão de toda a suíte vem de um único arquivo, `VERSION` na raiz (SemVer,
+ex.: `1.0.0-rc.3`). Os scripts de packaging e o CI derivam a sintaxe de cada
+formato via `tools/version.sh`:
+
+| Consumidor         | Derivado                        | Exemplo (1.0.0-rc.3) |
+| ------------------ | ------------------------------- | -------------------- |
+| Aplicação/AppImage | `--app`                         | `1.0.0-rc.3`         |
+| Debian             | `--deb`                         | `1.0.0~rc3-1`        |
+| RPM                | `--rpm-version`/`--rpm-release` | `1.0.0` / `0.3.rc3`  |
+| Release            | `--prerelease`                  | `true`               |
+
+As tags de release seguem `v$(tools/version.sh --app)`; o CI valida que a tag
+corresponde ao `VERSION` antes de publicar.
 
 ## Como Construir
 

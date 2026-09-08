@@ -1,4 +1,4 @@
-showbox (1.0.0-1) unstable; urgency=medium
+showbox (1.0.0~rc3-1) unstable; urgency=medium
 
   * Initial release
   * Qt6-based GUI widgets for shell scripts

@@ -5,6 +5,13 @@ project(showbox-studio LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# Versão única da suíte (definida pela raiz; aqui caso este módulo seja lido
+# isoladamente pela ferramenta, o VERSION ainda vem do monorepo).
+if(NOT DEFINED SHOWBOX_VERSION)
+    file(READ "${CMAKE_SOURCE_DIR}/VERSION" _showbox_version_raw)
+    string(STRIP "${_showbox_version_raw}" SHOWBOX_VERSION)
+endif()
+
 # 1. Localizar pacotes do Qt6
 find_package(Qt6 REQUIRED COMPONENTS Widgets Charts Svg)
 
@@ -70,6 +77,7 @@ target_link_libraries(showbox-studio-components PUBLIC
 
 add_executable(showbox-studio src/main.cpp)
 target_link_libraries(showbox-studio PRIVATE showbox-studio-components)
+target_compile_definitions(showbox-studio PRIVATE SHOWBOX_VERSION="${SHOWBOX_VERSION}")
 
 enable_testing()
 add_subdirectory(tests)

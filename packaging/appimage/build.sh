@@ -14,7 +14,8 @@ PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 DIST_DIR="${PROJECT_ROOT}/dist"
 APPDIR="${SCRIPT_DIR}/ShowBox.AppDir"
 BUILD_DIR="${APPIMAGE_BUILD_DIR:-${PROJECT_ROOT}/build-appimage}"
-VERSION="1.0.0"
+# Versão derivada da fonte única VERSION (SemVer, ex.: 1.0.0-rc.3).
+VERSION="$("${PROJECT_ROOT}/tools/version.sh" --app)"
 TOOLS_DIR="${LINUXDEPLOY_TOOLS_DIR:-${SCRIPT_DIR}/tools}"
 
 echo "=== ShowBox Studio AppImage Builder ==="

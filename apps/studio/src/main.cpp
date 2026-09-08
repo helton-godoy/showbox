@@ -5,7 +5,7 @@
 
 int main(int argc, char *argv[]) {
   QCoreApplication::setApplicationName("showbox-studio");
-  QCoreApplication::setApplicationVersion("1.0.0");
+  QCoreApplication::setApplicationVersion(SHOWBOX_VERSION);
 
   {
     QCoreApplication core(argc, argv);
