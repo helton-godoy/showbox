@@ -108,7 +108,6 @@ rpm)
 	# container confere com o rpmdev-vercmp real que ele precede o estável.
 	rpm_version="$(bash "${repo}/tools/version.sh" --rpm-version)"
 	rpm_release="$(bash "${repo}/tools/version.sh" --rpm-release)"
-	rpm_nevr="${rpm_version}-${rpm_release}"
 	run "fedora:latest" "$(
 		# shellcheck disable=SC2312  # heredoc no argumento; status do cat intencionalmente ignorado
 		cat <<-'EOF'
@@ -124,6 +123,33 @@ rpm)
 			showbox --version
 			showbox --help | grep -qi stdin
 			showbox-studio --version
+			engine_version="$(rpm -q --qf '%{VERSION}' showbox)"
+			engine_release="$(rpm -q --qf '%{RELEASE}' showbox)"
+			studio_version="$(rpm -q --qf '%{VERSION}' showbox-studio)"
+			studio_release="$(rpm -q --qf '%{RELEASE}' showbox-studio)"
+			case "${engine_release}" in
+			"${SMOKE_RPM_RELEASE}"|"${SMOKE_RPM_RELEASE}".*) ;;
+			*)
+				echo "FALHA: Release do motor ${engine_release}; esperado ${SMOKE_RPM_RELEASE} com sufixo de distro opcional" >&2
+				exit 1
+				;;
+			esac
+			case "${studio_release}" in
+			"${SMOKE_RPM_RELEASE}"|"${SMOKE_RPM_RELEASE}".*) ;;
+			*)
+				echo "FALHA: Release do Studio ${studio_release}; esperado ${SMOKE_RPM_RELEASE} com sufixo de distro opcional" >&2
+				exit 1
+				;;
+			esac
+			if [[ ${engine_version} != "${SMOKE_RPM_VERSION}" ]]; then
+				echo "FALHA: Version do motor ${engine_version}; esperado ${SMOKE_RPM_VERSION}" >&2
+				exit 1
+			fi
+			if [[ ${studio_version} != "${SMOKE_RPM_VERSION}" ]]; then
+				echo "FALHA: Version do Studio ${studio_version}; esperado ${SMOKE_RPM_VERSION}" >&2
+				exit 1
+			fi
+			engine_nevr="${engine_version}-${engine_release}"
 			rpm -q showbox-studio >/dev/null
 			if rpm -ql showbox | grep -q '/showbox-studio$'; then
 				echo "FALHA: showbox-studio dentro do pacote do motor" >&2
@@ -145,14 +171,14 @@ rpm)
 					exit 1
 				fi
 			}
-			cmplt "${SMOKE_RPM_NEVR}" "${SMOKE_RPM_NEVR%%-*}-1"
+			cmplt "${engine_nevr}" "${engine_nevr%%-*}-1"
 			cmplt '1.0.0-0.1.alpha9' '1.0.0-0.2.beta1'
 			cmplt '1.0.0-0.2.beta9' '1.0.0-0.3.rc1'
 			cmplt '1.0.0-0.3.rc2' '1.0.0-0.3.rc10'
 			cmplt '1.0.0-0.3.rc10' '1.0.0-1'
 			echo "smoke rpm: OK"
 		EOF
-	)" "SMOKE_RPM_NEVR=${rpm_nevr}"
+	)" "SMOKE_RPM_VERSION=${rpm_version} SMOKE_RPM_RELEASE=${rpm_release}"
 	;;
 appimage)
 	if [[ ! -f ${source_dir} ]]; then
