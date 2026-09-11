@@ -17,9 +17,10 @@ Roadmap global é atualizado pelo integrador; agentes atualizam seu handoff.
 
 ## Configuração remota (aplicada na SB-006)
 
-Exigir PR e checks build-test/sanitizers, bloquear exclusão e force-push em
-`main` e `integration/showbox-v1`, sem aprovação humana (repositório de conta
-única). Tags `v*` protegidas contra sobrescrita/exclusão. Ver a política
+Exigir PR e checks build-test/sanitizers/trunk-check, bloquear exclusão e
+force-push em `main`, sem aprovação humana (repositório de conta única).
+Branches curtas entram diretamente em `main` por PR e são removidas após o
+merge. Tags `v*` ficam protegidas contra sobrescrita/exclusão. Ver a política
 completa em `docs/development/GIT_REMOTE.md` e a decisão em
-`docs/architecture/adr/0006-remote-governance.md`; `just doctor` confere a
+`docs/architecture/adr/0007-trunk-based-flow.md`; `just doctor` confere a
 configuração efetiva pela API. Sem fila de merge, integrar uma mudança por vez.
