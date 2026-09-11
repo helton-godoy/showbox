@@ -29,6 +29,8 @@ ActionEditor::ActionEditor(QWidget *parent) : QWidget(parent) {
     auto *buttons = new QHBoxLayout;
     for (const QString &label : {QString("Adicionar"), QString("Remover"), QString("↑"), QString("↓")}) {
         auto *button = new QPushButton(label);
+        if (label == "Adicionar") button->setObjectName("actionAdd");
+        else if (label == "Remover") button->setObjectName("actionRemove");
         buttons->addWidget(button);
         connect(button, &QPushButton::clicked, this, [this, label] {
             if (!m_target || m_event->currentText().isEmpty()) return;
