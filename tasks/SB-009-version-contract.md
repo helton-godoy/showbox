@@ -1,6 +1,6 @@
 # SB-009 — Contrato e validação da versão única
 
-Estado: em execução (2026-09-08).
+Estado: concluída (2026-09-08).
 
 - Objetivo: transformar `tools/version.sh` em fonte única com validação estrita
   de SemVer e conversões explícitas para os consumidores (binários, Debian,
@@ -45,3 +45,11 @@ Estado: em execução (2026-09-08).
   - Documentado no `packaging/README.md` e no handoff.
 - Handoff ao final com SHA base/final, casos cobertos e limitações
   (rpmdev-vercmp é opcional no ambiente local; dpkg disponível no runner CI).
+- Handoff (2026-09-08):
+  - Base `2f3f73f`; implementação integrada em `554af5b`.
+  - `tools/version.sh` passou a aceitar somente SemVer estável ou os estágios
+    `alpha.N`, `beta.N` e `rc.N`, com conversões explícitas para Debian e RPM.
+  - `version_contract` foi integrado ao CTest; `just test` executou 24/24
+    suítes e os quatro gates do PR ficaram verdes.
+  - A ordenação RPM entre estágios e a validação do pacote instalado foram
+    reforçadas nas correções SB-009A, SB-009B e SB-009C.
