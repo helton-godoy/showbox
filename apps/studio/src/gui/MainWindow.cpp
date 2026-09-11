@@ -73,6 +73,8 @@ MainWindow::MainWindow(QWidget *parent)
 
   // MenuBar
   QMenu *fileMenu = menuBar()->addMenu("&File");
+  fileMenu->addAction("New Project", QKeySequence::New, this,
+                      &MainWindow::onNewClicked);
   fileMenu->addAction("Open", this, &MainWindow::onOpenClicked,
                       QKeySequence::Open);
   fileMenu->addAction("Save", this, &MainWindow::onSaveClicked,
@@ -146,6 +148,9 @@ void MainWindow::setupUI() {
 
   // Toolbar
   QToolBar *toolBar = addToolBar("Main Toolbar");
+
+  QAction *newAction = toolBar->addAction("New");
+  connect(newAction, &QAction::triggered, this, &MainWindow::onNewClicked);
 
   QAction *openAction = toolBar->addAction("Open");
   connect(openAction, &QAction::triggered, this, &MainWindow::onOpenClicked);
@@ -300,6 +305,23 @@ void MainWindow::createSampleWidgets() {
     m_canvas->addWidget(w1);
     m_controller->manageWidget(w1);
   }
+}
+
+void MainWindow::onNewClicked() {
+  if (!confirmDiscardIfModified())
+    return;
+
+  m_previewManager->stop();
+  m_controller->selectWidget(nullptr);
+  m_controller->undoStack()->clear();
+  m_canvas->clear();
+  m_actionEditor->setTargetWidget(nullptr);
+  m_propEditor->setTargetWidget(nullptr);
+  m_inspector->updateHierarchy(m_canvas);
+  m_actionsModified = false;
+  m_projectDirectory = QDir::currentPath();
+  markDocumentSaved();
+  statusBar()->showMessage("Novo projeto criado.");
 }
 
 void MainWindow::onGroupRequested(const QString &containerType) {

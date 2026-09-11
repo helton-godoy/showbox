@@ -18,7 +18,7 @@ Somente o integrador altera esta tabela.
 | SB-009A | Correção: ordenação RPM da versão única entre estágios                  | SB-009         | Concluída                      |
 | SB-009B | Testes de ordenação ligados à saída real do conversor                   | SB-009A        | Concluída                      |
 | SB-009C | Smoke RPM valida Version/Release realmente instalados                   | SB-009B        | Concluída                      |
-| SB-010  | Fluxo visual executável de ponta a ponta                                | SB-004         | Pronta para iniciar            |
+| SB-010  | Fluxo visual executável de ponta a ponta                                | SB-004         | Concluída                      |
 
 ## Marco de produto
 

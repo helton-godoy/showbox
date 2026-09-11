@@ -1,18 +1,28 @@
 #include <QtTest>
 #include <QFile>
+#include <QApplication>
+#include <QDropEvent>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QLabel>
 #include <QLineEdit>
+#include <QMimeData>
 #include <QProcess>
 #include <QPushButton>
+#include <QPlainTextEdit>
+#include <QTableWidget>
 #include <QTemporaryDir>
 #include <QVBoxLayout>
 #include "core/ScriptGenerator.h"
 #include "core/PreviewManager.h"
 #include "core/ProjectSerializer.h"
 #include "core/StudioWidgetFactory.h"
+#include "core/StudioController.h"
+#include "gui/ActionEditor.h"
+#include "gui/Canvas.h"
+#include "gui/MainWindow.h"
+#include "gui/PropertyEditor.h"
 
 class ShellFlowTest : public QObject {
     Q_OBJECT
@@ -52,6 +62,32 @@ private:
         qputenv("SB_RESULT_FILE", dir.filePath("result").toUtf8());
         qputenv("SB_CHILD_PID_FILE", dir.filePath("child").toUtf8());
         qputenv("SB_ACTION_PID_FILE", dir.filePath("action").toUtf8());
+    }
+    void drop(Canvas *canvas, const QString &type) {
+        QMimeData mime;
+        mime.setText(type);
+        QDragEnterEvent enter(QPoint(2, 2), Qt::CopyAction, &mime,
+                              Qt::LeftButton, Qt::NoModifier);
+        QApplication::sendEvent(canvas, &enter);
+        QVERIFY2(enter.isAccepted(), qPrintable("Drag recusado: " + type));
+        QDropEvent event(QPointF(2, 2), Qt::CopyAction, &mime,
+                         Qt::LeftButton, Qt::NoModifier);
+        QApplication::sendEvent(canvas, &event);
+        QVERIFY2(event.isAccepted(), qPrintable("Drop recusado: " + type));
+    }
+    void renameThroughEditor(StudioController *controller,
+                             PropertyEditor *editor, QWidget *widget,
+                             const QString &name) {
+        controller->selectWidget(widget);
+        for (int row = 0; row < editor->rowCount(); ++row) {
+            if (editor->item(row, 0) &&
+                editor->item(row, 0)->text() == "objectName") {
+                editor->item(row, 1)->setText(name);
+                QCOMPARE(widget->objectName(), name);
+                return;
+            }
+        }
+        QFAIL("PropertyEditor não expôs objectName");
     }
 private slots:
     void cleanup() {
@@ -117,6 +153,75 @@ private slots:
         QTRY_VERIFY_WITH_TIMEOUT(!done.isEmpty(), 6000);
         QVERIFY2(done.first().first().toInt() == 0, qPrintable(output(errors)));
         QVERIFY(QFile::exists(dir.filePath("result")));
+    }
+    void studioAuthoredProjectSurvivesAndRuns() {
+        QTemporaryDir dir;
+        environment(dir, "normal");
+        MainWindow window;
+        window.show();
+        QVERIFY(QTest::qWaitForWindowExposed(&window));
+        QVERIFY(QMetaObject::invokeMethod(&window, "onNewClicked"));
+        auto *canvas = window.findChild<Canvas *>();
+        auto *controller = window.findChild<StudioController *>();
+        auto *properties = window.findChild<PropertyEditor *>();
+        auto *actions = window.findChild<ActionEditor *>();
+        QVERIFY(canvas && controller && properties && actions);
+
+        drop(canvas, "TextBox");
+        drop(canvas, "Button");
+        drop(canvas, "Label");
+        const auto widgets = canvas->findChildren<QWidget *>(
+            QString(), Qt::FindDirectChildrenOnly);
+        QCOMPARE(widgets.size(), 3);
+        QWidget *entry = nullptr;
+        QWidget *button = nullptr;
+        QWidget *result = nullptr;
+        for (QWidget *widget : widgets) {
+            const QString type = widget->property("showbox_type").toString();
+            if (type == "textbox") entry = widget;
+            else if (type == "button") button = widget;
+            else if (type == "label") result = widget;
+        }
+        QVERIFY(entry && button && result);
+        renameThroughEditor(controller, properties, entry, "entry");
+        renameThroughEditor(controller, properties, button, "run");
+        renameThroughEditor(controller, properties, result, "result");
+
+        controller->selectWidget(button);
+        auto *addAction = actions->findChild<QPushButton *>("actionAdd");
+        auto *command = actions->findChild<QPlainTextEdit *>("actionCommand");
+        QVERIFY(addAction && command);
+        addAction->click();
+        command->setPlainText(
+            "showbox_get VALUE entry\n"
+            "showbox_set result text \"Olá: $VALUE\"");
+        QVERIFY(window.hasUnsavedChanges());
+
+        const QString projectPath = dir.filePath("criado-no-studio.sbxproj");
+        ProjectSerializer serializer;
+        StudioWidgetFactory factory;
+        QVERIFY(serializer.save(projectPath, canvas, &factory));
+        QList<QWidget *> restoredWidgets;
+        QVERIFY(serializer.load(projectPath, &factory, restoredWidgets));
+        QWidget restored;
+        auto *layout = new QVBoxLayout(&restored);
+        for (QWidget *widget : restoredWidgets) layout->addWidget(widget);
+
+        ScriptGenerator generator;
+        const QString script = generator.generate(&restored);
+        QVERIFY2(!script.isEmpty(), qPrintable(generator.errorString()));
+        PreviewManager manager;
+        QSignalSpy done(&manager, &PreviewManager::previewFinished);
+        QSignalSpy errors(&manager, &PreviewManager::previewError);
+        manager.runPreview(script, dir.path());
+        QTRY_VERIFY_WITH_TIMEOUT(!done.isEmpty(), 6000);
+        QVERIFY2(done.first().first().toInt() == 0,
+                 qPrintable(output(errors)));
+        QFile resultFile(dir.filePath("result"));
+        QVERIFY(resultFile.open(QIODevice::ReadOnly));
+        QCOMPARE(resultFile.readAll(), qgetenv("SB_TEST_EXPECTED"));
+        QVERIFY(!QFile::exists(dir.filePath("INDEVIDO")));
+        QVERIFY(!QFile::exists(dir.filePath("OUTRO")));
     }
     void visualPreviewDoesNotExecuteActions() {
         QTemporaryDir dir; environment(dir, "visual");

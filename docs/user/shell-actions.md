@@ -3,10 +3,14 @@
 ## Experimente no Studio
 
 1. Execute `just run-studio` na worktree.
-2. No menu File, escolha **Nova demonstração campo/botão/rótulo**. Isso substitui
+2. Para montar a interface, escolha **File → New Project** e arraste TextBox,
+   Button e Label da Toolbox para o canvas. Selecione cada componente e ajuste
+   `objectName` para `entry`, `run` e `result` no editor de propriedades.
+   Como atalho, escolha **Nova demonstração campo/botão/rótulo**. Isso substitui
    o canvas atual; salve seu trabalho antes. Também é possível abrir
    `examples/hello-world/hello-world.sbxproj`.
-3. Selecione o botão Saudar e abra a aba Ações. Selecione a ação para editar o código.
+3. Selecione o botão e abra a aba Ações. Escolha **Adicionar** e edite o código
+   Bash. Na demonstração pronta, selecione a ação existente.
 4. Use **Prévia visual** para conferir a interface sem executar nenhuma ação.
 5. Use **Executar aplicação** (F5), preencha o campo e clique em Saudar.
 6. O rótulo recebe o valor e os logs aparecem no painel inferior. **Parar** encerra
@@ -62,6 +66,6 @@ Nomes precisam ser identificadores ASCII únicos, sem espaços. main e showbox s
 reservados. Os valores transportados nesta etapa precisam caber em uma linha;
 respostas multilinha e consultas simultâneas exigem um contrato posterior.
 
-Salvar/reabrir agora preserva o JSON das ações. Isso não substitui a SB-003:
-modelo independente dos widgets, validação do formato, layouts e persistência
-completa continuam sendo a próxima etapa.
+Salvar/reabrir preserva o modelo versionado, a hierarquia suportada, as
+propriedades cobertas e o JSON das ações. O Studio valida o projeto antes de
+substituir o documento atual e não executa ações durante a abertura.
