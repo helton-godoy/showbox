@@ -2,7 +2,7 @@ name: Showbox CI
 
 on:
   push:
-    branches: [main, chore/**, integration/**]
+    branches: [main]
   pull_request:
     branches: [main]
 

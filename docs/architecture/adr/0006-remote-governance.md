@@ -2,6 +2,10 @@
 
 Estado: implementado na SB-006; proteções ativas e verificadas por API.
 
+A estratégia de duas branches desta decisão foi substituída pela ADR 0007 após
+a `integration/showbox-v1` deixar de receber mudanças. As demais decisões de
+repositório canônico, proteção e arquivamento permanecem vigentes.
+
 ## Contexto
 
 Nas tarefas anteriores (SB-001 a SB-005) o monorepo Showbox existia apenas

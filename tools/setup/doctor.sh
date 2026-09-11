@@ -66,7 +66,8 @@ fi
 
 # --- Repositório remoto (helton-godoy/showbox) ---------------------------------
 repo="helton-godoy/showbox"
-expected_checks=("build-test" "sanitizers")
+expected_checks=("build-test" "sanitizers" "trunk-check")
+expected_app_id="15368"
 check_protection() {
 	local branch="$1"
 	local payload
@@ -74,28 +75,43 @@ check_protection() {
 		printf 'Proteção ausente: %s\n' "${branch}" >&2
 		return 1
 	fi
-	local info ctx count
+	local info ctx checks count strict force_push deletions enforce_admins
 	info="$(printf '%s' "${payload}" | python3 -c '
 import json, sys
 d = json.load(sys.stdin)
 ctx = (d.get("required_status_checks") or {}).get("contexts") or []
+checks = (d.get("required_status_checks") or {}).get("checks") or []
 count = (d.get("required_pull_request_reviews") or {}).get("required_approving_review_count")
 print("contexts=" + ",".join(ctx))
+print("checks=" + ",".join(str(x.get("context")) + ":" + str(x.get("app_id")) for x in checks))
+print("strict=" + str((d.get("required_status_checks") or {}).get("strict")))
 print("approvals=" + str(count if count is not None else "NA"))
-print("force_push=" + str(d.get("allows_force_pushes")))
-print("deletions=" + str(d.get("allows_deletions")))
+print("force_push=" + str((d.get("allow_force_pushes") or {}).get("enabled")))
+print("deletions=" + str((d.get("allow_deletions") or {}).get("enabled")))
 print("enforce_admins=" + str(d.get("enforce_admins", {}).get("enabled")))
 ')"
 	ctx="$(printf '%s\n' "${info}" | sed -n 's/^contexts=//p')"
+	checks="$(printf '%s\n' "${info}" | sed -n 's/^checks=//p')"
 	count="$(printf '%s\n' "${info}" | sed -n 's/^approvals=//p')"
+	strict="$(printf '%s\n' "${info}" | sed -n 's/^strict=//p')"
+	force_push="$(printf '%s\n' "${info}" | sed -n 's/^force_push=//p')"
+	deletions="$(printf '%s\n' "${info}" | sed -n 's/^deletions=//p')"
+	enforce_admins="$(printf '%s\n' "${info}" | sed -n 's/^enforce_admins=//p')"
 	for expected in "${expected_checks[@]}"; do
-		if ! printf ',%s,' "${ctx}" | grep -q ",${expected},"; then
-			printf 'Check obrigatório ausente em %s: %s [contextos: %s]\n' \
-				"${branch}" "${expected}" "${ctx}" >&2
+		if ! printf ',%s,' "${checks}" | grep -q ",${expected}:${expected_app_id},"; then
+			printf 'Check obrigatório ausente ou com app_id incorreto em %s: %s:%s [checks: %s]\n' \
+				"${branch}" "${expected}" "${expected_app_id}" "${checks}" >&2
 			return 1
 		fi
 	done
-	printf 'OK: %s — approvals=%s contexts=[%s]\n' "${branch}" "${count}" "${ctx}"
+	if [[ ${count} != 0 || ${strict} != True || ${force_push} != False ||
+		${deletions} != False || ${enforce_admins} != True ]]; then
+		printf 'Proteção incompleta em %s: approvals=%s strict=%s force_push=%s deletions=%s enforce_admins=%s\n' \
+			"${branch}" "${count}" "${strict}" "${force_push}" "${deletions}" "${enforce_admins}" >&2
+		return 1
+	fi
+	printf 'OK: %s — approvals=%s strict=%s contexts=[%s] enforce_admins=%s\n' \
+		"${branch}" "${count}" "${strict}" "${ctx}" "${enforce_admins}"
 }
 
 if command -v gh >/dev/null 2>&1; then
@@ -115,23 +131,19 @@ if command -v gh >/dev/null 2>&1; then
 		missing=1
 	fi
 	remote_branches="$(git ls-remote --heads origin 2>/dev/null)"
-	for branch in main integration/showbox-v1; do
-		if printf '%s\n' "${remote_branches}" | grep -q "refs/heads/${branch}$"; then
-			printf 'OK: branch remota %s\n' "${branch}"
-		else
-			printf 'Ausente: branch remota %s\n' "${branch}" >&2
-			missing=1
-		fi
-	done
+	if printf '%s\n' "${remote_branches}" | grep -q 'refs/heads/main$'; then
+		printf '%s\n' 'OK: branch remota main'
+	else
+		printf '%s\n' 'Ausente: branch remota main' >&2
+		missing=1
+	fi
 	# Proteções e nomes efetivos dos checks.
-	for branch in main integration/showbox-v1; do
-		# shellcheck disable=SC2310  # set -e fica desativado no if; retorno tratado explicitamente
-		if check_protection "${branch}"; then
-			:
-		else
-			missing=1
-		fi
-	done
+	# shellcheck disable=SC2310  # set -e fica desativado no if; retorno tratado explicitamente
+	if check_protection main; then
+		:
+	else
+		missing=1
+	fi
 	if gh api "repos/${repo}/rulesets" 2>/dev/null | grep -q 'tags-v-protection'; then
 		printf '%s\n' 'OK: tags protegidas (v*)'
 	else

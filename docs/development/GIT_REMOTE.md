@@ -1,26 +1,20 @@
 # Git remoto — governança do repositório canônico
 
 Estas regras valem para o repositório canônico `helton-godoy/showbox`. Elas são
-operacionalizadas por proteções configuradas no GitHub (ver ADR 0006 e
+operacionalizadas por proteções configuradas no GitHub (ver ADRs 0006 e 0007 e
 `tools/setup/doctor.sh`), não apenas por convenção. O repositório é de conta
 única; as proteções não exigem aprovação humana, mas exigem PR e checks verdes.
 
 ## Função das branches
 
-- `main`: linha de entrega. Recebe somente merges de `integration/showbox-v1`
-  (via PR, preservando a cadeia de commits). É a branch padrão e origem das
-  tags de release `v*`.
-- `integration/showbox-v1`: linha de integração contínua. Nela as tarefas
-  (`feat/SB-*`) são integradas de forma sequencial pelo responsável da
-  integração, via PR ou pela política de `just worktree`. Não há push direto de
-  agentes. Quando a linha está estável, é consolidada em `main` por PR.
+- `main`: única branch permanente, linha de entrega, branch padrão e origem das
+  tags de release `v*`. Recebe branches curtas de tarefa somente por PR.
 - `feat/SB-*`, `fix/SB-*`, `chore/SB-*`: branches de tarefa, uma por worktree,
-  curtas e descartáveis após a integração. Não são protegidas, mas nunca devem
-  receber push direto de `main`/`integration` por terceiros.
+  curtas e descartáveis após a integração. Não são protegidas nem reutilizadas.
 
 ## Pull Requests obrigatórios
 
-- Toda mudança que altera `main` e `integration/showbox-v1` entra por PR.
+- Toda mudança que altera `main` entra por PR a partir de uma branch de tarefa.
 - O PR deve estar atualizado com a base (`Update branch`/up-to-date) antes do
   merge.
 - Checks obrigatórios (configurados como required status checks de PR):
@@ -47,8 +41,8 @@ operacionalizadas por proteções configuradas no GitHub (ver ADR 0006 e
 
 ## Proibição de force-push
 
-- Force-push é proibido em `main`, `integration/showbox-v1` e em tags `v*`
-  (bloqueio configurado na proteção).
+- Force-push é proibido em `main` e em tags `v*` (bloqueio configurado na
+  proteção).
 - Rebase somente em branch exclusiva da tarefa, e ainda assim sem sobrescrever
   refs remotas de outras pessoas. Divergência com o remoto resolve por PR,
   nunca por force-push.
@@ -66,10 +60,10 @@ operacionalizadas por proteções configuradas no GitHub (ver ADR 0006 e
 ## Política para agentes LLM e worktrees
 
 - Trabalho isolado conforme `docs/development/worktrees.md`: uma tarefa, branch,
-  worktree e responsável; integrador atualiza o ROADMAP e mantém a integração.
-- Agentes não fazem push direto para `main`/`integration/showbox-v1`: a entrega
-  é a branch da tarefa + handoff. A integração é feita pelo responsável da
-  integração via `just worktree` + PR (ou merge seguindo a política).
+  worktree e responsável; integrador atualiza o ROADMAP e integra uma tarefa por
+  vez.
+- Agentes não fazem push direto para `main`: a entrega é a branch da tarefa com
+  handoff, integrada pelo responsável somente via PR.
 - Fora de tarefa autorizada, nenhuma alteração em proteções, tags, arquivamento
   de repositórios ou configuração externa.
 - Sempre confirmar com `git status`, `git diff --check`, `just check` e validar
@@ -78,8 +72,8 @@ operacionalizadas por proteções configuradas no GitHub (ver ADR 0006 e
 ## Verificação
 
 `just doctor` valida a presença/autenticação do `gh`, o acesso ao repositório,
-a existência das branches remotas, as proteções aplicadas e os nomes reais dos
-checks obrigatórios (passo a passo em `tools/setup/doctor.sh`).
+a existência da `main`, sua proteção completa e os nomes reais dos checks
+obrigatórios (passo a passo em `tools/setup/doctor.sh`).
 
 ## Integrações de GitHub Apps
 
