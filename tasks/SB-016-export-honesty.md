@@ -1,6 +1,6 @@
 # SB-016 — Exportação honesta no toolbox
 
-Estado: proposta (2026-09-12).
+Estado: concluída (2026-09-12).
 
 - Objetivo: impedir que o usuário monte no Studio um projeto que a prévia e
   a exportação recusam, desabilitando no toolbox os itens não-exportáveis
@@ -57,3 +57,22 @@ SB-017+, fora desta tarefa.
 - Usuários com projetos legados contendo itens experimentais verão a
   recusa de forma mais visível — mitigação: mensagem indica o item exato e
   o caminho (remover ou aguardar suporte). Reversão por revert simples.
+
+## Handoff
+
+- Implementação na branch `feat/SB-016-export-honesty`, base `c43c484`:
+  - `AbstractToolbox`: novo método `markItemExperimental(displayName,
+tooltip)` (virtual puro, implementado nos dois estilos).
+  - `ToolboxClassic`: itens sem `ItemIsEnabled`/`ItemIsSelectable` + tooltip;
+    fora de seleção, não arrastam (modo DragOnly).
+  - `ToolboxTree`: idem nas folhas (+ sem `ItemIsDragEnabled`).
+  - `MainWindow::populateToolbox`: marca tudo com `scriptable=false` do
+    catálogo (11 tipos: spinbox, textview, combobox, listbox, table,
+    calendar, chart, separator, scrollarea, layouts grade/form, spacers).
+- Novo `tst_Toolbox` (3 casos, Classic + Tree): não-exportáveis
+  desabilitados com tooltip; exportáveis (Button, Label) intactos.
+- Validações locais: `just build` limpo; `just test` **26/26**; `just check`
+  sem achados. Gates do PR como prova final.
+- Limitação: suporte real por família continua SB-017+ (motor+protocolo);
+  projetos legados com esses itens ainda abrem, e a recusa do gerador segue
+  nomeando o componente.

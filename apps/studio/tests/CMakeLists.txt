@@ -1,5 +1,5 @@
 find_package(Qt6 REQUIRED COMPONENTS Test)
-foreach(suite WidgetConfigs StudioIntegration ScriptGenerator ProjectSerializer ProjectWidgetMapper UndoRedo Hierarchy StylePerformance ShellFlow ActionEditor LifetimeGuards)
+foreach(suite WidgetConfigs StudioIntegration ScriptGenerator ProjectSerializer ProjectWidgetMapper UndoRedo Hierarchy StylePerformance ShellFlow ActionEditor LifetimeGuards Toolbox)
     add_executable(tst_${suite} tst_${suite}.cpp)
     target_link_libraries(tst_${suite} PRIVATE Qt6::Test showbox-studio-components)
     add_test(NAME tst_${suite} COMMAND tst_${suite})
