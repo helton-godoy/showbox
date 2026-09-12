@@ -6,6 +6,7 @@
 #include "gui/Canvas.h"
 #include <QGroupBox>
 #include <QLayout>
+#include <QPointer>
 #include <QTabWidget>
 #include <QUndoCommand>
 #include <QWidget>
@@ -19,37 +20,47 @@ public:
     setText("Add " + widget->objectName());
   }
 
-  void undo() override { m_canvas->removeWidget(m_widget); }
+  void undo() override {
+    if (m_canvas && !m_widget.isNull())
+      m_canvas->removeWidget(m_widget.data());
+  }
 
   void redo() override {
-    if (m_parent && m_parent != m_canvas) {
-      m_widget->setParent(m_parent);
-      if (auto *tabs = qobject_cast<QTabWidget *>(m_parent)) {
-        QString title = m_widget->property("title").toString();
-        if (title.isEmpty())
-          title = "Tab";
-        tabs->addTab(m_widget, title);
-      } else if (m_parent->layout()) {
-        m_parent->layout()->addWidget(m_widget);
-      }
-      m_widget->show();
-    } else {
-      m_canvas->addWidget(m_widget);
-    }
+    if (!m_widget.isNull())
+      applyAdd(m_widget.data(), m_parent.data());
   }
 
 private:
-  Canvas *m_canvas;
-  QWidget *m_widget;
-  QWidget *m_parent;
+  void applyAdd(QWidget *widget, QWidget *parent) {
+    if (!m_canvas || !widget)
+      return;
+    if (parent && parent != m_canvas) {
+      widget->setParent(parent);
+      if (auto *tabs = qobject_cast<QTabWidget *>(parent)) {
+        QString title = widget->property("title").toString();
+        if (title.isEmpty())
+          title = "Tab";
+        tabs->addTab(widget, title);
+      } else if (parent->layout()) {
+        parent->layout()->addWidget(widget);
+      }
+      widget->show();
+    } else {
+      m_canvas->addWidget(widget);
+    }
+  }
+
+  QPointer<Canvas> m_canvas;
+  QPointer<QWidget> m_widget;
+  QPointer<QWidget> m_parent;
 };
 
 class DeleteWidgetCommand : public QUndoCommand {
 public:
   struct WidgetInfo {
-    QWidget *widget;
-    QWidget *parent;
-    int index;
+    QPointer<QWidget> widget;
+    QPointer<QWidget> parent;
+    int index = -1;
   };
 
   DeleteWidgetCommand(Canvas *canvas, QList<QWidget *> widgets,
@@ -68,19 +79,24 @@ public:
   }
 
   void undo() override {
+    if (!m_canvas)
+      return;
     for (const auto &info : m_widgetsInfo) {
-      if (!info.parent || info.parent == m_canvas) {
-        m_canvas->addWidget(info.widget);
+      if (info.widget.isNull())
+        continue;
+      QWidget *parent = info.parent.data();
+      if (!parent || parent == m_canvas.data()) {
+        m_canvas->addWidget(info.widget.data());
       } else {
-        info.widget->setParent(info.parent);
-        if (auto *tabs = qobject_cast<QTabWidget *>(info.parent)) {
-          tabs->insertTab(info.index, info.widget,
+        info.widget->setParent(parent);
+        if (auto *tabs = qobject_cast<QTabWidget *>(parent)) {
+          tabs->insertTab(info.index, info.widget.data(),
                           info.widget->property("title").toString());
-        } else if (info.parent->layout()) {
-          if (auto *box = qobject_cast<QBoxLayout *>(info.parent->layout())) {
-            box->insertWidget(info.index, info.widget);
+        } else if (parent->layout()) {
+          if (auto *box = qobject_cast<QBoxLayout *>(parent->layout())) {
+            box->insertWidget(info.index, info.widget.data());
           } else {
-            info.parent->layout()->addWidget(info.widget);
+            parent->layout()->addWidget(info.widget.data());
           }
         }
       }
@@ -89,13 +105,16 @@ public:
   }
 
   void redo() override {
+    if (!m_canvas)
+      return;
     for (const auto &info : m_widgetsInfo) {
-      m_canvas->removeWidget(info.widget);
+      if (!info.widget.isNull())
+        m_canvas->removeWidget(info.widget.data());
     }
   }
 
 private:
-  Canvas *m_canvas;
+  QPointer<Canvas> m_canvas;
   QList<WidgetInfo> m_widgetsInfo;
 };
 
@@ -110,15 +129,17 @@ public:
   }
 
   void undo() override {
-    m_target->setProperty(m_propertyName.toUtf8().constData(), m_oldValue);
+    if (!m_target.isNull())
+      m_target->setProperty(m_propertyName.toUtf8().constData(), m_oldValue);
   }
 
   void redo() override {
-    m_target->setProperty(m_propertyName.toUtf8().constData(), m_newValue);
+    if (!m_target.isNull())
+      m_target->setProperty(m_propertyName.toUtf8().constData(), m_newValue);
   }
 
 private:
-  QWidget *m_target;
+  QPointer<QWidget> m_target;
   QString m_propertyName;
   QVariant m_oldValue;
   QVariant m_newValue;
@@ -144,13 +165,13 @@ public:
                      newParent ? newParent->objectName() : "Root"));
   }
 
-  void undo() override { applyMove(m_oldParent, m_oldIndex); }
+  void undo() override { applyMove(m_oldParent.data(), m_oldIndex); }
 
-  void redo() override { applyMove(m_newParent, m_newIndex); }
+  void redo() override { applyMove(m_newParent.data(), m_newIndex); }
 
 private:
   void applyMove(QWidget *parent, int index) {
-    if (!parent || !m_widget)
+    if (!parent || m_widget.isNull())
       return;
 
     m_widget->setParent(parent);
@@ -158,30 +179,30 @@ private:
       if (index >= 0) {
         // Se for um QBoxLayout, podemos inserir
         if (auto *box = qobject_cast<QBoxLayout *>(parent->layout())) {
-          box->insertWidget(index, m_widget);
+          box->insertWidget(index, m_widget.data());
         } else {
-          parent->layout()->addWidget(m_widget);
+          parent->layout()->addWidget(m_widget.data());
         }
       } else {
-        parent->layout()->addWidget(m_widget);
+        parent->layout()->addWidget(m_widget.data());
       }
     }
     m_widget->show();
   }
 
-  QWidget *m_widget;
-  QWidget *m_oldParent;
-  QWidget *m_newParent;
-  int m_oldIndex;
-  int m_newIndex;
+  QPointer<QWidget> m_widget;
+  QPointer<QWidget> m_oldParent;
+  QPointer<QWidget> m_newParent;
+  int m_oldIndex = -1;
+  int m_newIndex = -1;
 };
 
 class GroupWidgetsCommand : public QUndoCommand {
 public:
   struct WidgetInfo {
-    QWidget *widget;
-    QWidget *oldParent;
-    int oldIndex;
+    QPointer<QWidget> widget;
+    QPointer<QWidget> oldParent;
+    int oldIndex = -1;
   };
 
   GroupWidgetsCommand(Canvas *canvas, IStudioWidgetFactory *factory,
@@ -204,58 +225,70 @@ public:
   }
 
   void undo() override {
+    if (!m_canvas)
+      return;
     for (const auto &info : m_widgetsInfo) {
-      info.widget->setParent(info.oldParent);
-      if (info.oldParent && info.oldParent->layout()) {
+      if (info.widget.isNull() || info.oldParent.isNull())
+        continue;
+      info.widget->setParent(info.oldParent.data());
+      if (info.oldParent->layout()) {
         if (auto *box = qobject_cast<QBoxLayout *>(info.oldParent->layout())) {
-          box->insertWidget(info.oldIndex, info.widget);
+          box->insertWidget(info.oldIndex, info.widget.data());
         } else {
-          info.oldParent->layout()->addWidget(info.widget);
+          info.oldParent->layout()->addWidget(info.widget.data());
         }
       }
       info.widget->show();
     }
-    m_canvas->removeWidget(m_container);
+    if (!m_container.isNull())
+      m_canvas->removeWidget(m_container.data());
     if (m_controller)
       m_controller->selectWidget(nullptr);
   }
 
   void redo() override {
-    if (!m_container) {
-      m_container = m_factory->createWidget(
+    if (!m_canvas || !m_factory)
+      return;
+    if (m_container.isNull()) {
+      QWidget *created = m_factory->createWidget(
           m_containerType, m_containerType.toLower() + "_group");
+      if (!created)
+        return;
+      m_container = created;
       // Configurar layout padrão se for Frame/GroupBox
       if (m_containerType == "Frame") {
         m_container->setProperty("showbox_type", "frame");
-        auto *l = new QHBoxLayout(m_container);
+        auto *l = new QHBoxLayout(m_container.data());
         l->setContentsMargins(5, 5, 5, 5);
       } else if (m_containerType == "GroupBox") {
         m_container->setProperty("showbox_type", "groupbox");
-        auto *l = new QVBoxLayout(m_container);
+        auto *l = new QVBoxLayout(m_container.data());
         l->setContentsMargins(5, 15, 5, 5);
       }
     }
 
-    m_canvas->addWidget(m_container);
+    m_canvas->addWidget(m_container.data());
     for (const auto &info : m_widgetsInfo) {
+      if (info.widget.isNull())
+        continue;
       if (m_container->layout()) {
-        m_container->layout()->addWidget(info.widget);
+        m_container->layout()->addWidget(info.widget.data());
       } else {
-        info.widget->setParent(m_container);
+        info.widget->setParent(m_container.data());
       }
       info.widget->show();
     }
     if (m_controller)
-      m_controller->selectWidget(m_container);
+      m_controller->selectWidget(m_container.data());
   }
 
 private:
-  Canvas *m_canvas;
+  QPointer<Canvas> m_canvas;
   IStudioWidgetFactory *m_factory;
-  StudioController *m_controller;
+  QPointer<StudioController> m_controller;
   QList<WidgetInfo> m_widgetsInfo;
   QString m_containerType;
-  QWidget *m_container = nullptr;
+  QPointer<QWidget> m_container;
 };
 
 class ChangeLayoutCommand : public QUndoCommand {
@@ -277,7 +310,7 @@ public:
 
 private:
   void applyLayout(const QString &type) {
-    if (!m_container)
+    if (m_container.isNull())
       return;
 
     // 1. Coletar widgets atuais
@@ -309,7 +342,7 @@ private:
     }
   }
 
-  QWidget *m_container;
+  QPointer<QWidget> m_container;
   QString m_oldType;
   QString m_newType;
 };

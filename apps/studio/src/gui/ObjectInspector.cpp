@@ -5,6 +5,7 @@
 #include <QDropEvent>
 #include <QElapsedTimer>
 #include <QMenu>
+#include <QSignalBlocker>
 #include <QTabWidget>
 
 ObjectInspector::ObjectInspector(QWidget *parent) : QTreeWidget(parent) {
@@ -39,7 +40,9 @@ void ObjectInspector::onSelectionChanged() {
 
   for (QTreeWidgetItem *item : items) {
     QWidget *w = item->data(0, Qt::UserRole).value<QWidget *>();
-    if (w)
+    // A chave pode ter sido deletada entre a construção da árvore e o clique;
+    // só aceitar widgets vivos e ainda mapeados.
+    if (w && m_widgetToItem.contains(w))
       widgets.append(w);
   }
 
@@ -56,9 +59,11 @@ void ObjectInspector::onSelectionChanged() {
 
 void ObjectInspector::onCurrentItemChanged(QTreeWidgetItem *current,
                                            QTreeWidgetItem *previous) {
+  Q_UNUSED(previous);
   if (current) {
     QWidget *widget = current->data(0, Qt::UserRole).value<QWidget *>();
-    emit itemSelected(widget);
+    if (widget && m_widgetToItem.contains(widget))
+      emit itemSelected(widget);
   }
 }
 
@@ -110,15 +115,18 @@ void ObjectInspector::dropEvent(QDropEvent *event) {
   // Executar o drop visual do Qt
   QTreeWidget::dropEvent(event);
 
-  // Identificar o novo pai na árvore
+  // Identificar o novo pai na árvore (só widgets vivos e mapeados participam)
   QTreeWidgetItem *newParentItem = item->parent();
   QWidget *newParentWidget = nullptr;
 
   if (newParentItem) {
-    newParentWidget = newParentItem->data(0, Qt::UserRole).value<QWidget *>();
+    QWidget *candidate =
+        newParentItem->data(0, Qt::UserRole).value<QWidget *>();
+    if (candidate && m_widgetToItem.contains(candidate))
+      newParentWidget = candidate;
   }
 
-  if (widget && newParentWidget) {
+  if (widget && newParentWidget && m_widgetToItem.contains(widget)) {
     // --- VALIDAÇÃO DE CONTAINER ---
     // Política de UI para destino de drop na árvore, mantida explícita (ADR
     // 0004): só os containers que aceitam aninhamento direto. Tabs,
@@ -197,10 +205,45 @@ void ObjectInspector::onWidgetRemoved(QWidget *widget) {
   delete item;
 }
 
+void ObjectInspector::onWidgetDestroyed(QObject *destroyed) {
+  // Cada chave poda a si mesma ao morrer. Atenção: `delete` no item de um
+  // widget libera também os itens filhos na árvore, então as chaves desses
+  // filhos precisam sair do mapa junto — sem isso, o destroyed() de cada
+  // filho deletaria um item já liberado. Nenhuma chamada toca o widget em
+  // destruição além da comparação de endereço.
+  auto it = m_widgetToItem.begin();
+  while (it != m_widgetToItem.end()) {
+    if (it.key() == destroyed) {
+      QTreeWidgetItem *item = it.value();
+      QList<QWidget *> orphaned;
+      for (auto j = m_widgetToItem.begin(); j != m_widgetToItem.end(); ++j) {
+        QTreeWidgetItem *candidate = j.value();
+        bool descendant = (candidate == item);
+        for (QTreeWidgetItem *p = candidate->parent(); !descendant && p;
+             p = p->parent()) {
+          descendant = (p == item);
+        }
+        if (descendant)
+          orphaned.append(j.key());
+      }
+      if (item->treeWidget() == this)
+        delete item;
+      for (QWidget *w : orphaned)
+        m_widgetToItem.remove(w);
+      return;
+    }
+    ++it;
+  }
+}
+
 void ObjectInspector::updateHierarchy(QWidget *root) {
   QElapsedTimer timer;
   timer.start();
 
+  // Bloquear sinais durante a reconstrução: clear() dispara
+  // itemSelectionChanged/currentItemChanged, que emitiriam itemSelected com
+  // ponteiros em transição.
+  const QSignalBlocker blocker(this);
   clear();
   m_widgetToItem.clear();
 
@@ -228,6 +271,12 @@ void ObjectInspector::addWidgetToTree(QWidget *widget,
   item->setData(0, Qt::UserRole, QVariant::fromValue(widget));
 
   m_widgetToItem[widget] = item;
+
+  // Podar o mapa quando o widget morrer: sem isso, undo/delete/clear
+  // deixariam chaves penduradas reutilizáveis por ponteiros reciclados.
+  // (Slot membro: UniqueConnection exige ponteiro para função-membro.)
+  connect(widget, &QObject::destroyed, this,
+          &ObjectInspector::onWidgetDestroyed, Qt::UniqueConnection);
 
   // Verificar se deve recursar: Apenas containers devem expor seus filhos na
   // árvore. Widgets atômicos (Button, ComboBox) têm filhos internos (Qt

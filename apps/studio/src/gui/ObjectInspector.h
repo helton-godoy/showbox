@@ -38,6 +38,7 @@ private slots:
   void onSelectionChanged();
   void onCurrentItemChanged(QTreeWidgetItem *current,
                             QTreeWidgetItem *previous);
+  void onWidgetDestroyed(QObject *destroyed);
 
 private:
   void addWidgetToTree(QWidget *widget, QTreeWidgetItem *parentItem);

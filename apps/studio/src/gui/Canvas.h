@@ -3,6 +3,7 @@
 
 #include <QDragEnterEvent>
 #include <QDropEvent>
+#include <QPointer>
 #include <QVBoxLayout>
 #include <QWidget>
 
@@ -47,6 +48,11 @@ private:
   // Suporte a drop em containers
   QWidget *findContainerAtPos(const QPoint &pos);
   void highlightContainer(QWidget *container, bool highlight, bool blue = false);
+  void clearHighlight();
+
+  // Último container destacado no drag (QPointer: anula sozinho se o widget
+  // for deletado, evitando use-after-free do antigo `static` local).
+  QPointer<QWidget> m_lastHighlight;
 };
 
 #endif // CANVAS_H

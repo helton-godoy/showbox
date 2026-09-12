@@ -84,6 +84,8 @@ void Canvas::removeWidget(QWidget *widget) {
   if (!widget)
     return;
 
+  if (m_lastHighlight == widget)
+    clearHighlight();
   // Remover do layout do Canvas se for filho direto
   if (widget->parentWidget() == this) {
     m_layout->removeWidget(widget);
@@ -106,6 +108,7 @@ void Canvas::removeWidget(QWidget *widget) {
 
 void Canvas::clear() {
   setSelectedWidget(nullptr);
+  clearHighlight();
   QLayoutItem *item;
   while ((item = m_layout->takeAt(0)) != nullptr) {
     if (QWidget *w = item->widget()) {
@@ -163,9 +166,8 @@ void Canvas::dragMoveEvent(QDragMoveEvent *event) {
   }
 
   // Remover highlight do container anterior se houver
-  static QWidget *lastHighlighted = nullptr;
-  if (lastHighlighted && lastHighlighted != container) {
-    highlightContainer(lastHighlighted, false);
+  if (m_lastHighlight && m_lastHighlight != container) {
+    highlightContainer(m_lastHighlight, false);
   }
 
   if (container && container != this) {
@@ -176,21 +178,21 @@ void Canvas::dragMoveEvent(QDragMoveEvent *event) {
       if (containerType == "tabs") {
         // Highlight AZUL para indicar que vai adicionar uma nova aba
         highlightContainer(container, true, true);
-        lastHighlighted = container;
+        m_lastHighlight = container;
       } else {
         // Se for Page mas o container não for TabWidget, não destaca (operação
         // inválida)
         highlightContainer(container, false); // Garante que não fique verde
-        lastHighlighted = nullptr;
+        m_lastHighlight = nullptr;
       }
     } else {
       // Comportamento normal para outros widgets (Verde)
       highlightContainer(container, true, false);
-      lastHighlighted = container;
+      m_lastHighlight = container;
     }
 
   } else {
-    lastHighlighted = nullptr;
+    m_lastHighlight = nullptr;
   }
 
   event->acceptProposedAction();
@@ -199,17 +201,22 @@ void Canvas::dragMoveEvent(QDragMoveEvent *event) {
 void Canvas::dropEvent(QDropEvent *event) {
   QString type;
   const QMimeData *mime = event->mimeData();
+  // A origem do drag (toolbox) pode ter sido destruída (ex.: troca de estilo
+  // durante o arrasto); QPointer anula sozinho nesse caso.
+  const QPointer<QObject> dragSource(event->source());
 
   if (mime->hasText()) {
     type = mime->text();
-  } else if (QListWidget *list = qobject_cast<QListWidget *>(event->source())) {
+  } else if (dragSource && qobject_cast<QListWidget *>(dragSource.data())) {
     // Modo Classic (QToolBox com QListWidget)
+    auto *list = qobject_cast<QListWidget *>(dragSource.data());
     QList<QListWidgetItem *> items = list->selectedItems();
     if (!items.isEmpty()) {
       type = items.first()->text();
     }
-  } else if (QTreeWidget *tree = qobject_cast<QTreeWidget *>(event->source())) {
+  } else if (dragSource && qobject_cast<QTreeWidget *>(dragSource.data())) {
     // Modo Tree (QTreeWidget)
+    auto *tree = qobject_cast<QTreeWidget *>(dragSource.data());
     QList<QTreeWidgetItem *> items = tree->selectedItems();
     if (!items.isEmpty()) {
       QTreeWidgetItem *item = items.first();
@@ -220,7 +227,7 @@ void Canvas::dropEvent(QDropEvent *event) {
     }
   }
 
-  if (type.isEmpty())
+  if (type.isEmpty() || !m_factory)
     return;
 
   // Gerar um nome único simples
@@ -352,4 +359,11 @@ void Canvas::highlightContainer(QWidget *container, bool highlight, bool blue) {
     container->setStyleSheet(""); // Limpar estilo dinâmico
   }
   container->style()->polish(container);
+}
+
+void Canvas::clearHighlight() {
+  if (m_lastHighlight) {
+    highlightContainer(m_lastHighlight, false);
+    m_lastHighlight = nullptr;
+  }
 }
