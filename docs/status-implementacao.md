@@ -1,7 +1,7 @@
 # Status da implementação
 
-**Atualizado em:** 16/08/2026
-**Linha de integração:** `integration/showbox-v1`
+**Atualizado em:** 11/09/2026
+**Linha de integração:** `main` via pull request
 
 | Área          | Estado atual                                                                |
 | ------------- | --------------------------------------------------------------------------- |
@@ -17,3 +17,7 @@ Os diretórios `legacy/v1_monolith` e `legacy/v2_incomplete` permanecem somente
 como referência histórica e não participam do alvo moderno. O status detalhado,
 gates restantes e regras para múltiplos agentes ficam em
 [`project/v1/STATUS.md`](project/v1/STATUS.md).
+
+A SB-011 encerrou a branch intermediária `integration/showbox-v1`. A `main` é a
+única branch permanente de desenvolvimento e recebe mudanças somente por pull
+request com `build-test`, `sanitizers` e `trunk-check` obrigatórios.
