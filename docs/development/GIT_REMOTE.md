@@ -18,10 +18,12 @@ operacionalizadas por proteções configuradas no GitHub (ver ADRs 0006 e 0007 e
 - O PR deve estar atualizado com a base (`Update branch`/up-to-date) antes do
   merge.
 - Checks obrigatórios (configurados como required status checks de PR):
-  - `build-test` (app_id 15368 / GitHub Actions) — build, testes (23 suítes),
+  - `build-test` (app_id 15368 / GitHub Actions) — build, testes (24 suítes),
     ShellCheck, validação da árvore de instalação e smoke de CLI contratual.
   - `sanitizers` (app_id 15368 / GitHub Actions) — build e testes com
     ASan/UBSan.
+  - `trunk-check` (app_id 15368 / GitHub Actions) — lint, formatação e
+    detecção de segredos pelo Trunk.
     Os nomes acima correspondem aos nomes efetivos dos check-runs produzidos pelo
     workflow `Showbox CI`; a proteção vincula cada contexto ao app_id do GitHub
     Actions para evitar colisões (`tools/setup/doctor.sh` valida).
@@ -30,14 +32,14 @@ operacionalizadas por proteções configuradas no GitHub (ver ADRs 0006 e 0007 e
 
 ## Tags `v*`
 
-- Tags de release são criadas somente pelo job de release do `release.yml`
-  (fluxo autorizado), nunca manualmente por push direto.
+- Tags de release são criadas pelo mantenedor sobre um merge aprovado em
+  `main`. O push da tag dispara o `release.yml`, que valida tag e `VERSION`,
+  produz os artefatos e cria o draft; a publicação exige decisão explícita.
 - Regra de proteção de tags com padrão `v*`: proíbe sobrescrita
   (`non_fast_forward`) e exclusão (`deletion`), aplicada por ruleset
   `tags-v-protection` (validação em `just doctor`).
-- O primeiro candidato, `v1.0.0-rc.3`, permanece como **draft prerelease**.
-  Publicá-lo exige decisão explícita do mantenedor; novos candidatos só devem
-  ser criados quando houver mudança de produto ou correção que os justifique.
+- `v1.0.0-rc.4` é o primeiro candidato publicado. O RC.3 permanece em draft
+  como evidência histórica e não deve ser promovido porque antecede a SB-010.
 
 ## Proibição de force-push
 

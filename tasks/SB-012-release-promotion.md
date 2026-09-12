@@ -1,6 +1,6 @@
 # SB-012 — Publicação do release candidate v1.0.0-rc.4
 
-Estado: em andamento (2026-09-12).
+Estado: concluída (2026-09-12).
 
 - Objetivo: produzir, validar e publicar `v1.0.0-rc.4` a partir da `main`, com
   todo o marco funcional até a SB-011, como prerelease para validação externa.
@@ -40,3 +40,44 @@ Estado: em andamento (2026-09-12).
 - Tag protegida aponta para o SHA validado e o release é publicado com
   `prerelease: true` e `draft: false`.
 - Branch-canário removida, `just check` aprovado e handoff integrado por PR.
+
+## Handoff
+
+- O RC.3 foi baixado e seus quatro smokes passaram, mas a tag `9b417d8` estava
+  33 commits atrás da `main` e antecedia a SB-010. A promoção foi bloqueada e o
+  mantenedor autorizou substituí-la pelo RC.4.
+- PR [#28](https://github.com/helton-godoy/showbox/pull/28): preparação do
+  RC.4 integrada em `30e72c1`; `build-test`, `sanitizers`, `trunk-check` e
+  SonarCloud verdes. Antes do PR: `just build`, `just test` (24/24) e
+  `just check` aprovados, incluindo `tst_ShellFlow`.
+- Tag anotada `v1.0.0-rc.4` criada sobre `30e72c1`. Workflow
+  [34663088886](https://github.com/helton-godoy/showbox/actions/runs/34663088886)
+  aprovado com builds DEB Ubuntu, DEB Debian, RPM e AppImage, `install-smoke` e
+  criação do draft.
+- Os sete assets do draft foram baixados novamente. Os smokes locais Ubuntu,
+  Debian, Fedora/RPM e AppImage passaram e reportaram `1.0.0-rc.4`. A prova do
+  fluxo visual combina o `tst_ShellFlow` no SHA exato da tag com a validação
+  dos binários empacotados pelo workflow desse mesmo SHA.
+- Checksums SHA-256:
+  - `d751331dc14497cba369d112b4858726ebb50580542f6076612f32e14448901b`
+    `ShowBox-Studio-1.0.0-rc.4-x86_64.AppImage`;
+  - `6f3d5698f22374a731d152c15730129e76976aebdfc1fefade29c21fc2fc7bf4`
+    `showbox-1.0.0-0.3.rc4.fc46.x86_64.rpm`;
+  - `48b4ba4e61bb9da97b5122e46d64333e53d1bcebb80cce161bece000118a9d06`
+    `showbox-studio-1.0.0-0.3.rc4.fc46.x86_64.rpm`;
+  - `a3db944967699c050342e34d46df9613b8fa4dbf9446330323b4b8400852348a`
+    `showbox-studio_1.0.0.rc4-1_debian13_amd64.deb`;
+  - `d5d4a4910930ab95c4ed91ab2393ed32343c38fc9f9922d932cc2dbc9b8ec216`
+    `showbox-studio_1.0.0.rc4-1_ubuntu24.04_amd64.deb`;
+  - `db1b69ba111b248d7daa88996a275c3333facf4feea3435f5f10cd0c09c3ab6c`
+    `showbox_1.0.0.rc4-1_debian13_amd64.deb`;
+  - `caa4c1938be51845f4662c5300ee9f31060d760c00fe68cb6bfb964fd16f1c67`
+    `showbox_1.0.0.rc4-1_ubuntu24.04_amd64.deb`.
+- Release publicado como prerelease em 2026-09-12:
+  [ShowBox v1.0.0-rc.4](https://github.com/helton-godoy/showbox/releases/tag/v1.0.0-rc.4),
+  com `draft: false` e `prerelease: true`.
+- A branch remota `test/trunk-check-blocking2` foi excluída; após a limpeza,
+  somente `main` permaneceu como branch remota.
+- Limitações: artefatos sem assinatura/notarização; validação GUI empacotada
+  inferida pela cadeia reprodutível descrita acima, pois os pacotes não instalam
+  o executável QtTest; Actions ainda emitem aviso de depreciação do Node.js 20.
