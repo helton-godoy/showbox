@@ -6,7 +6,7 @@
 - Branch e worktree: `feat/SB-017-studio-automation`,
   `/home/helton/Public/fork_dialogbox/showbox`.
 - SHA base: `b5779e3`.
-- SHA atual: `df0e5d4` (interface local e consumidores implementados).
+- SHA atual: `0bafd60` (checkpoint final desta entrega).
 - Itens concluídos: leitura do contrato colado; inspeção de AGENTS.md,
   roadmap, arquitetura, código do Studio, modelo, catálogo e estado Git;
   branch própria criada; contrato/checkpoint inicial; protocolo JSON-RPC 2.0;
