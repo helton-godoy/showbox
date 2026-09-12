@@ -3,6 +3,7 @@
 
 #include <QMetaProperty>
 #include <QObject>
+#include <QPointer>
 #include <QTableWidget>
 
 class StudioController;
@@ -24,7 +25,9 @@ private slots:
   void onCellValueChanged(int row, int col);
 
 private:
-  QWidget *m_target = nullptr;
+  // QPointer: anula sozinho se o widget for deletado; combinado com a
+  // observação de destroyed(), impede edição sobre memória livre.
+  QPointer<QWidget> m_target = nullptr;
   StudioController *m_controller = nullptr;
   bool m_isLoading =
       false; // Flag para evitar loop de sinal durante o carregamento

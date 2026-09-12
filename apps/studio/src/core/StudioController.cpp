@@ -12,6 +12,10 @@ void StudioController::manageWidget(QWidget *widget) {
   QElapsedTimer timer;
   timer.start();
 
+  if (!widget)
+    return;
+  trackWidget(widget);
+
   // Instalamos o filtro para interceptar cliques
   widget->installEventFilter(this);
 
@@ -100,7 +104,8 @@ void StudioController::selectWidget(QWidget *widget) {
   }
 
   // Limpar destaques antigos
-  for (QWidget *w : m_selectedWidgets) {
+  for (const auto &guarded : m_selectedWidgets) {
+    QWidget *w = guarded.data();
     if (w) {
       // Só desmarcar se realmente estava marcado
       if (w->property("selected").toBool()) {
@@ -113,6 +118,7 @@ void StudioController::selectWidget(QWidget *widget) {
   m_selectedWidgets.clear();
 
   if (widget) {
+    trackWidget(widget);
     m_selectedWidgets.append(widget);
     // Só marcar se não estava
     if (!widget->property("selected").toBool()) {
@@ -135,6 +141,7 @@ void StudioController::multiSelectWidget(QWidget *widget) {
   if (!widget)
     return;
 
+  trackWidget(widget);
   if (m_selectedWidgets.contains(widget)) {
     widget->setProperty("selected", false);
     m_selectedWidgets.removeOne(widget);
@@ -148,5 +155,19 @@ void StudioController::multiSelectWidget(QWidget *widget) {
 
   emit selectionChanged();
   emit widgetSelected(m_selectedWidgets.isEmpty() ? nullptr
-                                                  : m_selectedWidgets.last());
+                                                  : selectedWidget());
+}
+
+void StudioController::trackWidget(QWidget *widget) {
+  // Observar a destruição para podar a seleção: sem isso, delete/clear
+  // deixariam ponteiros pendurados na lista.
+  connect(widget, &QObject::destroyed, this,
+          &StudioController::pruneSelection, Qt::UniqueConnection);
+}
+
+void StudioController::pruneSelection(QObject *destroyed) {
+  m_selectedWidgets.removeIf(
+      [destroyed](const QPointer<QWidget> &guarded) {
+        return guarded.isNull() || guarded.data() == destroyed;
+      });
 }

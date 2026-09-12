@@ -1,6 +1,7 @@
 #ifndef PREVIEWMANAGER_H
 #define PREVIEWMANAGER_H
 #include <QObject>
+#include <QPointer>
 #include <QProcess>
 #include <QTemporaryDir>
 #include <memory>
@@ -22,7 +23,9 @@ signals:
 private:
     void start(const QString &content, bool shell, const QString &workingDirectory);
     void finish(int code);
-    QProcess *m_process = nullptr;
+    // QPointer: lambdas assíncronas (readyRead/finished/singleShot) nunca
+    // tocam um QProcess já destruído.
+    QPointer<QProcess> m_process;
     qint64 m_group = 0;
     bool m_stopping = false;
     std::unique_ptr<QTemporaryDir> m_temp;

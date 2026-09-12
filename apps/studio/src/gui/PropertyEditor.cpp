@@ -20,6 +20,9 @@ PropertyEditor::PropertyEditor(QWidget *parent) : QTableWidget(parent) {
 }
 
 void PropertyEditor::setTargetWidget(QWidget *widget) {
+  if (m_target && m_target != widget) {
+    disconnect(m_target, &QObject::destroyed, this, nullptr);
+  }
   m_target = widget;
   m_isLoading = true;
 
@@ -30,6 +33,11 @@ void PropertyEditor::setTargetWidget(QWidget *widget) {
     m_isLoading = false;
     return;
   }
+
+  // Se o alvo for deletado (delete/clear/Novo/Abrir), limpar a tabela em vez
+  // de manter um alvo pendurado que as lambdas de edição tocariam.
+  connect(widget, &QObject::destroyed, this,
+          [this]() { setTargetWidget(nullptr); });
 
   const QMetaObject *meta = widget->metaObject();
 
@@ -173,14 +181,14 @@ void PropertyEditor::addLayoutPropertyRow(QWidget *widget) {
   }
 
   connect(combo, QOverload<int>::of(&QComboBox::currentIndexChanged),
-          [this, widget, combo](int index) {
-            if (m_isLoading)
+          [this, target = QPointer<QWidget>(widget), combo](int index) {
+            if (m_isLoading || target.isNull())
               return;
             QString type = combo->itemData(index).toString();
 
             if (m_controller) {
               m_controller->undoStack()->push(
-                  new ChangeLayoutCommand(widget, type));
+                  new ChangeLayoutCommand(target.data(), type));
             }
           });
 

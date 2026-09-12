@@ -13,7 +13,9 @@
 #include "toolbox/ToolboxClassic.h"
 #include "toolbox/ToolboxTree.h"
 #include <QActionGroup>
+#include <QApplication>
 #include <QCloseEvent>
+#include <QCoreApplication>
 #include <QDockWidget>
 #include <QFile>
 #include <QDir>
@@ -88,6 +90,45 @@ MainWindow::MainWindow(QWidget *parent)
   editMenu->addAction(m_controller->undoStack()->createUndoAction(this));
   editMenu->addAction(m_controller->undoStack()->createRedoAction(this));
 
+  // Menu View para alternar estilo do Toolbox. Criado aqui (e não no
+  // setupUI) para garantir a ordem padrão File, Edit, View, Help.
+  QMenu *viewMenu = menuBar()->addMenu("&View");
+  QMenu *toolboxStyleMenu = viewMenu->addMenu("Toolbox Style");
+
+  QActionGroup *styleGroup = new QActionGroup(this);
+  styleGroup->setExclusive(true);
+
+  QAction *classicAction =
+      toolboxStyleMenu->addAction("Classic (Uma aba por vez)");
+  classicAction->setCheckable(true);
+  classicAction->setChecked(m_toolboxStyle == 0);
+  classicAction->setData(0);
+  styleGroup->addAction(classicAction);
+
+  QAction *treeAction = toolboxStyleMenu->addAction("Tree (Múltiplas seções)");
+  treeAction->setCheckable(true);
+  treeAction->setChecked(m_toolboxStyle == 1);
+  treeAction->setData(1);
+  styleGroup->addAction(treeAction);
+
+  connect(styleGroup, &QActionGroup::triggered, this, [this](QAction *action) {
+    onToolboxStyleChanged(action->data().toInt());
+  });
+
+  // Menu Help (padrão File, Edit, View, Help)
+  QMenu *helpMenu = menuBar()->addMenu("&Help");
+  helpMenu->addAction("About Showbox Studio", this, [this]() {
+    // Versão definida em main.cpp via setApplicationVersion().
+    const QString version = QCoreApplication::applicationVersion();
+    QMessageBox::about(
+        this, "About Showbox Studio",
+        QString("Showbox Studio %1\n\nAmbiente visual Qt6 para criar "
+                "ferramentas com shell script como back-end.\n"
+                "Documentação: docs/user/README.md")
+            .arg(version.isEmpty() ? QStringLiteral("dev") : version));
+  });
+  helpMenu->addAction("About Qt", qApp, &QApplication::aboutQt);
+
   // Sincronizar seleção: Canvas -> Inspector & Property Editor & Action Editor
   connect(m_controller, &StudioController::widgetSelected, m_inspector,
           &ObjectInspector::selectItemForWidget);
@@ -126,6 +167,15 @@ MainWindow::MainWindow(QWidget *parent)
 }
 
 MainWindow::~MainWindow() {
+  // Teardown ordenado (SB-015): parar a prévia e soltar referências antes de
+  // destruir, para que nenhum sinal alcance objetos em destruição parcial.
+  if (m_previewManager) {
+    disconnect(m_previewManager, nullptr, this, nullptr);
+    m_previewManager->stop();
+  }
+  if (m_canvas) {
+    m_canvas->setController(nullptr);
+  }
   // O QUndoStack é destruído por último (filho do controller, criado cedo);
   // desconectar antecipa as notificações que tocariam editores já liberados.
   if (m_controller && m_controller->undoStack()) {
@@ -133,7 +183,9 @@ MainWindow::~MainWindow() {
                &MainWindow::onUndoIndexChanged);
   }
   delete m_previewManager;
+  m_previewManager = nullptr;
   delete m_factory;
+  m_factory = nullptr;
 }
 
 void MainWindow::onUndoIndexChanged() {
@@ -215,30 +267,6 @@ void MainWindow::setupUI() {
   addDockWidget(Qt::LeftDockWidgetArea, m_dockToolbox);
 
   tabifyDockWidget(dockInspector, m_dockToolbox);
-
-  // Menu View para alternar estilo do Toolbox
-  QMenu *viewMenu = menuBar()->addMenu("&View");
-  QMenu *toolboxStyleMenu = viewMenu->addMenu("Toolbox Style");
-
-  QActionGroup *styleGroup = new QActionGroup(this);
-  styleGroup->setExclusive(true);
-
-  QAction *classicAction =
-      toolboxStyleMenu->addAction("Classic (Uma aba por vez)");
-  classicAction->setCheckable(true);
-  classicAction->setChecked(m_toolboxStyle == 0);
-  classicAction->setData(0);
-  styleGroup->addAction(classicAction);
-
-  QAction *treeAction = toolboxStyleMenu->addAction("Tree (Múltiplas seções)");
-  treeAction->setCheckable(true);
-  treeAction->setChecked(m_toolboxStyle == 1);
-  treeAction->setData(1);
-  styleGroup->addAction(treeAction);
-
-  connect(styleGroup, &QActionGroup::triggered, this, [this](QAction *action) {
-    onToolboxStyleChanged(action->data().toInt());
-  });
 
   // Right Dock: PROPERTIES & ACTIONS (Tabbed)
   QDockWidget *dockProps = new QDockWidget("Propriedades", this);
@@ -466,6 +494,10 @@ void MainWindow::closeEvent(QCloseEvent *event) {
     event->ignore();
     return;
   }
+  // Parar a prévia antes do teardown para que o destrutor não precise
+  // finalizar um processo ainda em Starting/Running.
+  if (m_previewManager)
+    m_previewManager->stop();
   event->accept();
 }
 
@@ -496,10 +528,12 @@ void MainWindow::onRemovePageRequested(QWidget *tabs) {
 }
 
 void MainWindow::createToolbox(int style) {
-  // Remover toolbox atual se existir
+  // Remover toolbox atual se existir. deleteLater() em vez de delete
+  // síncrono: uma troca de estilo durante um drag ativo destruiria a origem
+  // do evento (QListWidget/QTreeWidget) ainda em uso pelo Canvas.
   if (m_toolbox) {
     m_dockToolbox->setWidget(nullptr);
-    delete m_toolbox;
+    m_toolbox->deleteLater();
     m_toolbox = nullptr;
   }
 

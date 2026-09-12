@@ -69,6 +69,8 @@ void PreviewManager::start(const QString &content, bool shell, const QString &di
     m_stopping = false;
     m_process = new QProcess(this);
     connect(m_process, &QProcess::started, this, [this] {
+        if (!m_process)
+            return;
         m_group = m_process->processId();
         if (m_stopping) stop();
     });
@@ -78,12 +80,18 @@ void PreviewManager::start(const QString &content, bool shell, const QString &di
     m_process->setProcessEnvironment(environment);
     if (!directory.isEmpty()) m_process->setWorkingDirectory(directory);
     connect(m_process, &QProcess::readyReadStandardOutput, this, [this] {
+        if (!m_process)
+            return;
         emit previewOutput(QString::fromUtf8(m_process->readAllStandardOutput()));
     });
     connect(m_process, &QProcess::readyReadStandardError, this, [this] {
+        if (!m_process)
+            return;
         emit previewError(QString::fromUtf8(m_process->readAllStandardError()));
     });
     connect(m_process, &QProcess::errorOccurred, this, [this](QProcess::ProcessError error) {
+        if (!m_process)
+            return;
         if (error == QProcess::FailedToStart) {
             emit previewError(m_process->errorString()); finish(127);
         }

@@ -1,6 +1,6 @@
 # SB-015 — Estabilidade do Studio e menu padrão
 
-Estado: proposta (2026-09-12).
+Estado: concluída (2026-09-12).
 
 - Objetivo: eliminar os fechamentos repentinos do showbox-studio corrigindo o
   ciclo de vida de widgets/seleção/comandos/processos, e completar a barra de
@@ -56,3 +56,35 @@ Menus atuais (`MainWindow.cpp:75-220`): File, Edit, View — sem Help.
 - Correções de lifetime podem expor bugs latentes. Mitigação: PRs pequenos
   por frente, gates obrigatórios, reversão por revert. Sanitizers no CI
   cobrem regressões de memória nos testes automatizados.
+
+## Handoff
+
+- Implementação na branch `fix/SB-015-studio-stability`, base `1bd5889`:
+  - `Canvas`: highlight de drag virou membro `QPointer` (fim do `static`
+    pendurado); limpeza em `removeWidget`/`clear`; origem do drop guardada
+    por `QPointer`; guarda de `m_factory`.
+  - `StudioController`: seleção como `QList<QPointer>` com poda via
+    `destroyed()`; `manageWidget`/`select`/`multiSelect` rastreiam o widget.
+  - `PropertyEditor`: alvo `QPointer` com reset via `destroyed()`; lambda de
+    layout captura `QPointer`.
+  - `ObjectInspector`: poda no `destroyed()` (com purga de chaves órfãs dos
+    itens filhos), `QSignalBlocker` no `updateHierarchy`, guardas de
+    liveness em seleção/current/drop.
+  - `StudioCommands`: membros `QPointer` + guardas em undo/redo/move/layout;
+    `GroupWidgetsCommand` valida container criado pela fábrica.
+  - `PreviewManager`: `m_process` virou `QPointer` com guardas nas lambdas.
+  - `MainWindow`: teardown ordenado (desconectar, parar prévia, soltar
+    controller/fábrica), `stop()` no `closeEvent`, toolbox com `deleteLater`,
+    menus View/Help movidos ao construtor (ordem File, Edit, View, Help) e
+    menu Help com About + About Qt.
+- Novo `tst_LifetimeGuards` (5 casos): seleção podada, editor limpo,
+  inspector após morte, undo-após-clear como no-op, ordem dos menus.
+- Achado durante o trabalho: a poda ingênua do inspector deletava item já
+  liberado quando o widget pai morria (filhos órfãos no mapa); corrigido com
+  purga de descendentes — `tst_Hierarchy` voltou a passar.
+- Validações locais: `just build` limpo; `just test` **25/25** (inclui o
+  novo teste); `just check` sem achados. Prova de sanitizers pelos gates do
+  PR.
+- Limitação: testes offscreen não cobrem drag real nem janelas visíveis; o
+  roteiro manual (arrastar/deletar/desfazer/fechar com prévia ativa) deve ser
+  repetido pelo mantenedor em X11/Wayland antes da `v1.0.0`.

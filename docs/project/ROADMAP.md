@@ -22,6 +22,9 @@ Somente o integrador altera esta tabela.
 | SB-011  | Simplificar integração Git para branches de tarefa → main               | SB-006, SB-007 | Concluída                      |
 | SB-012  | Produzir, validar e publicar o release candidate v1.0.0-rc.4            | SB-008–SB-011  | Concluída                      |
 | SB-013  | Validação externa do RC.4 e decisão v1.0.0 vs rc.5                      | SB-010–SB-012  | Em andamento                   |
+| SB-014  | Migrar pins das Actions para runtime Node 24                            | SB-007, SB-011 | Concluída                      |
+| SB-015  | Estabilidade do Studio (lifetime) e menu File, Edit, View, Help         | SB-010         | Concluída                      |
+| SB-016  | Exportação honesta no toolbox (desabilitar não-exportáveis)             | SB-004, SB-015 | Proposta                       |
 
 ## Marco de produto
 
