@@ -25,10 +25,14 @@ log de release disponível para confirmar, permanece intocado nesta tarefa.
 ## Escopo
 
 - `ci.yml`: `actions/checkout` `11d5960a` (v4.2.2) → `fbc6f399` (v5);
-  `actions/upload-artifact` `ea165f8d` (v4.6.2) → `330a01c4` (v5).
-- `release.yml`: mesmos bumps de checkout (5 ocorrências) e upload-artifact
-  (4 ocorrências), mais `actions/download-artifact` `d3f86a10` (v4) →
-  `634f93cb` (v5, 2 ocorrências). Comentários `# vN` atualizados.
+  `actions/upload-artifact` `ea165f8d` (v4.6.2) → `b7c566a7` (v6).
+- `release.yml`: checkout → `fbc6f399` (v5, 6 ocorrências); upload-artifact →
+  `b7c566a7` (v6, 4 ocorrências); `actions/download-artifact` `d3f86a10`
+  (v4) → `018cc2cf` (v6, 2 ocorrências). Comentários `# vN` atualizados.
+- Por que v5 para checkout e v6 para artifacts: o run do próprio PR provou que
+  checkout v5 já roda sem avisos, enquanto upload-artifact v5 (`330a01c4`)
+  ainda mira Node 20; a v6 (`b7c566a7`, dez/2025) declara "Node.js 24
+  support". Download-artifact acompanha na v6 por ser da mesma geração.
 - SHAs resolvidos via `gh api repos/<owner>/<repo>/commits/<major>` em
   2026-09-12; registrar SHAs final no handoff.
 - Confirmar nos logs do run do PR que nenhum job lista mais actions em
