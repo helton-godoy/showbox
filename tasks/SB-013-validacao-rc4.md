@@ -54,3 +54,16 @@ Estado: em andamento (2026-09-12).
 - Decisão: **não promover `v1.0.0` ainda**. A janela externa segue aberta;
   falta definir prazo e testadores com o mantenedor. Estado permanece
   `em andamento` até o registro de feedback externo ou o fim da janela.
+
+## Decisão — produzir `v1.0.0-rc.5` (2026-09-12)
+
+- O mantenedor solicitou testar as correções do Studio (SB-015: crashes e
+  menus; SB-016: toolbox honesto) via release publicada. Essas mudanças de
+  produto justificam novo candidato nos termos da SB-012.
+- A `main` em `87b9929` (SB-014/015/016 integradas) está 6 merges à frente
+  da tag `v1.0.0-rc.4` (`30e72c1`); nenhum asset publicado contém as
+  correções. `VERSION` sobe para `1.0.0-rc.5`; tag `v1.0.0-rc.5` sobre o
+  merge de preparação; validação (checksums + 4 smokes + fluxo visual) e
+  publicação como prerelease seguem o mesmo roteiro da SB-012.
+- A janela de validação externa recomeça no RC.5; o RC.4 permanece publicado
+  como histórico.
