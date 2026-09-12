@@ -8,10 +8,10 @@
 - SHA base: `b5779e3` (`main`, RC.5 integrado).
 - Último SHA funcional validado: `a8a8908` — `feat(studio): harden automation
   protocol and transport`.
-- Commits documentais posteriores ao incremento funcional: os arquivos de
-  contrato e documentação desta revisão são não funcionais; o SHA do próprio
-  commit documental não é repetido aqui para evitar referência autorreferente.
-  Consulte `git log --oneline` para o identificador imutável.
+- Commits documentais posteriores ao incremento funcional: `2e33c1e` —
+  contrato, documentação e evidências; este checkpoint também será atualizado
+  em um commit documental posterior, cujo SHA não é repetido aqui para evitar
+  referência autorreferente.
 
 ## Entrega
 
