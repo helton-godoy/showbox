@@ -20,7 +20,7 @@ Somente o integrador altera esta tabela.
 | SB-009C | Smoke RPM valida Version/Release realmente instalados                   | SB-009B        | Concluída                      |
 | SB-010  | Fluxo visual executável de ponta a ponta                                | SB-004         | Concluída                      |
 | SB-011  | Simplificar integração Git para branches de tarefa → main               | SB-006, SB-007 | Concluída                      |
-| SB-012  | Revalidar e publicar o release candidate v1.0.0-rc.3                    | SB-008–SB-011  | Em andamento                   |
+| SB-012  | Produzir, validar e publicar o release candidate v1.0.0-rc.4            | SB-008–SB-011  | Em andamento                   |
 
 ## Marco de produto
 

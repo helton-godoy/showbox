@@ -1,9 +1,9 @@
-# SB-012 — Publicação do release candidate v1.0.0-rc.3
+# SB-012 — Publicação do release candidate v1.0.0-rc.4
 
 Estado: em andamento (2026-09-12).
 
-- Objetivo: revalidar os sete artefatos do draft `v1.0.0-rc.3` e publicar o
-  candidato como prerelease para validação externa.
+- Objetivo: produzir, validar e publicar `v1.0.0-rc.4` a partir da `main`, com
+  todo o marco funcional até a SB-011, como prerelease para validação externa.
 - Base: `60e7eaf` (`main` com a SB-011 concluída).
 - Branch: `chore/SB-012-release-promotion`.
 - Responsável: integrador desta sessão.
@@ -11,11 +11,15 @@ Estado: em andamento (2026-09-12).
 
 ## Escopo
 
-- Confirmar tag, commit-alvo, workflow de release, notas e sete assets do draft.
-- Baixar os assets, registrar checksums SHA-256 e repetir os smokes de instalação
-  DEB Ubuntu/Debian, RPM e AppImage.
+- Registrar que o draft `v1.0.0-rc.3` foi revalidado, mas não publicado porque
+  sua tag antecede a SB-010 em 33 commits.
+- Atualizar a fonte única para `1.0.0-rc.4`, integrar por PR e criar a tag
+  protegida sobre o merge aprovado.
+- Confirmar tag, commit-alvo, workflow, notas e sete assets do novo draft.
+- Baixar os assets do RC.4, registrar checksums SHA-256 e repetir os smokes de
+  instalação DEB Ubuntu/Debian, RPM e AppImage.
 - Executar o roteiro do fluxo visual da SB-010 contra o produto empacotado.
-- Publicar o draft como prerelease sem alterar artefatos, tag ou versão.
+- Publicar o draft RC.4 como prerelease sem alterar seus artefatos ou tag.
 - Remover a branch-canário remota `test/trunk-check-blocking2`, cuja finalidade
   de provar o bloqueio de checks já foi cumprida.
 - Registrar evidências, limitações e período de validação antes de decidir entre
@@ -23,7 +27,7 @@ Estado: em andamento (2026-09-12).
 
 ## Fora do escopo
 
-- Alterar código, pacotes ou os assets já produzidos.
+- Alterar código ou os assets depois de produzidos pelo workflow.
 - Promover diretamente `v1.0.0` ou publicar em repositórios de terceiros.
 - Adicionar assinatura, notarização ou novos formatos de pacote.
 
