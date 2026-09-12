@@ -31,8 +31,15 @@ QJsonArray tools() {
         tool("widget.remove", "Remove um componente."),
         tool("widget.select", "Seleciona um componente."),
         tool("widget.setProperty", "Altera uma propriedade."),
+        tool("widget.move", "Move um componente para outro container."),
+        tool("action.add", "Adiciona uma ação a um evento."),
+        tool("action.update", "Atualiza uma ação de um evento."),
+        tool("action.remove", "Remove uma ação de um evento."),
         tool("history.undo", "Desfaz uma alteração."),
-        tool("history.redo", "Refaz uma alteração.")};
+        tool("history.redo", "Refaz uma alteração."),
+        tool("preview.start", "Inicia o preview quando autorizado."),
+        tool("preview.stop", "Interrompe o preview."),
+        tool("export.bash", "Exporta a aplicação Bash quando autorizado.")};
 }
 
 QJsonObject errorResponse(const QJsonValue &id, const QString &message) {
