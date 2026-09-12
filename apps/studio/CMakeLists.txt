@@ -13,7 +13,7 @@ if(NOT DEFINED SHOWBOX_VERSION)
 endif()
 
 # 1. Localizar pacotes do Qt6
-find_package(Qt6 REQUIRED COMPONENTS Widgets Charts Svg)
+find_package(Qt6 REQUIRED COMPONENTS Widgets Charts Svg Network)
 
 # Configuração Automática do Qt
 set(CMAKE_AUTOMOC ON)
@@ -54,6 +54,10 @@ set(STUDIO_SOURCES
     src/core/IStudioWidgetFactory.h
     src/core/PreviewManager.cpp
     src/core/PreviewManager.h
+    src/automation/AutomationProtocol.cpp
+    src/automation/AutomationProtocol.h
+    src/automation/StudioAutomationServer.cpp
+    src/automation/StudioAutomationServer.h
 )
 
 add_library(showbox-studio-components STATIC
@@ -70,6 +74,7 @@ target_link_libraries(showbox-studio-components PUBLIC
     Qt6::Widgets
     Qt6::Charts
     Qt6::Svg
+    Qt6::Network
     showbox-ui
     showbox-project
     showbox-catalog
@@ -78,6 +83,26 @@ target_link_libraries(showbox-studio-components PUBLIC
 add_executable(showbox-studio src/main.cpp)
 target_link_libraries(showbox-studio PRIVATE showbox-studio-components)
 target_compile_definitions(showbox-studio PRIVATE SHOWBOX_VERSION="${SHOWBOX_VERSION}")
+
+add_executable(showbox-studioctl
+    src/automation/AutomationProtocol.cpp
+    src/automation/AutomationProtocol.h
+    src/automation/AutomationClient.cpp
+    src/automation/AutomationClient.h
+    src/automation/StudioAutomationCtl.cpp
+)
+target_include_directories(showbox-studioctl PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_link_libraries(showbox-studioctl PRIVATE Qt6::Core Qt6::Network)
+
+add_executable(showbox-studio-mcp
+    src/automation/AutomationProtocol.cpp
+    src/automation/AutomationProtocol.h
+    src/automation/AutomationClient.cpp
+    src/automation/AutomationClient.h
+    src/automation/StudioAutomationMcp.cpp
+)
+target_include_directories(showbox-studio-mcp PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_link_libraries(showbox-studio-mcp PRIVATE Qt6::Core Qt6::Network)
 
 enable_testing()
 add_subdirectory(tests)
@@ -89,6 +114,10 @@ include(GNUInstallDirs)
 
 # Instala o binário em usr/bin
 install(TARGETS showbox-studio
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    COMPONENT showbox-studio
+)
+install(TARGETS showbox-studioctl showbox-studio-mcp
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
     COMPONENT showbox-studio
 )

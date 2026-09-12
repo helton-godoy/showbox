@@ -17,7 +17,7 @@ set(SHOWBOX_LEGACY_ORACLE "" CACHE FILEPATH
     "Optional showbox-legacy executable used by the golden compatibility test")
 
 # Configuração Global do Qt
-find_package(Qt6 6.4 REQUIRED COMPONENTS Widgets Charts Svg)
+find_package(Qt6 6.4 REQUIRED COMPONENTS Widgets Charts Svg Network)
 
 # Diretórios de Saída
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)

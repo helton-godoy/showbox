@@ -2,6 +2,8 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QJsonArray>
+#include <QJsonObject>
 
 class Canvas;
 class IStudioWidgetFactory;
@@ -26,6 +28,34 @@ public:
 
   bool hasUnsavedChanges() const;
   void markDocumentSaved();
+
+  // Facade estável da Showbox Studio Automation Interface. Essas operações
+  // devolvem dados/erros públicos e não expõem objetos QWidget ao protocolo.
+  QJsonObject automationProjectSnapshot() const;
+  QJsonObject automationUiTree() const;
+  QJsonArray automationDiagnostics() const;
+  QJsonObject automationExportValidate() const;
+  QString automationPreviewLogs() const { return m_automationPreviewLogs; }
+  bool automationPreviewRunning() const;
+  bool automationNew(QString *error = nullptr);
+  bool automationOpen(const QString &fileName, QString *error = nullptr);
+  bool automationSave(const QString &fileName, QString *error = nullptr);
+  bool automationAddWidget(const QString &type, const QString &name,
+                           const QString &parentName, QString *error = nullptr);
+  bool automationRemoveWidget(const QString &name, QString *error = nullptr);
+  bool automationSelectWidget(const QString &name, QString *error = nullptr);
+  bool automationMoveWidget(const QString &name, const QString &parentName,
+                            int index, QString *error = nullptr);
+  bool automationSetProperty(const QString &name, const QString &property,
+                             const QJsonValue &value, QString *error = nullptr);
+  bool automationSetActions(const QString &name, const QJsonObject &actions,
+                            QString *error = nullptr);
+  bool automationUndo(QString *error = nullptr);
+  bool automationRedo(QString *error = nullptr);
+  bool automationStartPreview(QString *error = nullptr);
+  bool automationStopPreview(QString *error = nullptr);
+  bool automationExport(const QString &fileName, QJsonObject *result = nullptr,
+                        QString *error = nullptr);
 
 protected:
   void closeEvent(QCloseEvent *event) override;
@@ -71,6 +101,7 @@ private:
   // Live Preview
   PreviewManager *m_previewManager;
   QTextEdit *m_previewLog;
+  QString m_automationPreviewLogs;
 };
 
 #endif // MAINWINDOW_H

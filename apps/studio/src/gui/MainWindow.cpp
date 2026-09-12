@@ -6,6 +6,7 @@
 #include "PropertyEditor.h"
 #include "core/PreviewManager.h"
 #include "core/ProjectSerializer.h"
+#include "core/ProjectWidgetMapper.h"
 #include "core/ScriptGenerator.h"
 #include "core/StudioCommands.h"
 #include "core/StudioController.h"
@@ -40,6 +41,60 @@
 #include <QTextStream>
 #include <QTime>
 #include <QToolBar>
+
+namespace {
+
+QWidget *findAutomationWidget(QWidget *root, const QString &name) {
+  if (!root || name.isEmpty())
+    return nullptr;
+  const auto widgets = root->findChildren<QWidget *>();
+  for (QWidget *widget : widgets) {
+    if (widget->objectName() == name &&
+        widget->property("showbox_type").isValid())
+      return widget;
+  }
+  return nullptr;
+}
+
+QJsonValue automationValue(const QVariant &value) {
+  if (value.typeId() == QMetaType::Bool)
+    return value.toBool();
+  if (value.canConvert<double>() &&
+      (value.typeId() == QMetaType::Int || value.typeId() == QMetaType::UInt ||
+       value.typeId() == QMetaType::LongLong ||
+       value.typeId() == QMetaType::Double))
+    return value.toDouble();
+  return value.toString();
+}
+
+QVariant automationVariant(const QJsonValue &value,
+                           const QVariant &oldValue) {
+  if (value.isBool())
+    return value.toBool();
+  if (value.isDouble()) {
+    if (oldValue.typeId() == QMetaType::Int)
+      return value.toInt();
+    if (oldValue.typeId() == QMetaType::LongLong)
+      return static_cast<qlonglong>(value.toDouble());
+    return value.toDouble();
+  }
+  if (value.isNull())
+    return QVariant();
+  return value.toString();
+}
+
+QJsonObject automationDiagnostic(const QString &message,
+                                 const QString &code = "validation_failed") {
+  return QJsonObject{{"code", code},
+                     {"severity", "error"},
+                     {"component", "studio"},
+                     {"message", message},
+                     {"context", QJsonObject{}},
+                     {"location", QJsonObject{}},
+                     {"suggestion", "Corrija o projeto e tente novamente."}};
+}
+
+} // namespace
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), m_dockToolbox(nullptr), m_toolbox(nullptr),
@@ -297,6 +352,7 @@ void MainWindow::setupUI() {
   // Connect Preview Signals
   connect(m_previewManager, &PreviewManager::previewOutput, this,
           [this](const QString &out) {
+            m_automationPreviewLogs += out;
             m_previewLog->moveCursor(QTextCursor::End);
             m_previewLog->insertPlainText(out);
             // Auto scroll
@@ -304,11 +360,14 @@ void MainWindow::setupUI() {
           });
   connect(m_previewManager, &PreviewManager::previewError, this,
           [this](const QString &err) {
+            m_automationPreviewLogs += err;
             m_previewLog->moveCursor(QTextCursor::End);
             m_previewLog->insertPlainText(err);
           });
   connect(m_previewManager, &PreviewManager::previewFinished, this,
           [this](int code) {
+            m_automationPreviewLogs +=
+                QString("\n[preview.finished] exitCode=%1\n").arg(code);
             QString status;
             if (code == 0) {
               status = "<span style='color:lime'>Finished Successfully</span>";
@@ -525,6 +584,317 @@ void MainWindow::onRemovePageRequested(QWidget *tabs) {
       statusBar()->showMessage("Aba removida.");
     }
   }
+}
+
+QJsonObject MainWindow::automationProjectSnapshot() const {
+  const ProjectModel model = ProjectWidgetMapper::toModel(m_canvas);
+  QJsonObject snapshot = model.toJson();
+  snapshot["projectDirectory"] = m_projectDirectory;
+  snapshot["dirty"] = hasUnsavedChanges();
+  snapshot["selected"] = m_controller->selectedWidget()
+                             ? m_controller->selectedWidget()->objectName()
+                             : QString();
+  snapshot["previewRunning"] = automationPreviewRunning();
+  return snapshot;
+}
+
+QJsonObject MainWindow::automationUiTree() const {
+  const ProjectModel model = ProjectWidgetMapper::toModel(m_canvas);
+  return QJsonObject{{"version", 1},
+                     {"nodes", model.toJson().value("widgets")},
+                     {"selected", m_controller->selectedWidget()
+                                      ? m_controller->selectedWidget()->objectName()
+                                      : QString()}};
+}
+
+QJsonArray MainWindow::automationDiagnostics() const {
+  QJsonArray diagnostics;
+  const ProjectModel model = ProjectWidgetMapper::toModel(m_canvas);
+  for (const QString &issue : model.validate())
+    diagnostics.append(automationDiagnostic(issue));
+  return diagnostics;
+}
+
+QJsonObject MainWindow::automationExportValidate() const {
+  ScriptGenerator generator;
+  const QString script = generator.generate(m_canvas);
+  QJsonArray diagnostics = automationDiagnostics();
+  if (script.isEmpty())
+    diagnostics.append(automationDiagnostic(generator.errorString(),
+                                            "export_not_available"));
+  return QJsonObject{{"valid", !script.isEmpty() && diagnostics.isEmpty()},
+                     {"diagnostics", diagnostics},
+                     {"bytes", script.toUtf8().size()}};
+}
+
+bool MainWindow::automationPreviewRunning() const {
+  return m_previewManager && m_previewManager->isRunning();
+}
+
+bool MainWindow::automationNew(QString *error) {
+  Q_UNUSED(error);
+  if (m_previewManager)
+    m_previewManager->stop();
+  m_controller->selectWidget(nullptr);
+  m_controller->undoStack()->clear();
+  m_canvas->clear();
+  m_actionEditor->setTargetWidget(nullptr);
+  m_propEditor->setTargetWidget(nullptr);
+  m_inspector->updateHierarchy(m_canvas);
+  m_actionsModified = false;
+  m_projectDirectory = QDir::currentPath();
+  markDocumentSaved();
+  return true;
+}
+
+bool MainWindow::automationOpen(const QString &fileName, QString *error) {
+  if (fileName.isEmpty()) {
+    if (error)
+      *error = "O caminho do projeto não pode ser vazio.";
+    return false;
+  }
+  ProjectSerializer serializer;
+  QList<QWidget *> widgets;
+  if (!serializer.load(fileName, m_factory, widgets)) {
+    if (error)
+      *error = serializer.errors().join("\n");
+    qDeleteAll(widgets);
+    return false;
+  }
+  m_previewManager->stop();
+  m_controller->selectWidget(nullptr);
+  m_controller->undoStack()->clear();
+  m_canvas->clear();
+  for (QWidget *widget : widgets) {
+    m_canvas->addWidget(widget);
+    m_controller->manageWidget(widget);
+  }
+  m_inspector->updateHierarchy(m_canvas);
+  m_projectDirectory = QFileInfo(fileName).absolutePath();
+  markDocumentSaved();
+  return true;
+}
+
+bool MainWindow::automationSave(const QString &fileName, QString *error) {
+  if (fileName.isEmpty()) {
+    if (error)
+      *error = "O caminho do projeto não pode ser vazio.";
+    return false;
+  }
+  ProjectSerializer serializer;
+  if (!serializer.save(fileName, m_canvas, m_factory)) {
+    if (error)
+      *error = "Não foi possível salvar o projeto: " + fileName;
+    return false;
+  }
+  m_projectDirectory = QFileInfo(fileName).absolutePath();
+  markDocumentSaved();
+  return true;
+}
+
+bool MainWindow::automationAddWidget(const QString &type, const QString &name,
+                                     const QString &parentName, QString *error) {
+  if (!showbox::catalog::isKnownType(type)) {
+    if (error)
+      *error = "Tipo de componente desconhecido: " + type;
+    return false;
+  }
+  if (name.isEmpty()) {
+    if (error)
+      *error = "O nome do componente não pode ser vazio.";
+    return false;
+  }
+  if (findAutomationWidget(m_canvas, name)) {
+    if (error)
+      *error = "Já existe um componente com o nome: " + name;
+    return false;
+  }
+  QWidget *parent = parentName.isEmpty() ? static_cast<QWidget *>(m_canvas)
+                                         : findAutomationWidget(m_canvas, parentName);
+  if (!parent) {
+    if (error)
+      *error = "Componente pai não encontrado: " + parentName;
+    return false;
+  }
+  if (parent != m_canvas && !parent->layout() &&
+      !qobject_cast<QTabWidget *>(parent)) {
+    if (error)
+      *error = "O componente pai não aceita filhos: " + parentName;
+    return false;
+  }
+  QWidget *widget = m_factory->createWidget(type, name);
+  if (!widget) {
+    if (error)
+      *error = "Não foi possível criar o componente: " + type;
+    return false;
+  }
+  m_controller->undoStack()->push(new AddWidgetCommand(m_canvas, widget, parent));
+  m_controller->manageWidget(widget);
+  m_inspector->updateHierarchy(m_canvas);
+  return true;
+}
+
+bool MainWindow::automationRemoveWidget(const QString &name, QString *error) {
+  QWidget *widget = findAutomationWidget(m_canvas, name);
+  if (!widget) {
+    if (error)
+      *error = "Componente não encontrado: " + name;
+    return false;
+  }
+  m_controller->undoStack()->push(new DeleteWidgetCommand(m_canvas, {widget}));
+  m_controller->selectWidget(nullptr);
+  m_inspector->updateHierarchy(m_canvas);
+  return true;
+}
+
+bool MainWindow::automationSelectWidget(const QString &name, QString *error) {
+  QWidget *widget = name.isEmpty() ? nullptr : findAutomationWidget(m_canvas, name);
+  if (!name.isEmpty() && !widget) {
+    if (error)
+      *error = "Componente não encontrado: " + name;
+    return false;
+  }
+  m_controller->selectWidget(widget);
+  return true;
+}
+
+bool MainWindow::automationMoveWidget(const QString &name,
+                                       const QString &parentName, int index,
+                                       QString *error) {
+  QWidget *widget = findAutomationWidget(m_canvas, name);
+  QWidget *parent = parentName.isEmpty() ? static_cast<QWidget *>(m_canvas)
+                                         : findAutomationWidget(m_canvas, parentName);
+  if (!widget || !parent) {
+    if (error)
+      *error = "Componente ou pai não encontrado.";
+    return false;
+  }
+  if (widget == parent || widget->isAncestorOf(parent)) {
+    if (error)
+      *error = "Não é permitido mover um componente para dentro de si mesmo.";
+    return false;
+  }
+  if (parent != m_canvas && !parent->layout()) {
+    if (error)
+      *error = "O componente pai não possui um layout.";
+    return false;
+  }
+  m_controller->undoStack()->push(new MoveWidgetCommand(widget, parent, index));
+  m_inspector->updateHierarchy(m_canvas);
+  return true;
+}
+
+bool MainWindow::automationSetProperty(const QString &name,
+                                       const QString &property,
+                                       const QJsonValue &value,
+                                       QString *error) {
+  QWidget *widget = findAutomationWidget(m_canvas, name);
+  if (!widget || property.isEmpty()) {
+    if (error)
+      *error = "Componente ou propriedade inválida.";
+    return false;
+  }
+  const QVariant oldValue = widget->property(property.toUtf8().constData());
+  if (!oldValue.isValid() && widget->metaObject()->indexOfProperty(
+                                  property.toUtf8().constData()) < 0) {
+    if (error)
+      *error = "Propriedade não encontrada: " + property;
+    return false;
+  }
+  const QVariant newValue = automationVariant(value, oldValue);
+  m_controller->undoStack()->push(new PropertyChangeCommand(
+      widget, property, oldValue, newValue));
+  m_propEditor->setTargetWidget(widget);
+  return true;
+}
+
+bool MainWindow::automationSetActions(const QString &name,
+                                      const QJsonObject &actions,
+                                      QString *error) {
+  QWidget *widget = findAutomationWidget(m_canvas, name);
+  if (!widget) {
+    if (error)
+      *error = "Componente não encontrado: " + name;
+    return false;
+  }
+  const QString encoded =
+      QString::fromUtf8(QJsonDocument(actions).toJson(QJsonDocument::Compact));
+  const QString oldValue = widget->property("showbox_actions").toString();
+  m_controller->undoStack()->push(new PropertyChangeCommand(
+      widget, "showbox_actions", oldValue, encoded));
+  m_actionsModified = true;
+  m_actionEditor->setTargetWidget(widget);
+  return true;
+}
+
+bool MainWindow::automationUndo(QString *error) {
+  if (!m_controller->undoStack()->canUndo()) {
+    if (error)
+      *error = "Não há alterações para desfazer.";
+    return false;
+  }
+  m_controller->undoStack()->undo();
+  onUndoIndexChanged();
+  return true;
+}
+
+bool MainWindow::automationRedo(QString *error) {
+  if (!m_controller->undoStack()->canRedo()) {
+    if (error)
+      *error = "Não há alterações para refazer.";
+    return false;
+  }
+  m_controller->undoStack()->redo();
+  onUndoIndexChanged();
+  return true;
+}
+
+bool MainWindow::automationStartPreview(QString *error) {
+  ScriptGenerator generator;
+  const QString script = generator.generate(m_canvas);
+  if (script.isEmpty()) {
+    if (error)
+      *error = generator.errorString();
+    return false;
+  }
+  m_automationPreviewLogs.clear();
+  m_previewLog->clear();
+  m_previewManager->runPreview(script, m_projectDirectory);
+  return true;
+}
+
+bool MainWindow::automationStopPreview(QString *error) {
+  Q_UNUSED(error);
+  if (m_previewManager)
+    m_previewManager->stop();
+  return true;
+}
+
+bool MainWindow::automationExport(const QString &fileName, QJsonObject *result,
+                                  QString *error) {
+  ScriptGenerator generator;
+  const QString script = generator.generate(m_canvas);
+  if (script.isEmpty()) {
+    if (error)
+      *error = generator.errorString();
+    return false;
+  }
+  if (!fileName.isEmpty()) {
+    QSaveFile file(fileName);
+    const QByteArray bytes = script.toUtf8();
+    if (!file.open(QIODevice::WriteOnly) || file.write(bytes) != bytes.size() ||
+        !file.commit()) {
+      if (error)
+        *error = "Não foi possível exportar o arquivo Bash: " + fileName;
+      return false;
+    }
+    QFile::setPermissions(fileName,
+                          QFile::permissions(fileName) | QFileDevice::ExeOwner);
+  }
+  if (result)
+    *result = QJsonObject{{"path", fileName}, {"script", script},
+                          {"bytes", script.toUtf8().size()}};
+  return true;
 }
 
 void MainWindow::createToolbox(int style) {
