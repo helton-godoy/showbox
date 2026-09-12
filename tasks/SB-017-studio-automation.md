@@ -1,6 +1,7 @@
 # SB-017 — Showbox Studio Automation Interface
 
-Estado: em execução (2026-09-12).
+Estado: implementação concluída na branch (2026-09-12); aguardando revisão,
+sem integração em `main`.
 
 - Objetivo: oferecer uma interface local, versionada e observável para
   automação, testes funcionais, CI e diagnóstico do Showbox Studio.
@@ -30,6 +31,19 @@ Estado: em execução (2026-09-12).
 - Erros possuem forma estável com `code`, `severity`, `component`, `message`,
   `context`, `location` e `suggestion`, quando aplicável.
 - O MCP é um adaptador separado e conversa somente com a interface local.
+- A lista de métodos e schemas é centralizada em `AutomationDescriptors` e é
+  reutilizada pelo servidor, `system.describe` e `tools/list`.
+- `widget.setProperty` usa propriedades públicas tipadas, inclusive controles
+  compostos e `headers`/`rows` de tabelas; metadados Qt e propriedades
+  desconhecidas são recusados.
+- Erros JSON-RPC têm forma padrão com metadados adicionais em `error.data`;
+  notificações válidas não recebem resposta.
+- `events.subscribe` é por conexão, com filtro validado e payload estável para
+  projeto, seleção, dirty, preview e diagnósticos.
+- O transporte impõe 1 MiB por mensagem e 2 MiB por buffer; endpoints ativos
+  nunca são removidos durante a recuperação de socket obsoleto.
+- `project.new`/`project.open` exigem `force=true` para descartar alterações
+  não salvas.
 
 ## Critérios de aceite
 
@@ -43,6 +57,10 @@ Estado: em execução (2026-09-12).
   ocorre após `--automation-allow-execution`.
 - `showbox-studio-mcp` traduz `initialize`, `tools/list` e `tools/call` para
   o protocolo público, sem acessar o Studio internamente.
+- Testes de transporte automatizados cobrem cliente/servidor reais, framing,
+  notificações, reconexão, filtros, autorização de preview, CLI, MCP e falha
+  de transporte; o único skip permitido é a indisponibilidade de socket local
+  no sandbox.
 - `just build` e `just test` passam; os comandos e limitações reais ficam no
   checkpoint e no handoff.
 
