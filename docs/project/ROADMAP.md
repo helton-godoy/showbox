@@ -19,7 +19,7 @@ Somente o integrador altera esta tabela.
 | SB-009B | Testes de ordenação ligados à saída real do conversor                   | SB-009A        | Concluída                      |
 | SB-009C | Smoke RPM valida Version/Release realmente instalados                   | SB-009B        | Concluída                      |
 | SB-010  | Fluxo visual executável de ponta a ponta                                | SB-004         | Concluída                      |
-| SB-011  | Simplificar integração Git para branches de tarefa → main               | SB-006, SB-007 | Pronta para iniciar            |
+| SB-011  | Simplificar integração Git para branches de tarefa → main               | SB-006, SB-007 | Concluída                      |
 
 ## Marco de produto
 

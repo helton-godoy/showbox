@@ -1,6 +1,6 @@
 # SB-011 — Simplificação do fluxo Git
 
-Estado: pronta para iniciar (2026-09-10).
+Estado: concluída (2026-09-11).
 
 - Objetivo: alinhar a governança documentada ao fluxo efetivamente usado desde
   a SB-007: branches curtas de tarefa entram em `main` por PR com todos os gates
@@ -52,3 +52,25 @@ Estado: pronta para iniciar (2026-09-10).
 - `just check`, testes pertinentes e gates do PR verdes.
 - Handoff registra SHAs, configuração anterior/final, comandos de prova e
   limitações.
+
+## Handoff
+
+- Base da implementação: `afb416e`; implementação: `c00acb5`; merge do PR
+  [#26](https://github.com/helton-godoy/showbox/pull/26): `546f558`.
+- Gates do PR #26: `build-test`, `sanitizers`, `trunk-check` e SonarCloud
+  concluídos com sucesso.
+- Antes da exclusão, a comparação
+  `integration/showbox-v1...main` registrou `main` 70 commits à frente, zero
+  commits exclusivos na branch intermediária e merge-base `66860c3`.
+- A proteção de `integration/showbox-v1` foi removida e a branch foi excluída.
+  Também foram removidas 18 branches remotas de tarefa já integradas; referências
+  locais, worktrees e auditorias históricas foram preservadas.
+- A proteção final da `main` exige branch atualizada, PR, enforce admins e os
+  checks `build-test`, `sanitizers` e `trunk-check`; force-push e exclusão estão
+  desabilitados. O ruleset `tags-v-protection` permanece ativo.
+- Um commit vazio descartável (`25437f1`) tentou atualizar `main` diretamente e
+  foi rejeitado pelo GitHub (`GH006`: mudanças devem passar por pull request; 3
+  de 3 checks obrigatórios esperados). O commit não foi publicado.
+- Validações locais: `just doctor` e `just check` aprovados em 2026-09-11.
+- Limitação preservada: `test/trunk-check-blocking2` não foi removida porque não
+  está integrada a `main`; ela não é uma branch permanente de desenvolvimento.
