@@ -1,6 +1,6 @@
 # SB-014 — Migrar pins das Actions para runtime Node 24
 
-Estado: em andamento (2026-09-12).
+Estado: concluída (2026-09-12).
 
 - Objetivo: eliminar os avisos de depreciação do Node.js 20 no GitHub Actions
   migrando os pins SHA das actions para releases baseados em Node 24.
@@ -54,6 +54,29 @@ log de release disponível para confirmar, permanece intocado nesta tarefa.
 - Handoff com SHAs antes/depois, run de prova e limitações.
 - Limitação conhecida: `release.yml` só executa integralmente em push de tag
   `v*`; a validação completa do release aguarda o próximo candidato.
+
+## Handoff
+
+- Implementação: bumps aplicados em `ci.yml` (3 checkouts, 1 upload) e
+  `release.yml` (6 checkouts, 4 uploads, 2 downloads).
+- Antes → depois:
+  - `actions/checkout@11d5960a` (v4) → `@fbc6f399` (v5);
+  - `actions/upload-artifact@ea165f8d` (v4) → `@b7c566a7` (v6);
+  - `actions/download-artifact@d3f86a10` (v4) → `@018cc2cf` (v6).
+- Achado intermediário: upload-artifact v5 (`330a01c4`) ainda mira Node 20
+  (provado no run `34666791917`); a v6 declara "Node.js 24 support"
+  (commit `b7c566a7`, dez/2025). Checkout v5 já era silencioso e foi mantido
+  por mudança mínima.
+- Prova: run `34666972126` do PR #33 — zero ocorrências de
+  `Node 20 is being deprecated` / `Node.js 20 is deprecated` em todos os
+  jobs; `build-test`, `sanitizers`, `trunk-check` e SonarCloud verdes.
+- Validações locais na worktree: `just check` sem achados (actionlint cobre
+  os workflows); sem mudança de produto, sem necessidade de build/test local
+  adicional além dos gates do PR.
+- Limitação: `release.yml` (download-artifact v6) só executa integralmente
+  em push de tag `v*` ou `workflow_dispatch`; validação completa pendente do
+  próximo candidato. `trunk-action` e `softprops` intocados pelos motivos da
+  seção de evidência.
 
 ## Riscos
 
