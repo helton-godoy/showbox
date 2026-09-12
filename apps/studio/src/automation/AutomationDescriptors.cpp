@@ -167,7 +167,8 @@ QList<MethodDescriptor> buildDescriptors() {
          objectSchema(QJsonObject{{"name", name}, {"parent", name},
                                   {"index", integerSchema("Índice no pai", -1)}},
                       QJsonArray{"name"})},
-        {"widget.setProperty", "Altera uma propriedade pública tipada.", true,
+        {"widget.setProperty", "Altera uma propriedade pública tipada "
+          "(orientation: 1|2; echoMode: 0..3).", true,
          objectSchema(QJsonObject{{"name", name},
                                   {"property", propertyValueSchema("all")},
                                   {"value", jsonValueSchema()}},
@@ -367,7 +368,33 @@ bool validateParams(const MethodDescriptor &descriptor,
             *error = "Tipo ou limite inválido para " + path + ".";
         return valid;
     };
-    return validate(QJsonObject(params), descriptor.inputSchema, "params");
+    if (!validate(QJsonObject(params), descriptor.inputSchema, "params"))
+        return false;
+    // Domínios fechados publicados no contrato: recusar em vez de normalizar.
+    if (descriptor.name == "widget.setProperty") {
+        const QString property = params.value("property").toString();
+        const QJsonValue value = params.value("value");
+        if (property == "orientation") {
+            const double number = value.toDouble(-1);
+            if (!value.isDouble() || std::floor(number) != number ||
+                (number != 1 && number != 2)) {
+                if (error)
+                    *error = "Valor fora do enum para params.value: orientation "
+                             "exige 1 ou 2.";
+                return false;
+            }
+        } else if (property == "echoMode") {
+            const double number = value.toDouble(-1);
+            if (!value.isDouble() || std::floor(number) != number ||
+                number < 0 || number > 3) {
+                if (error)
+                    *error = "Valor fora do enum para params.value: echoMode "
+                             "exige inteiro entre 0 e 3.";
+                return false;
+            }
+        }
+    }
+    return true;
 }
 
 } // namespace showbox::automation

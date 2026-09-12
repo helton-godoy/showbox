@@ -7,6 +7,7 @@
 #include <QGroupBox>
 #include <QLayout>
 #include <QPointer>
+#include <QScrollArea>
 #include <QTabWidget>
 #include <QUndoCommand>
 #include <QWidget>
@@ -35,14 +36,25 @@ private:
     if (!m_canvas || !widget)
       return;
     if (parent && parent != m_canvas) {
-      widget->setParent(parent);
       if (auto *tabs = qobject_cast<QTabWidget *>(parent)) {
         QString title = widget->property("title").toString();
         if (title.isEmpty())
-          title = "Tab";
+          title = widget->objectName().isEmpty() ? QString("Tab")
+                                                 : widget->objectName();
         tabs->addTab(widget, title);
+      } else if (auto *scroll = qobject_cast<QScrollArea *>(parent)) {
+        if (QWidget *content = scroll->widget()) {
+          if (content->layout())
+            content->layout()->addWidget(widget);
+          else
+            widget->setParent(content);
+        } else {
+          widget->setParent(parent);
+        }
       } else if (parent->layout()) {
         parent->layout()->addWidget(widget);
+      } else {
+        widget->setParent(parent);
       }
       widget->show();
     } else {
@@ -174,6 +186,47 @@ private:
     if (!parent || m_widget.isNull())
       return;
 
+    // Remover do QTabWidget de origem antes de reparentar, senão a aba
+    // antiga permanece vazia.
+    if (QWidget *current = m_widget->parentWidget()) {
+      if (current != parent) {
+        if (auto *oldTabs = qobject_cast<QTabWidget *>(current)) {
+          const int tabIndex = oldTabs->indexOf(m_widget.data());
+          if (tabIndex >= 0)
+            oldTabs->removeTab(tabIndex);
+        }
+      }
+    }
+    if (auto *tabs = qobject_cast<QTabWidget *>(parent)) {
+      QString title = m_widget->property("title").toString();
+      if (title.isEmpty())
+        title = m_widget->objectName().isEmpty() ? QString("Tab")
+                                                 : m_widget->objectName();
+      if (index >= 0)
+        tabs->insertTab(index, m_widget.data(), title);
+      else
+        tabs->addTab(m_widget.data(), title);
+      m_widget->show();
+      return;
+    }
+    if (auto *scroll = qobject_cast<QScrollArea *>(parent)) {
+      if (QWidget *content = scroll->widget()) {
+        if (content->layout()) {
+          if (index >= 0) {
+            if (auto *box = qobject_cast<QBoxLayout *>(content->layout()))
+              box->insertWidget(index, m_widget.data());
+            else
+              content->layout()->addWidget(m_widget.data());
+          } else {
+            content->layout()->addWidget(m_widget.data());
+          }
+        } else {
+          m_widget->setParent(content);
+        }
+        m_widget->show();
+        return;
+      }
+    }
     m_widget->setParent(parent);
     if (parent->layout()) {
       if (index >= 0) {

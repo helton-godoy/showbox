@@ -64,19 +64,31 @@ por tipo: `shell` exige `command`; `set` exige `target`/`property`/`value`;
 gravar, de modo que mutações que deixariam o projeto inválido são recusadas
 sem tocar na pilha de undo. `widget.add` reutiliza a validação canônica de
 identificadores (`^[A-Za-z_][A-Za-z0-9_]*$`, reservados `main`/`showbox`).
+O pai precisa ser container do catálogo (`isContainer`); tipos atômicos
+compostos (`textbox`, `combobox`, `listbox`) possuem layout interno mas
+rejeitam filhos — filhos ali sumiriam do snapshot e da serialização, pois o
+mapeamento só percorre containers. A inserção é específica por container
+(`tabs` via `addTab`/`insertTab`, `scrollarea` via widget de conteúdo,
+demais via layout). A mesma regra vale para `widget.move`.
 A propriedade `widget.setProperty` é tipada conforme o tipo do componente e
 o modelo do `ProjectWidgetMapper`: controles compostos como `textbox`,
 `combobox`, `listbox` e `table` alteram seus controles reais, incluindo
-`items`, `headers` e `rows`. Alterações em `table.headers`/`rows` e
-`combobox.items`/`currentIndex` são atômicas: o comando guarda o estado
-completo e o undo restaura dados e seleção. Metadados Qt (`objectName`,
-`showbox_type`, `showbox_actions`) e propriedades desconhecidas são
-rejeitados.
+`items`, `headers` e `rows`. Enums são estritos (`orientation`: 1|2;
+`echoMode`: 0..3) no schema e na facade — valores fora do domínio são
+recusados, nunca normalizados em silêncio. Alterações em
+`table.headers`/`rows` e `combobox.items`/`currentIndex` são atômicas: o
+comando guarda o estado completo e o undo restaura dados e seleção.
+Metadados Qt (`objectName`, `showbox_type`, `showbox_actions`) e
+propriedades desconhecidas são rejeitados.
 
 `project.new` e `project.open` recusam descartar alterações não salvas sem
 `force: true`; a resposta informa `discarded` quando o descarte foi explícito.
-Alterações de propriedades entram na pilha do Studio e participam de
-`history.undo`/`history.redo`.
+Alterações de propriedades e ações entram na pilha do Studio e participam de
+`history.undo`/`history.redo`. Mutações são pré-validadas antes do `push`:
+uma operação recusada nunca entra na pilha de `redo`, e diagnósticos são
+comparados (antes/depois) para permitir correções incrementais em projetos
+já inválidos. Ações automatizadas usam somente a semântica `clean` do undo
+stack, de modo que `history.undo` até o índice limpo restaura `dirty=false`.
 
 Mensagens são objetos JSON-RPC 2.0 delimitados por LF. Notificações válidas,
 sem `id`, não recebem resposta. `id` aceita string, número ou `null`; ids de

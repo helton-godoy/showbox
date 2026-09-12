@@ -1,7 +1,7 @@
 # SB-017 — Showbox Studio Automation Interface
 
-Estado: revisão P1/P2 aplicada na branch (2026-09-12); aguardando revisão,
-sem integração em `main`.
+Estado: segunda revisão P1/P2 aplicada na branch (2026-09-12); aguardando
+revisão, sem integração em `main`.
 
 - Objetivo: oferecer uma interface local, versionada e observável para
   automação, testes funcionais, CI e diagnóstico do Showbox Studio.
@@ -41,7 +41,16 @@ sem integração em `main`.
   desconhecidas são recusados. Tabela (`headers`+`rows`) e combobox
   (`items`+`currentIndex`) usam comandos atômicos com undo completo.
 - `widget.add` reutiliza `ProjectModel::isValidWidgetName` (regex canônica e
-  reservados `main`/`showbox`) antes de criar o comando.
+  reservados `main`/`showbox`) antes de criar o comando. `widget.add` e
+  `widget.move` exigem pai container (`catalog::isContainer`); atômicos
+  compostos com layout interno (`textbox`, `combobox`, `listbox`) rejeitam
+  filhos. Inserção específica por container (`tabs`, `scrollarea`, demais
+  via layout) em `StudioCommands`.
+- Mutações de propriedade/ação são pré-validadas antes do `push` (diagnósticos
+  antes/depois, permitindo fixes incrementais); recusadas nunca entram em
+  `redo`. Ações usam só a semântica `clean` do undo stack (`dirty` restaurado
+  pelo undo). Enums estritos: `orientation` 1|2 e `echoMode` 0..3 no schema
+  (`validateParams`) e na facade.
 - Ações usam `oneOf` por tipo (`shell` exige `command`; `set` exige
   `target`/`property`/`value`; `query` exige `target`/`variable`) e o modelo
   proposto é validado antes de gravar.

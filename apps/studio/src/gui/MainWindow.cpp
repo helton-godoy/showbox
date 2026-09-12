@@ -82,6 +82,29 @@ ProjectNode *findAutomationModelNode(QList<ProjectNode> *nodes,
   return nullptr;
 }
 
+// Um layout interno (textbox, combobox, listbox) não significa container
+// público. A fonte canônica é o catálogo: somente tipos com container=true
+// aceitam filhos no modelo (ProjectWidgetMapper só percorre containers).
+bool automationParentAcceptsChildren(QWidget *parent, QWidget *canvas) {
+  if (!parent || parent == canvas)
+    return true;
+  const QString type = showbox::catalog::canonicalType(
+      parent->property("showbox_type").toString());
+  return showbox::catalog::isContainer(type);
+}
+
+bool automationDiagnosticsAllow(const QStringList &before,
+                                const QStringList &after) {
+  // Permite correções incrementais: só recusa quando a mutação introduz
+  // diagnósticos novos. Comparação por conjunto (ordem irrelevante).
+  const QSet<QString> beforeSet(before.begin(), before.end());
+  for (const QString &issue : after) {
+    if (!beforeSet.contains(issue))
+      return false;
+  }
+  return true;
+}
+
 QJsonObject automationDiagnostic(const QString &message,
                                  const QString &code = "validation_failed") {
   return QJsonObject{{"code", code},
@@ -280,6 +303,18 @@ bool applyTypedAutomationProperty(QWidget *widget, const QString &property,
     if (!jsonInteger(value, &ignored)) {
       if (error)
         *error = "A propriedade " + property + " exige número inteiro.";
+      return false;
+    }
+    // Enums têm domínio fechado: recusar em vez de normalizar em silêncio,
+    // para que o snapshot corresponda ao valor solicitado.
+    if (property == "orientation" && ignored != 1 && ignored != 2) {
+      if (error)
+        *error = "A propriedade orientation exige 1 (horizontal) ou 2 (vertical).";
+      return false;
+    }
+    if (property == "echoMode" && (ignored < 0 || ignored > 3)) {
+      if (error)
+        *error = "A propriedade echoMode exige inteiro entre 0 e 3.";
       return false;
     }
   }
@@ -684,6 +719,9 @@ MainWindow::~MainWindow() {
 void MainWindow::onUndoIndexChanged() {
   if (m_controller->selectedWidget()) {
     m_propEditor->setTargetWidget(m_controller->selectedWidget());
+    // Recarregar ações do widget após undo/redo de showbox_actions para não
+    // exibir estado obsoleto no editor.
+    m_actionEditor->setTargetWidget(m_controller->selectedWidget());
   }
   m_inspector->updateHierarchy(m_canvas);
   emit automationEvent("dirty.changed", QJsonObject{{"dirty", hasUnsavedChanges()}});
@@ -1199,8 +1237,7 @@ bool MainWindow::automationAddWidget(const QString &type, const QString &name,
       *error = "Componente pai não encontrado: " + parentName;
     return false;
   }
-  if (parent != m_canvas && !parent->layout() &&
-      !qobject_cast<QTabWidget *>(parent)) {
+  if (!automationParentAcceptsChildren(parent, m_canvas)) {
     if (error)
       *error = "O componente pai não aceita filhos: " + parentName;
     return false;
@@ -1257,7 +1294,7 @@ bool MainWindow::automationMoveWidget(const QString &name,
       *error = "Não é permitido mover um componente para dentro de si mesmo.";
     return false;
   }
-  if (parent != m_canvas && !parent->layout()) {
+  if (!automationParentAcceptsChildren(parent, m_canvas)) {
     if (error)
       *error = "O componente pai não possui um layout.";
     return false;
@@ -1338,15 +1375,25 @@ bool MainWindow::automationSetProperty(const QString &name,
           row.append(QString());
       }
     }
+    // Pré-validação sem poluir a pilha: aplica o estado proposto direto no
+    // widget, compara diagnósticos (permite correções incrementais) e
+    // restaura antes do push. Um comando recusado nunca chega ao redo.
+    {
+      const QStringList before =
+          ProjectWidgetMapper::toModel(m_canvas).validate();
+      applyAutomationTableState(table, newState);
+      const QStringList after =
+          ProjectWidgetMapper::toModel(m_canvas).validate();
+      applyAutomationTableState(table, oldState);
+      if (!automationDiagnosticsAllow(before, after)) {
+        if (error)
+          *error = "A alteração produziria um projeto inválido.";
+        return false;
+      }
+    }
     m_controller->undoStack()->push(
         new AutomationTableCommand(widget, property, oldState, newState));
     m_propEditor->setTargetWidget(widget);
-    if (!automationDiagnostics().isEmpty()) {
-      m_controller->undoStack()->undo();
-      if (error)
-        *error = "A alteração produziria um projeto inválido.";
-      return false;
-    }
     return true;
   }
   if (type == "combobox" && (property == "items" || property == "currentIndex")) {
@@ -1388,15 +1435,24 @@ bool MainWindow::automationSetProperty(const QString &name,
       }
       newState.currentIndex = index;
     }
+    {
+      const QStringList before =
+          ProjectWidgetMapper::toModel(m_canvas).validate();
+      if (QComboBox *live = widget->findChild<QComboBox *>())
+        applyAutomationComboState(live, newState);
+      const QStringList after =
+          ProjectWidgetMapper::toModel(m_canvas).validate();
+      if (QComboBox *live = widget->findChild<QComboBox *>())
+        applyAutomationComboState(live, oldState);
+      if (!automationDiagnosticsAllow(before, after)) {
+        if (error)
+          *error = "A alteração produziria um projeto inválido.";
+        return false;
+      }
+    }
     m_controller->undoStack()->push(
         new AutomationComboCommand(widget, property, oldState, newState));
     m_propEditor->setTargetWidget(widget);
-    if (!automationDiagnostics().isEmpty()) {
-      m_controller->undoStack()->undo();
-      if (error)
-        *error = "A alteração produziria um projeto inválido.";
-      return false;
-    }
     return true;
   }
   const ProjectNode node = ProjectWidgetMapper::toNode(widget);
@@ -1406,15 +1462,26 @@ bool MainWindow::automationSetProperty(const QString &name,
       *error = "Propriedade não está disponível no snapshot: " + property;
     return false;
   }
-  QString applyError;
-  if (!applyTypedAutomationProperty(widget, property, value, &applyError)) {
-    if (error)
-      *error = applyError;
-    return false;
+  // Pré-validação sem poluir redo: aplica direto, compara diagnósticos e
+  // restaura antes do push. Só entra na pilha o que não cria issues novas.
+  {
+    const QStringList before =
+        ProjectWidgetMapper::toModel(m_canvas).validate();
+    QString applyError;
+    if (!applyTypedAutomationProperty(widget, property, value, &applyError)) {
+      if (error)
+        *error = applyError;
+      return false;
+    }
+    const QStringList after =
+        ProjectWidgetMapper::toModel(m_canvas).validate();
+    applyTypedAutomationProperty(widget, property, oldValue, nullptr);
+    if (!automationDiagnosticsAllow(before, after)) {
+      if (error)
+        *error = "A alteração produziria um projeto inválido.";
+      return false;
+    }
   }
-  // Reverter a aplicação imediata; o comando realiza a alteração e registra
-  // undo/redo com valores do modelo, não com QVariant do QWidget externo.
-  applyTypedAutomationProperty(widget, property, oldValue, nullptr);
   m_controller->undoStack()->push(new AutomationPropertyCommand(
       widget, property, oldValue, value,
       [](QWidget *target, const QString &key, const QJsonValue &newValue,
@@ -1422,12 +1489,6 @@ bool MainWindow::automationSetProperty(const QString &name,
         return applyTypedAutomationProperty(target, key, newValue, applyError);
       }));
   m_propEditor->setTargetWidget(widget);
-  if (!automationDiagnostics().isEmpty()) {
-    m_controller->undoStack()->undo();
-    if (error)
-      *error = "A alteração produziria um projeto inválido.";
-    return false;
-  }
   return true;
 }
 
@@ -1442,11 +1503,14 @@ bool MainWindow::automationSetActions(const QString &name,
   }
   const QString encoded =
       QString::fromUtf8(QJsonDocument(actions).toJson(QJsonDocument::Compact));
-  // Validar o modelo proposto antes de mutar: evita gravar ações que deixam
-  // o projeto inválido (shell sem command, set/query incompletos, destinos
-  // inexistentes). Nenhum comando entra na pilha quando inválido.
+  // Validar o modelo proposto antes de mutar: evita gravar ações que criam
+  // diagnósticos novos. Permite correções incrementais quando o projeto já
+  // possui issues não relacionadas. Nenhum comando entra na pilha recusada.
   {
-    ProjectModel proposed = ProjectWidgetMapper::toModel(m_canvas);
+    ProjectModel current = ProjectWidgetMapper::toModel(m_canvas);
+    const QStringList before = current.validate();
+    ProjectModel proposed = current;
+    // Recalcular nós após a cópia: ponteiros da árvore anterior não valem.
     ProjectNode *node = findAutomationModelNode(&proposed.widgets, name);
     if (!node) {
       if (error)
@@ -1454,17 +1518,27 @@ bool MainWindow::automationSetActions(const QString &name,
       return false;
     }
     node->actions = encoded;
-    const QStringList issues = proposed.validate();
-    if (!issues.isEmpty()) {
+    const QStringList after = proposed.validate();
+    if (!automationDiagnosticsAllow(before, after)) {
+      QSet<QString> beforeSet(before.begin(), before.end());
+      QString firstNew;
+      for (const QString &issue : after) {
+        if (!beforeSet.contains(issue)) {
+          firstNew = issue;
+          break;
+        }
+      }
       if (error)
-        *error = issues.first();
+        *error = firstNew.isEmpty() ? "A alteração produziria um projeto inválido."
+                                    : firstNew;
       return false;
     }
   }
   const QString oldValue = widget->property("showbox_actions").toString();
+  // Somente semântica clean do undo stack: sem m_actionsModified aqui, para
+  // que history.undo até o índice limpo volte a dirty=false.
   m_controller->undoStack()->push(new PropertyChangeCommand(
       widget, "showbox_actions", oldValue, encoded));
-  m_actionsModified = true;
   m_actionEditor->setTargetWidget(widget);
   return true;
 }
