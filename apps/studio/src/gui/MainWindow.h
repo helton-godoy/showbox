@@ -38,7 +38,9 @@ public:
   QString automationPreviewLogs() const { return m_automationPreviewLogs; }
   bool automationPreviewRunning() const;
   bool automationNew(QString *error = nullptr);
+  bool automationNew(bool force, QString *error);
   bool automationOpen(const QString &fileName, QString *error = nullptr);
+  bool automationOpen(const QString &fileName, bool force, QString *error);
   bool automationSave(const QString &fileName, QString *error = nullptr);
   bool automationAddWidget(const QString &type, const QString &name,
                            const QString &parentName, QString *error = nullptr);
@@ -56,6 +58,9 @@ public:
   bool automationStopPreview(QString *error = nullptr);
   bool automationExport(const QString &fileName, QJsonObject *result = nullptr,
                         QString *error = nullptr);
+
+signals:
+  void automationEvent(const QString &name, const QJsonObject &data);
 
 protected:
   void closeEvent(QCloseEvent *event) override;

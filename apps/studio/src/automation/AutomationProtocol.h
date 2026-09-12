@@ -8,6 +8,8 @@
 namespace showbox::automation {
 
 constexpr int ProtocolVersion = 1;
+constexpr int MaxMessageBytes = 1024 * 1024;
+constexpr int MaxBufferBytes = 2 * 1024 * 1024;
 
 QJsonObject makeResult(const QJsonValue &id, const QJsonObject &result);
 QJsonObject makeErrorData(int code, const QString &severity,

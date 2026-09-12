@@ -56,6 +56,8 @@ set(STUDIO_SOURCES
     src/core/PreviewManager.h
     src/automation/AutomationProtocol.cpp
     src/automation/AutomationProtocol.h
+    src/automation/AutomationDescriptors.cpp
+    src/automation/AutomationDescriptors.h
     src/automation/StudioAutomationServer.cpp
     src/automation/StudioAutomationServer.h
 )
@@ -87,22 +89,26 @@ target_compile_definitions(showbox-studio PRIVATE SHOWBOX_VERSION="${SHOWBOX_VER
 add_executable(showbox-studioctl
     src/automation/AutomationProtocol.cpp
     src/automation/AutomationProtocol.h
+    src/automation/AutomationDescriptors.cpp
+    src/automation/AutomationDescriptors.h
     src/automation/AutomationClient.cpp
     src/automation/AutomationClient.h
     src/automation/StudioAutomationCtl.cpp
 )
 target_include_directories(showbox-studioctl PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
-target_link_libraries(showbox-studioctl PRIVATE Qt6::Core Qt6::Network)
+target_link_libraries(showbox-studioctl PRIVATE Qt6::Core Qt6::Network showbox-catalog)
 
 add_executable(showbox-studio-mcp
     src/automation/AutomationProtocol.cpp
     src/automation/AutomationProtocol.h
+    src/automation/AutomationDescriptors.cpp
+    src/automation/AutomationDescriptors.h
     src/automation/AutomationClient.cpp
     src/automation/AutomationClient.h
     src/automation/StudioAutomationMcp.cpp
 )
 target_include_directories(showbox-studio-mcp PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
-target_link_libraries(showbox-studio-mcp PRIVATE Qt6::Core Qt6::Network)
+target_link_libraries(showbox-studio-mcp PRIVATE Qt6::Core Qt6::Network showbox-catalog)
 
 enable_testing()
 add_subdirectory(tests)

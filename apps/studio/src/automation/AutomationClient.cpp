@@ -56,5 +56,11 @@ QJsonObject AutomationClient::call(const QString &method,
         }
         return {};
     }
-    return document.object();
+    const QJsonObject response = document.object();
+    if (response.value("id") != QJsonValue(1)) {
+        if (transportError)
+            *transportError = "A resposta do Studio não corresponde à solicitação.";
+        return {};
+    }
+    return response;
 }

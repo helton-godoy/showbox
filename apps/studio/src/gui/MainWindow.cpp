@@ -1,5 +1,6 @@
 #include "MainWindow.h"
 #include "ActionEditor.h"
+#include "automation/AutomationDescriptors.h"
 #include "Canvas.h"
 #include "Catalog.h"
 #include "ObjectInspector.h"
@@ -13,6 +14,8 @@
 #include "core/StudioWidgetFactory.h"
 #include "toolbox/ToolboxClassic.h"
 #include "toolbox/ToolboxTree.h"
+#include "custom_table_widget.h"
+#include <QAbstractButton>
 #include <QActionGroup>
 #include <QApplication>
 #include <QCloseEvent>
@@ -41,6 +44,16 @@
 #include <QTextStream>
 #include <QTime>
 #include <QToolBar>
+#include <QComboBox>
+#include <QGroupBox>
+#include <QListWidget>
+#include <QProgressBar>
+#include <QSlider>
+#include <QSpinBox>
+#include <QTableWidget>
+#include <cmath>
+#include <functional>
+#include <limits>
 
 namespace {
 
@@ -56,33 +69,6 @@ QWidget *findAutomationWidget(QWidget *root, const QString &name) {
   return nullptr;
 }
 
-QJsonValue automationValue(const QVariant &value) {
-  if (value.typeId() == QMetaType::Bool)
-    return value.toBool();
-  if (value.canConvert<double>() &&
-      (value.typeId() == QMetaType::Int || value.typeId() == QMetaType::UInt ||
-       value.typeId() == QMetaType::LongLong ||
-       value.typeId() == QMetaType::Double))
-    return value.toDouble();
-  return value.toString();
-}
-
-QVariant automationVariant(const QJsonValue &value,
-                           const QVariant &oldValue) {
-  if (value.isBool())
-    return value.toBool();
-  if (value.isDouble()) {
-    if (oldValue.typeId() == QMetaType::Int)
-      return value.toInt();
-    if (oldValue.typeId() == QMetaType::LongLong)
-      return static_cast<qlonglong>(value.toDouble());
-    return value.toDouble();
-  }
-  if (value.isNull())
-    return QVariant();
-  return value.toString();
-}
-
 QJsonObject automationDiagnostic(const QString &message,
                                  const QString &code = "validation_failed") {
   return QJsonObject{{"code", code},
@@ -93,6 +79,275 @@ QJsonObject automationDiagnostic(const QString &message,
                      {"location", QJsonObject{}},
                      {"suggestion", "Corrija o projeto e tente novamente."}};
 }
+
+bool jsonInteger(const QJsonValue &value, int *out) {
+  if (!value.isDouble())
+    return false;
+  const double number = value.toDouble();
+  if (!std::isfinite(number) || std::floor(number) != number ||
+      number < std::numeric_limits<int>::min() ||
+      number > std::numeric_limits<int>::max())
+    return false;
+  if (out)
+    *out = static_cast<int>(number);
+  return true;
+}
+
+bool jsonStringArray(const QJsonValue &value) {
+  if (!value.isArray())
+    return false;
+  for (const QJsonValue &item : value.toArray()) {
+    if (!item.isString())
+      return false;
+  }
+  return true;
+}
+
+bool jsonStringMatrix(const QJsonValue &value) {
+  if (!value.isArray())
+    return false;
+  for (const QJsonValue &row : value.toArray()) {
+    if (!jsonStringArray(row))
+      return false;
+  }
+  return true;
+}
+
+QLineEdit *automationLineEdit(QWidget *widget) {
+  if (!widget)
+    return nullptr;
+  if (auto *edit = qobject_cast<QLineEdit *>(widget->focusProxy()))
+    return edit;
+  return widget->findChild<QLineEdit *>();
+}
+
+QJsonValue nodePropertyValue(const ProjectNode &node, const QString &property) {
+  if (property == "items")
+    return node.items;
+  if (property == "headers")
+    return node.headers;
+  if (property == "rows")
+    return node.rows;
+  return node.properties.value(property);
+}
+
+bool applyTypedAutomationProperty(QWidget *widget, const QString &property,
+                                  const QJsonValue &value, QString *error) {
+  const QString type = showbox::catalog::canonicalType(
+      widget ? widget->property("showbox_type").toString() : QString());
+  if (!widget || !showbox::automation::isMutableProperty(type, property)) {
+    if (error)
+      *error = "Propriedade não é mutável no contrato público: " + property;
+    return false;
+  }
+
+  if (property == "items" || property == "headers") {
+    if (!jsonStringArray(value)) {
+      if (error)
+        *error = "A propriedade " + property + " exige uma lista de strings.";
+      return false;
+    }
+  } else if (property == "rows") {
+    if (!jsonStringMatrix(value)) {
+      if (error)
+        *error = "A propriedade rows exige uma matriz de strings.";
+      return false;
+    }
+  } else if (showbox::automation::propertyType(type, property) == "boolean") {
+    if (!value.isBool()) {
+      if (error)
+        *error = "A propriedade " + property + " exige booleano.";
+      return false;
+    }
+  } else if (showbox::automation::propertyType(type, property) == "string") {
+    if (!value.isString()) {
+      if (error)
+        *error = "A propriedade " + property + " exige string.";
+      return false;
+    }
+  } else {
+    int ignored = 0;
+    if (!jsonInteger(value, &ignored)) {
+      if (error)
+        *error = "A propriedade " + property + " exige número inteiro.";
+      return false;
+    }
+  }
+
+  if (property == "enabled") {
+    widget->setEnabled(value.toBool());
+  } else if (property == "width" || property == "height") {
+    int number = 0;
+    jsonInteger(value, &number);
+    if (number < 0) {
+      if (error)
+        *error = "Dimensões não podem ser negativas.";
+      return false;
+    }
+    QSize size = widget->size();
+    if (property == "width")
+      size.setWidth(number);
+    else
+      size.setHeight(number);
+    widget->resize(size);
+  } else if (type == "textbox") {
+    QLineEdit *edit = automationLineEdit(widget);
+    if (!edit) {
+      if (error)
+        *error = "Textbox sem campo de entrada associado.";
+      return false;
+    }
+    if (property == "text")
+      edit->setText(value.toString());
+    else if (property == "placeholder")
+      edit->setPlaceholderText(value.toString());
+    else if (property == "readOnly")
+      edit->setReadOnly(value.toBool());
+    else if (property == "echoMode")
+      edit->setEchoMode(static_cast<QLineEdit::EchoMode>(value.toInt()));
+  } else if (type == "textview") {
+    auto *text = qobject_cast<QTextEdit *>(widget);
+    if (!text) {
+      if (error)
+        *error = "TextView sem controle associado.";
+      return false;
+    }
+    if (property == "plainText")
+      text->setPlainText(value.toString());
+    else if (property == "readOnly")
+      text->setReadOnly(value.toBool());
+  } else if (type == "combobox") {
+    auto *combo = widget->findChild<QComboBox *>();
+    if (!combo) {
+      if (error)
+        *error = "ComboBox sem controle associado.";
+      return false;
+    }
+    if (property == "items") {
+      combo->clear();
+      for (const QJsonValue &item : value.toArray())
+        combo->addItem(item.toString());
+    } else {
+      int index = 0;
+      jsonInteger(value, &index);
+      if (index < -1 || index >= combo->count()) {
+        if (error)
+          *error = "currentIndex fora dos limites do ComboBox.";
+        return false;
+      }
+      combo->setCurrentIndex(index);
+    }
+  } else if (type == "listbox") {
+    auto *list = widget->findChild<QListWidget *>();
+    if (!list) {
+      if (error)
+        *error = "ListBox sem controle associado.";
+      return false;
+    }
+    list->clear();
+    for (const QJsonValue &item : value.toArray())
+      list->addItem(item.toString());
+  } else if (type == "table") {
+    auto *custom = qobject_cast<CustomTableWidget *>(widget);
+    QTableWidget *table = custom ? custom->table() : nullptr;
+    if (!table) {
+      if (error)
+        *error = "Tabela sem controle associado.";
+      return false;
+    }
+    if (property == "headers") {
+      const QStringList headers = [&value] {
+        QStringList result;
+        for (const QJsonValue &item : value.toArray())
+          result.append(item.toString());
+        return result;
+      }();
+      table->setColumnCount(headers.size());
+      table->setHorizontalHeaderLabels(headers);
+    } else {
+      const QJsonArray rows = value.toArray();
+      int columns = table->columnCount();
+      for (const QJsonValue &row : rows)
+        columns = qMax(columns, row.toArray().size());
+      table->clearContents();
+      table->setColumnCount(columns);
+      table->setRowCount(rows.size());
+      for (int row = 0; row < rows.size(); ++row) {
+        const QJsonArray cells = rows[row].toArray();
+        for (int column = 0; column < cells.size(); ++column)
+          table->setItem(row, column, new QTableWidgetItem(cells[column].toString()));
+      }
+    }
+  } else if (property == "text") {
+    if (auto *button = qobject_cast<QAbstractButton *>(widget))
+      button->setText(value.toString());
+    else if (auto *label = qobject_cast<QLabel *>(widget))
+      label->setText(value.toString());
+  } else if (property == "checked" || property == "checkable") {
+    if (auto *button = qobject_cast<QAbstractButton *>(widget)) {
+      if (property == "checked")
+        button->setChecked(value.toBool());
+      else
+        button->setCheckable(value.toBool());
+    } else if (auto *group = qobject_cast<QGroupBox *>(widget)) {
+      if (property == "checked")
+        group->setChecked(value.toBool());
+      else
+        group->setCheckable(value.toBool());
+    }
+  } else if (property == "title") {
+    if (auto *group = qobject_cast<QGroupBox *>(widget))
+      group->setTitle(value.toString());
+    else if (type == "page")
+      widget->setProperty("title", value.toString());
+  } else if (auto *spin = qobject_cast<QSpinBox *>(widget)) {
+    int number = 0;
+    jsonInteger(value, &number);
+    if (property == "value") spin->setValue(number);
+    else if (property == "minimum") spin->setMinimum(number);
+    else if (property == "maximum") spin->setMaximum(number);
+    else if (property == "singleStep") spin->setSingleStep(number);
+  } else if (auto *slider = qobject_cast<QSlider *>(widget)) {
+    int number = 0;
+    jsonInteger(value, &number);
+    if (property == "value") slider->setValue(number);
+    else if (property == "minimum") slider->setMinimum(number);
+    else if (property == "maximum") slider->setMaximum(number);
+    else if (property == "orientation") slider->setOrientation(
+        number == 2 ? Qt::Vertical : Qt::Horizontal);
+  } else if (auto *progress = qobject_cast<QProgressBar *>(widget)) {
+    int number = 0;
+    jsonInteger(value, &number);
+    if (property == "value") progress->setValue(number);
+    else if (property == "minimum") progress->setMinimum(number);
+    else if (property == "maximum") progress->setMaximum(number);
+    else if (property == "orientation") progress->setOrientation(
+        number == 2 ? Qt::Vertical : Qt::Horizontal);
+  }
+  return true;
+}
+
+class AutomationPropertyCommand final : public QUndoCommand {
+public:
+  using Apply = std::function<bool(QWidget *, const QString &, const QJsonValue &, QString *)>;
+  AutomationPropertyCommand(QWidget *widget, QString property,
+                             QJsonValue oldValue, QJsonValue newValue,
+                             Apply apply)
+      : m_widget(widget), m_property(std::move(property)),
+        m_oldValue(std::move(oldValue)), m_newValue(std::move(newValue)),
+        m_apply(std::move(apply)) {
+    setText("Automation property " + m_property);
+  }
+  void undo() override { if (m_widget) m_apply(m_widget, m_property, m_oldValue, nullptr); }
+  void redo() override { if (m_widget) m_apply(m_widget, m_property, m_newValue, nullptr); }
+
+private:
+  QPointer<QWidget> m_widget;
+  QString m_property;
+  QJsonValue m_oldValue;
+  QJsonValue m_newValue;
+  Apply m_apply;
+};
 
 } // namespace
 
@@ -122,7 +377,14 @@ MainWindow::MainWindow(QWidget *parent)
 
   // Edições de ações não geram comandos de undo; rastreá-las à parte.
   connect(m_actionEditor, &ActionEditor::actionsChanged, this,
-          [this]() { m_actionsModified = true; });
+          [this]() {
+            m_actionsModified = true;
+            emit automationEvent("project.changed",
+                                 QJsonObject{{"source", "gui"},
+                                             {"kind", "actions"}});
+            emit automationEvent("dirty.changed",
+                                 QJsonObject{{"dirty", true}});
+          });
 
   // Sincronizar seleção: Canvas -> Inspector & Property Editor
 
@@ -185,6 +447,12 @@ MainWindow::MainWindow(QWidget *parent)
   helpMenu->addAction("About Qt", qApp, &QApplication::aboutQt);
 
   // Sincronizar seleção: Canvas -> Inspector & Property Editor & Action Editor
+  connect(m_controller, &StudioController::widgetSelected, this,
+          [this](QWidget *widget) {
+            emit automationEvent(
+                "selection.changed",
+                QJsonObject{{"name", widget ? widget->objectName() : QString()}});
+          });
   connect(m_controller, &StudioController::widgetSelected, m_inspector,
           &ObjectInspector::selectItemForWidget);
   connect(m_controller, &StudioController::widgetSelected, m_propEditor,
@@ -248,6 +516,9 @@ void MainWindow::onUndoIndexChanged() {
     m_propEditor->setTargetWidget(m_controller->selectedWidget());
   }
   m_inspector->updateHierarchy(m_canvas);
+  emit automationEvent("dirty.changed", QJsonObject{{"dirty", hasUnsavedChanges()}});
+  emit automationEvent("diagnostics.changed",
+                       QJsonObject{{"count", automationDiagnostics().size()}});
 }
 
 void MainWindow::setupUI() {
@@ -292,9 +563,11 @@ void MainWindow::setupUI() {
   stopAction->setEnabled(false);
   connect(stopAction, &QAction::triggered, m_previewManager, &PreviewManager::stop);
   connect(m_previewManager, &PreviewManager::runningChanged, this,
-          [runAction, visualAction, stopAction](bool running) {
+          [this, runAction, visualAction, stopAction](bool running) {
     runAction->setEnabled(!running); visualAction->setEnabled(!running);
     stopAction->setEnabled(running);
+    emit automationEvent(running ? "preview.started" : "preview.finished",
+                         QJsonObject{{"running", running}});
   });
 
   // Atalho global para Delete
@@ -353,6 +626,9 @@ void MainWindow::setupUI() {
   connect(m_previewManager, &PreviewManager::previewOutput, this,
           [this](const QString &out) {
             m_automationPreviewLogs += out;
+            emit automationEvent("preview.output",
+                                 QJsonObject{{"stream", "stdout"},
+                                             {"text", out}});
             m_previewLog->moveCursor(QTextCursor::End);
             m_previewLog->insertPlainText(out);
             // Auto scroll
@@ -361,6 +637,9 @@ void MainWindow::setupUI() {
   connect(m_previewManager, &PreviewManager::previewError, this,
           [this](const QString &err) {
             m_automationPreviewLogs += err;
+            emit automationEvent("preview.output",
+                                 QJsonObject{{"stream", "stderr"},
+                                             {"text", err}});
             m_previewLog->moveCursor(QTextCursor::End);
             m_previewLog->insertPlainText(err);
           });
@@ -368,6 +647,9 @@ void MainWindow::setupUI() {
           [this](int code) {
             m_automationPreviewLogs +=
                 QString("\n[preview.finished] exitCode=%1\n").arg(code);
+            emit automationEvent("preview.finished",
+                                 QJsonObject{{"running", false},
+                                             {"exitCode", code}});
             QString status;
             if (code == 0) {
               status = "<span style='color:lime'>Finished Successfully</span>";
@@ -632,7 +914,15 @@ bool MainWindow::automationPreviewRunning() const {
 }
 
 bool MainWindow::automationNew(QString *error) {
-  Q_UNUSED(error);
+  return automationNew(false, error);
+}
+
+bool MainWindow::automationNew(bool force, QString *error) {
+  if (hasUnsavedChanges() && !force) {
+    if (error)
+      *error = "O projeto possui alterações não salvas; use force=true para descartar.";
+    return false;
+  }
   if (m_previewManager)
     m_previewManager->stop();
   m_controller->selectWidget(nullptr);
@@ -644,13 +934,26 @@ bool MainWindow::automationNew(QString *error) {
   m_actionsModified = false;
   m_projectDirectory = QDir::currentPath();
   markDocumentSaved();
+  emit automationEvent("project.changed", QJsonObject{{"source", "automation"},
+                                                       {"operation", "new"},
+                                                       {"discarded", force}});
   return true;
 }
 
 bool MainWindow::automationOpen(const QString &fileName, QString *error) {
+  return automationOpen(fileName, false, error);
+}
+
+bool MainWindow::automationOpen(const QString &fileName, bool force,
+                                QString *error) {
   if (fileName.isEmpty()) {
     if (error)
       *error = "O caminho do projeto não pode ser vazio.";
+    return false;
+  }
+  if (hasUnsavedChanges() && !force) {
+    if (error)
+      *error = "O projeto possui alterações não salvas; use force=true para descartar.";
     return false;
   }
   ProjectSerializer serializer;
@@ -672,6 +975,9 @@ bool MainWindow::automationOpen(const QString &fileName, QString *error) {
   m_inspector->updateHierarchy(m_canvas);
   m_projectDirectory = QFileInfo(fileName).absolutePath();
   markDocumentSaved();
+  emit automationEvent("project.changed", QJsonObject{{"source", "automation"},
+                                                       {"operation", "open"},
+                                                       {"discarded", force}});
   return true;
 }
 
@@ -689,6 +995,8 @@ bool MainWindow::automationSave(const QString &fileName, QString *error) {
   }
   m_projectDirectory = QFileInfo(fileName).absolutePath();
   markDocumentSaved();
+  emit automationEvent("project.changed", QJsonObject{{"source", "automation"},
+                                                       {"operation", "save"}});
   return true;
 }
 
@@ -794,17 +1102,42 @@ bool MainWindow::automationSetProperty(const QString &name,
       *error = "Componente ou propriedade inválida.";
     return false;
   }
-  const QVariant oldValue = widget->property(property.toUtf8().constData());
-  if (!oldValue.isValid() && widget->metaObject()->indexOfProperty(
-                                  property.toUtf8().constData()) < 0) {
+  const QString type = showbox::catalog::canonicalType(
+      widget->property("showbox_type").toString());
+  if (!showbox::automation::isMutableProperty(type, property)) {
     if (error)
-      *error = "Propriedade não encontrada: " + property;
+      *error = "Propriedade não é mutável no contrato público: " + property;
     return false;
   }
-  const QVariant newValue = automationVariant(value, oldValue);
-  m_controller->undoStack()->push(new PropertyChangeCommand(
-      widget, property, oldValue, newValue));
+  const ProjectNode node = ProjectWidgetMapper::toNode(widget);
+  const QJsonValue oldValue = nodePropertyValue(node, property);
+  if (oldValue.isUndefined()) {
+    if (error)
+      *error = "Propriedade não está disponível no snapshot: " + property;
+    return false;
+  }
+  QString applyError;
+  if (!applyTypedAutomationProperty(widget, property, value, &applyError)) {
+    if (error)
+      *error = applyError;
+    return false;
+  }
+  // Reverter a aplicação imediata; o comando realiza a alteração e registra
+  // undo/redo com valores do modelo, não com QVariant do QWidget externo.
+  applyTypedAutomationProperty(widget, property, oldValue, nullptr);
+  m_controller->undoStack()->push(new AutomationPropertyCommand(
+      widget, property, oldValue, value,
+      [](QWidget *target, const QString &key, const QJsonValue &newValue,
+         QString *applyError) {
+        return applyTypedAutomationProperty(target, key, newValue, applyError);
+      }));
   m_propEditor->setTargetWidget(widget);
+  if (!automationDiagnostics().isEmpty()) {
+    m_controller->undoStack()->undo();
+    if (error)
+      *error = "A alteração produziria um projeto inválido.";
+    return false;
+  }
   return true;
 }
 

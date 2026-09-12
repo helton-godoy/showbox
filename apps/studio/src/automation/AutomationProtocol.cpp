@@ -27,11 +27,15 @@ QJsonObject makeError(const QJsonValue &id, int code, const QString &severity,
                       const QString &component, const QString &message,
                       const QJsonObject &context, const QJsonObject &location,
                       const QString &suggestion) {
+    QJsonObject data = makeErrorData(code, severity, component, message,
+                                     context, location, suggestion);
+    data.remove("code");
+    data.remove("message");
     return QJsonObject{{"jsonrpc", "2.0"},
                        {"id", id},
-                       {"error", makeErrorData(code, severity, component,
-                                                 message, context, location,
-                                                 suggestion)}};
+                       {"error", QJsonObject{{"code", code},
+                                              {"message", message},
+                                              {"data", data}}}};
 }
 
 } // namespace showbox::automation

@@ -1,5 +1,5 @@
 find_package(Qt6 REQUIRED COMPONENTS Test)
-foreach(suite WidgetConfigs StudioIntegration ScriptGenerator ProjectSerializer ProjectWidgetMapper UndoRedo Hierarchy StylePerformance ShellFlow ActionEditor LifetimeGuards Toolbox StudioAutomation)
+foreach(suite WidgetConfigs StudioIntegration ScriptGenerator ProjectSerializer ProjectWidgetMapper UndoRedo Hierarchy StylePerformance ShellFlow ActionEditor LifetimeGuards Toolbox StudioAutomation StudioAutomationTransport)
     add_executable(tst_${suite} tst_${suite}.cpp)
     target_link_libraries(tst_${suite} PRIVATE Qt6::Test showbox-studio-components)
     add_test(NAME tst_${suite} COMMAND tst_${suite})
@@ -14,3 +14,7 @@ add_dependencies(tst_ShellFlow showbox_test_driver showbox)
 
 target_compile_definitions(tst_ShellFlow PRIVATE DEMO_PROJECT_PATH="${CMAKE_SOURCE_DIR}/examples/hello-world/hello-world.sbxproj")
 target_compile_definitions(tst_ProjectSerializer PRIVATE DEMO_PROJECT_PATH="${CMAKE_SOURCE_DIR}/examples/hello-world/hello-world.sbxproj")
+target_compile_definitions(tst_StudioAutomationTransport PRIVATE
+    STUDIOCTL_PATH="$<TARGET_FILE:showbox-studioctl>"
+    MCP_PATH="$<TARGET_FILE:showbox-studio-mcp>")
+add_dependencies(tst_StudioAutomationTransport showbox-studioctl showbox-studio-mcp)

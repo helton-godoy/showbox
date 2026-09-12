@@ -1,4 +1,5 @@
 #include "AutomationClient.h"
+#include "AutomationDescriptors.h"
 
 #include <QCommandLineParser>
 #include <QCoreApplication>
@@ -9,38 +10,6 @@
 #include <unistd.h>
 
 namespace {
-
-QJsonObject tool(const QString &name, const QString &description) {
-    return QJsonObject{{"name", name}, {"description", description},
-                       {"inputSchema", QJsonObject{{"type", "object"}}}};
-}
-
-QJsonArray tools() {
-    return QJsonArray{
-        tool("system.describe", "Descreve o protocolo público do Studio."),
-        tool("project.snapshot", "Obtém o snapshot versionado do projeto."),
-        tool("ui.tree", "Obtém a árvore pública de componentes."),
-        tool("diagnostics.list", "Lista diagnósticos estruturados."),
-        tool("export.validate", "Valida a possibilidade de exportação Bash."),
-        tool("preview.status", "Obtém o estado do preview."),
-        tool("preview.logs", "Obtém os logs acumulados do preview."),
-        tool("project.new", "Cria um projeto vazio."),
-        tool("project.open", "Abre um projeto pelo caminho."),
-        tool("project.save", "Salva o projeto pelo caminho."),
-        tool("widget.add", "Adiciona um componente."),
-        tool("widget.remove", "Remove um componente."),
-        tool("widget.select", "Seleciona um componente."),
-        tool("widget.setProperty", "Altera uma propriedade."),
-        tool("widget.move", "Move um componente para outro container."),
-        tool("action.add", "Adiciona uma ação a um evento."),
-        tool("action.update", "Atualiza uma ação de um evento."),
-        tool("action.remove", "Remove uma ação de um evento."),
-        tool("history.undo", "Desfaz uma alteração."),
-        tool("history.redo", "Refaz uma alteração."),
-        tool("preview.start", "Inicia o preview quando autorizado."),
-        tool("preview.stop", "Interrompe o preview."),
-        tool("export.bash", "Exporta a aplicação Bash quando autorizado.")};
-}
 
 QJsonObject errorResponse(const QJsonValue &id, const QString &message) {
     return QJsonObject{{"jsonrpc", "2.0"}, {"id", id},
@@ -82,7 +51,7 @@ int main(int argc, char **argv) {
             continue;
         } else if (method == "tools/list") {
             response = QJsonObject{{"jsonrpc", "2.0"}, {"id", id},
-                                   {"result", QJsonObject{{"tools", tools()}}}};
+                                   {"result", QJsonObject{{"tools", showbox::automation::mcpToolJson()}}}};
         } else if (method == "tools/call") {
             const QJsonObject params = object.value("params").toObject();
             const QString name = params.value("name").toString();
