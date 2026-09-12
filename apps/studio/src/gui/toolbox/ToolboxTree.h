@@ -97,6 +97,19 @@ public:
     }
   }
 
+  void markItemExperimental(const QString &displayName,
+                            const QString &tooltip) override {
+    // Só folhas: categorias têm filhos e nunca coincidem com displayName.
+    for (QTreeWidgetItem *item :
+         m_tree->findItems(displayName, Qt::MatchExactly | Qt::MatchRecursive)) {
+      if (item->childCount() > 0)
+        continue;
+      item->setFlags(item->flags() & ~Qt::ItemIsEnabled &
+                     ~Qt::ItemIsSelectable & ~Qt::ItemIsDragEnabled);
+      item->setToolTip(0, tooltip);
+    }
+  }
+
   QString styleName() const override { return "Tree (Expandable)"; }
 
   /**

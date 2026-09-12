@@ -557,6 +557,18 @@ void MainWindow::populateToolbox(AbstractToolbox *toolbox) {
     }
     toolbox->addCategory(group, items);
   }
+  // Honestidade de exportação (SB-016): o que o motor não renderiza
+  // (scriptable=false) continua visível, mas desabilitado com aviso — a
+  // decisão vem do catálogo, sem lista duplicada aqui.
+  for (const auto &info : showbox::catalog::widgetCatalog()) {
+    if (!info.toolboxGroup.isEmpty() && !info.scriptable) {
+      toolbox->markItemExperimental(
+          info.displayName,
+          QString("%1 ainda não é exportável nesta versão — suporte em "
+                  "breve. Prévia e exportação recusam este componente.")
+              .arg(info.displayName));
+    }
+  }
 }
 
 void MainWindow::onToolboxStyleChanged(int style) {
