@@ -54,4 +54,3 @@ Estado: em execução (2026-09-12).
   pelo modelo sanitizado, nunca por `QObject::children()` cru.
 - Preview é assíncrono; o contrato expõe estado e logs acumulados, não promete
   sincronismo da execução.
-
