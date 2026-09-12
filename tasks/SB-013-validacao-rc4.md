@@ -1,6 +1,6 @@
 # SB-013 — Validação externa do RC.4 e decisão v1.0.0
 
-Estado: em andamento (2026-09-12).
+Estado: concluída (2026-09-12, decidido: produzir e publicar `v1.0.0-rc.5`).
 
 - Objetivo: validar o prerelease `v1.0.0-rc.4` em uso externo e decidir, com evidências, entre promover `v1.0.0` ou produzir `v1.0.0-rc.5`.
 - Base: `8bc0757` (`main` com o contrato SB-013 integrado via PR #30).
@@ -67,3 +67,37 @@ Estado: em andamento (2026-09-12).
   publicação como prerelease seguem o mesmo roteiro da SB-012.
 - A janela de validação externa recomeça no RC.5; o RC.4 permanece publicado
   como histórico.
+
+## Handoff — RC.5 publicado (2026-09-12)
+
+- Preparação: PR #38 (`chore(release): prepara v1.0.0-rc.5`) integrado em
+  `e45d61f`; gates `build-test`, `sanitizers`, `trunk-check` e SonarCloud
+  verdes. Conversões validadas: app `1.0.0-rc.5`, deb `1.0.0~rc5-1`,
+  rpm `1.0.0`/`0.3.rc5`, prerelease `true`.
+- Tag anotada `v1.0.0-rc.5` sobre `e45d61f`. Workflow run `34708066203`:
+  `deb-ubuntu`, `deb-debian`, `rpm`, `appimage`, `install-smoke` e `release`
+  com sucesso; draft com os sete assets criado.
+- Assets baixados e conferidos (nomes/versões rc.5). Checksums SHA-256:
+  - `f7ed29e089e96419b85def4eca70a722e438e3614d795e420cdb1ee3e06f1d97`
+    `showbox_1.0.0.rc5-1_ubuntu24.04_amd64.deb`;
+  - `dac2faecf2f48695f7f594f2187586b1fdbaadd4de337203c6801df736caa76f`
+    `showbox_1.0.0.rc5-1_debian13_amd64.deb`;
+  - `2a9d0a7c8d82f7eb94a8be6db380b2a412d70863d7d5dfd707b0e41ae86270fd`
+    `showbox-1.0.0-0.3.rc5.fc46.x86_64.rpm`;
+  - `c704e1b983ef63917f6e3cb2dd6fb926b9dca51efc9eac52a2b6c693242fcbf9`
+    `showbox-studio_1.0.0.rc5-1_ubuntu24.04_amd64.deb`;
+  - `15694fb18cc9d94278992bca38b4e10a6a17782b2304deab6841f18ca45282e2`
+    `showbox-studio_1.0.0.rc5-1_debian13_amd64.deb`;
+  - `4c13027a030520f108527d3bc14bf3e6ee12e345511f8713b45cde4fffe4dfaf`
+    `showbox-studio-1.0.0-0.3.rc5.fc46.x86_64.rpm`;
+  - `d25240a4f80894f8c81fe5383e3f31e5b5ee2d1926261fbc0783d38c511d51ae`
+    `ShowBox-Studio-1.0.0-rc.5-x86_64.AppImage`.
+- Smokes locais (podman) aprovados, todos reportando `1.0.0-rc.5`: deb
+  Ubuntu, deb Debian, RPM Fedora e AppImage.
+- Fluxo visual: `tst_ShellFlow` 15/15 sobre a `main` == SHA da tag
+  (`e45d61f`), cobrindo prévia, exportação, salvar/reabrir e ações Bash.
+- Release publicado como prerelease em 2026-09-12:
+  `https://github.com/helton-godoy/showbox/releases/tag/v1.0.0-rc.5`,
+  com `draft: false` e `prerelease: true`.
+- Limitações: sem assinatura/notarização; GUI empacotada inferida por cadeia
+  reprodutível; validação externa do RC.5 ainda pendente (janela reaberta).
