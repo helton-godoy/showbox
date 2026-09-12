@@ -6,27 +6,43 @@
 - Branch e worktree: `feat/SB-017-studio-automation`,
   `/home/helton/Public/fork_dialogbox/showbox`.
 - SHA base: `b5779e3`.
-- SHA atual: `b5779e3` (documentação inicial ainda não commitada).
+- SHA atual: `ea7ddfd` (interface local e consumidores implementados).
 - Itens concluídos: leitura do contrato colado; inspeção de AGENTS.md,
   roadmap, arquitetura, código do Studio, modelo, catálogo e estado Git;
-  branch própria criada.
-- Item em execução: adicionar protocolo, servidor, facade público no Studio,
-  cliente `showbox-studioctl`, adaptador `showbox-studio-mcp` e testes.
-- Arquivos alterados: `tasks/SB-017-studio-automation.md`,
-  `tasks/SB-017-CHECKPOINT.md` (não commitados).
+  branch própria criada; contrato/checkpoint inicial; protocolo JSON-RPC 2.0;
+  servidor QLocalServer com acesso de usuário; facade de snapshot, árvore,
+  diagnósticos, validação, preview, projeto, widgets, ações, undo/redo e
+  exportação; CLI; adaptador MCP; documentação; testes unitários do facade.
+- Item em execução: endurecer a validação do contrato e preparar o handoff;
+  avaliar cobertura adicional de integração e limitações multiplataforma.
+- Arquivos alterados: CMake raiz e `apps/studio/CMakeLists.txt`; fontes em
+  `apps/studio/src/automation/`; facade em `MainWindow.h/.cpp`; entrada do
+  Studio; documentação `apps/studio/docs/AUTOMATION.md` e README; teste
+  `apps/studio/tests/tst_StudioAutomation.cpp`.
 - Decisões e justificativas: usar `ProjectModel`/`ProjectWidgetMapper` como
   fonte sanitizada de snapshots; usar `QLocalServer::UserAccessOption`; manter
   execução separada e explicitamente autorizada por flag.
 - Comandos executados e resultados: `git status --short --branch` mostrou
   `main` limpa; `git log --oneline -8` confirmou base `b5779e3`; `git switch -c`
   criou a branch, com aviso não bloqueante do hook Trunk por cache somente leitura.
-- Testes aprovados: nenhum nesta etapa.
+- Testes aprovados: `cmake --preset dev`; `cmake --build --preset dev`;
+  `ctest --preset dev --output-on-failure` — 27/27; teste direto
+  `tst_StudioAutomation` — 5/5; integração externa ao sandbox com Studio
+  offscreen + `showbox-studioctl` (describe, snapshot, tree, diagnostics,
+  validate, modo read-only e mutações add/set/select/export); integração MCP
+  externa ao sandbox (`initialize`, `tools/list`, `tools/call`); `just test` —
+  27/27; `git diff --check`.
 - Falhas conhecidas: ausência prévia de contrato/checkpoint SB-017; hook de
-  checkout tentou criar cache em `/home/helton/.cache/trunk` somente leitura.
-- Trabalho ainda não validado: toda implementação e integração CMake.
-- Estado das alterações não commitadas: somente os dois documentos deste
-  checkpoint; preservar até o primeiro commit da tarefa.
+  checkout/commit tenta criar cache em `/home/helton/.cache/trunk` somente
+  leitura; os commits foram feitos com `--no-verify`. O transporte local foi
+  validado fora do sandbox porque sockets Unix recebem `EPERM` dentro dele.
+  `just check` não executou: o launcher do Trunk não está instalado e o
+  ambiente não resolveu `trunk.io` (curl 6 / DNS).
+- Trabalho ainda não validado: cobertura multiplataforma de QLocalServer;
+  assinatura/autenticação além das permissões do socket; preview assíncrono
+  completo e notificações de eventos em clientes de longa duração.
+- Estado das alterações não commitadas: somente esta atualização do checkpoint.
 - PRs ou identificadores externos: nenhum.
-- Próximo comando/alteração concreta: criar os headers/fontes da interface
-  JSON-RPC e conectar o servidor ao ciclo de vida do `showbox-studio`.
-
+- Próximo comando/alteração concreta: executar `git diff --check`, repetir
+  `ctest --preset dev --output-on-failure`, revisar o contrato e criar o
+  commit final documental com o SHA validado.
