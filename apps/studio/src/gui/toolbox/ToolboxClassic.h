@@ -39,6 +39,20 @@ public:
     m_toolBox->addItem(list, categoryName);
   }
 
+  void markItemExperimental(const QString &displayName,
+                            const QString &tooltip) override {
+    for (QListWidget *list : findChildren<QListWidget *>()) {
+      for (QListWidgetItem *item : list->findItems(
+               displayName, Qt::MatchExactly)) {
+        // Sem Enabled/Selectable: não clica, não seleciona e não arrasta
+        // (o modo DragOnly só arrasta selecionados).
+        item->setFlags(item->flags() & ~Qt::ItemIsEnabled &
+                       ~Qt::ItemIsSelectable);
+        item->setToolTip(tooltip);
+      }
+    }
+  }
+
   QString styleName() const override { return "Classic (QToolBox)"; }
 
 private:

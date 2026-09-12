@@ -26,6 +26,19 @@ public:
                            const QStringList &items) = 0;
 
   /**
+   * @brief Marca um item como experimental (visível, mas não utilizável)
+   * @param displayName Nome exibido do item (ex.: "Table")
+   * @param tooltip Aviso exibido ao passar o mouse (ex.: motivo)
+   *
+   * Usado para componentes que o motor ainda não renderiza: o item continua
+   * visível para comunicar o roteiro, mas não pode ser selecionado nem
+   * arrastado. A decisão de quais itens marcar vem do catálogo
+   * (scriptable=false), sem lista duplicada no Studio.
+   */
+  virtual void markItemExperimental(const QString &displayName,
+                                    const QString &tooltip) = 0;
+
+  /**
    * @brief Retorna o nome do estilo de toolbox
    */
   virtual QString styleName() const = 0;
