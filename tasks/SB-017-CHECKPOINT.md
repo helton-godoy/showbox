@@ -6,10 +6,10 @@
 - Branch/worktree: `feat/SB-017-studio-automation`,
   `/home/helton/Public/fork_dialogbox/showbox`.
 - SHA base: `b5779e3` (`main`, RC.5 integrado).
-- SHA atual: `fbe5522` (base desta revisão; novo commit funcional será criado
-  após esta atualização).
-- Último SHA funcional validado antes desta revisão: `a8a8908` —
-  `feat(studio): harden automation protocol and transport`.
+- SHA atual: `59b2a2e` — `fix(studio): address SB-017 review P1/P2 findings`
+  (revisão funcional + testes + docs em um único commit coerente).
+- Último SHA funcional validado: `59b2a2e` (28/28 ctest, 14/14 facade,
+  6/6 transporte, E2E real).
 - Itens já concluídos: servidor local, framing JSON-RPC, negociação,
   observabilidade somente leitura, diagnósticos, mutações com undo/redo, CLI,
   MCP, testes offscreen e E2E real.
