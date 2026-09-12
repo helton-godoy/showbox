@@ -6,75 +6,114 @@
 - Branch/worktree: `feat/SB-017-studio-automation`,
   `/home/helton/Public/fork_dialogbox/showbox`.
 - SHA base: `b5779e3` (`main`, RC.5 integrado).
-- Último SHA funcional validado: `a8a8908` — `feat(studio): harden automation
-  protocol and transport`.
-- Commits documentais posteriores ao incremento funcional: `2e33c1e` —
-  contrato, documentação e evidências; este checkpoint também será atualizado
-  em um commit documental posterior, cujo SHA não é repetido aqui para evitar
-  referência autorreferente.
+- SHA atual: `fbe5522` (base desta revisão; novo commit funcional será criado
+  após esta atualização).
+- Último SHA funcional validado antes desta revisão: `a8a8908` —
+  `feat(studio): harden automation protocol and transport`.
+- Itens já concluídos: servidor local, framing JSON-RPC, negociação,
+  observabilidade somente leitura, diagnósticos, mutações com undo/redo, CLI,
+  MCP, testes offscreen e E2E real.
+- Item em execução: correção dos 6 achados P1/P2 da revisão
+  (undo atômico, validação de nomes/ações, MCP sem subscribe, transporte
+  obrigatório, preview.finished único, id null).
 
-## Entrega
+## Entrega desta revisão
 
-- Servidor local `QLocalServer`/`QLocalSocket`, desativado por padrão, com
-  `UserAccessOption`, anúncio de endpoint e proteção contra colisão com
-  instância ativa; somente endpoint comprovadamente obsoleto é removido.
-- JSON-RPC 2.0 delimitado por LF, ids validados, notificações válidas sem
-  resposta, erros padrão em `error.code`/`error.message` e metadados em
-  `error.data`.
-- Limites de transporte: 1 MiB por mensagem e 2 MiB por buffer de conexão;
-  excesso gera erro de transporte e desconexão.
-- Descritores centralizados para servidor, `system.describe` e MCP
-  `tools/list`, com tipos, campos obrigatórios, enums, limites e
-  `additionalProperties: false`.
-- Facade pública baseada em `ProjectModel`/`ProjectWidgetMapper`, sem
-  ponteiros, classes Qt ou metadados internos na árvore/snapshot.
-- `widget.setProperty` tipado e integrado ao widget real, incluindo
-  `textbox`, `textview`, `combobox`, `listbox`, `table` (`headers`/`rows`),
-  botões, grupo, spinbox, slider e progressbar; propriedades internas e
-  desconhecidas são rejeitadas; propriedades participam de undo/redo.
-- Eventos por conexão com filtros validados e payload estável para projeto,
-  seleção, dirty, preview, saída de preview e diagnósticos; subscriptions são
-  removidas no disconnect e não migram para reconexão.
-- Conflito de projeto sujo em `project.new`/`project.open`, liberado apenas
-  com `force=true` e reportado como `discarded`.
-- CLI `showbox-studioctl` e MCP `showbox-studio-mcp` usam exclusivamente o
-  socket público; falhas de transporte e respostas RPC com erro têm saída
-  não zero no CLI.
+- Undo atômico: `AutomationTableCommand` (headers+rows) e
+  `AutomationComboCommand` (items+currentIndex) em `MainWindow.cpp`;
+  reduzir colunas não perde dados no undo; índice preservado.
+- `ProjectModel::isValidWidgetName` canônico; `automationAddWidget` rejeita
+  `nome inválido`, `main`/`showbox`, `1abc` e vazio antes do comando.
+- `actionSchema` com `oneOf` por tipo (shell/set/query com obrigatórios) e
+  `automationSetActions` valida o `ProjectModel` proposto antes de mutar.
+- `mcpToolJson` exclui `events.subscribe`; `tools/call` para ele retorna erro
+  explícito sobre conexão persistente.
+- `runningChanged(false)` não emite mais `preview.finished`; término sai só
+  de `previewFinished` com `exitCode`.
+- Erros sem request (parse, 1 MiB, 2 MiB) usam `QJsonValue(Null)` com
+  `"id": null` garantido.
+- Transporte obrigatório: `init()` só dá `QSKIP` com
+  `SHOWBOX_ALLOW_TRANSPORT_SKIP=1`; caso contrário `QFAIL`. Novo slot
+  `readOnlyServerRejectsMutations` cobre `readOnly=true` com `-32010`.
+- Docs `AUTOMATION.md` atualizadas (MCP, atomicidade, oneOf, id null,
+  preview único, skip explícito).
 
-## Evidências
+## Arquivos alterados
+
+- `libs/project/include/ProjectModel.h`, `libs/project/src/ProjectModel.cpp`
+- `apps/studio/src/gui/MainWindow.cpp`
+- `apps/studio/src/automation/AutomationDescriptors.cpp`
+- `apps/studio/src/automation/StudioAutomationMcp.cpp`
+- `apps/studio/src/automation/StudioAutomationServer.cpp`
+- `apps/studio/tests/tst_StudioAutomation.cpp`
+- `apps/studio/tests/tst_StudioAutomationTransport.cpp`
+- `apps/studio/docs/AUTOMATION.md`
+- `tasks/SB-017-studio-automation.md`
+- `tasks/SB-017-CHECKPOINT.md`
+
+## Decisões e justificativas
+
+- Reutilizar a regex canônica via `ProjectModel` em vez de duplicar em
+  `MainWindow`, mantendo mensagens idênticas à validação.
+- Validar modelo proposto antes de empilhar undo em ações, evitando comandos
+  inválidos desfeitos na pilha.
+- Remover `events.subscribe` do MCP em vez de ponte persistente: MCP é
+  request/response por stdio e não sustenta push; documentado.
+- Manter botões de preview na UI em `runningChanged`, emitindo evento só em
+  `started`; `finished` exclusivo com código final.
+
+## Comandos executados e resultados
 
 - `cmake --preset dev` — concluído.
-- `cmake --build --preset dev` — concluído.
+- `cmake --build --preset dev` — concluído (após ajuste de `QVERIFY` em
+  lambda para helper manual).
 - `ctest --preset dev --output-on-failure` — 28/28 aprovados.
-- `QT_QPA_PLATFORM=offscreen build/dev/bin/tst_StudioAutomationTransport
-  -v1` fora do sandbox — 5/5 aprovados, incluindo framing parcial/múltiplo,
-  JSON inválido, método/parâmetros inválidos, notificações, limites,
-  autorização de preview, filtros, disconnect/reconnect, CLI, MCP e falha de
-  transporte.
-- E2E fora do sandbox com `showbox-studio` real — capabilities/describe,
-  `widget.add`, `widget.setProperty` em `textbox`, snapshot, MCP
-  `initialize`/`tools/list`/`tools/call` e modo somente leitura; CLI recusou
-  mutação com exit code 1.
-- `git diff --check` — concluído.
-- `just test` — 28/28 aprovados.
+- `QT_QPA_PLATFORM=offscreen build/dev/bin/tst_StudioAutomation -v1` —
+  14/14 aprovados (inclui `compoundUndoIsAtomic`,
+  `widgetAddRejectsInvalidNames`, `actionSchemasRequireConditionalFields`,
+  `mcpDoesNotPublishEventsSubscribe`, `id null`).
+- `QT_QPA_PLATFORM=offscreen build/dev/bin/tst_StudioAutomationTransport -v1` —
+  6/6 aprovados (inclui `readOnlyServerRejectsMutations` e `id: null` em
+  parse/limite).
+- E2E offscreen com `showbox-studio` real: `system.describe`, `widget.add`
+  inválido/reservado recusados, tabela shrink+undo restaura `rows`,
+  combobox shrink+undo restaura `items`+`currentIndex=2`, `action.add`
+  shell sem `command` recusado com `-32602`, parse retorna `"id": null`,
+  MCP `tools/list` sem `events.subscribe` (24 ferramentas) e `tools/call`
+  para ele com erro explícito, `readOnly` recusa com `-32010`.
+- `git diff --check` — concluído, sem erros.
+- `just test` — 28/28 aprovados (via ctest; `just` delega ao mesmo preset).
 
-## Limitações conhecidas
+## Testes aprovados
 
-- O teste de socket local é pulado somente quando o ambiente não permite
-  `QLocalServer`/socket Unix (no sandbox observado como `EPERM`); fora dele a
-  suíte foi executada com transporte real.
-- `just doctor` falhou após detectar as ferramentas básicas: o launcher Trunk
-  local não conseguiu executar por `/home/helton/.cache/trunk` somente leitura.
-- `just check` não pôde ser executado neste host: launcher Trunk ausente e
-  resolução de `trunk.io` indisponível (curl 6/DNS); hooks também não
-  conseguem escrever em `/home/helton/.cache/trunk`. Commits locais usam
-  `--no-verify` por essa limitação ambiental, sem tratar isso como validação.
-- Não há cobertura multiplataforma de `QLocalServer`, assinatura adicional ao
-  controle de acesso do socket, nem PR/integração em `main` nesta branch.
+- `tst_StudioAutomation`: 14 passed, 0 failed.
+- `tst_StudioAutomationTransport`: 6 passed, 0 failed, 0 skipped.
+- Suíte completa: 28/28 passed.
 
-## Estado
+## Falhas conhecidas
 
-- Alterações funcionais estão no SHA `a8a8908`; documentação/contrato e este
-  checkpoint são commits separados e não alteram o comportamento.
-- Próximo passo: revisão do integrador e eventual execução da matriz em cada
-  plataforma suportada; não abrir PR nem integrar `main` nesta tarefa.
+- `just doctor`/`just check` não executáveis neste host (Trunk sem cache
+  gravável e sem DNS para `trunk.io`, como na revisão anterior); commits
+  locais usam `--no-verify` sem tratar isso como validação.
+- Sem cobertura multiplataforma de `QLocalServer` nem PR/integração em
+  `main` nesta branch.
+
+## Trabalho ainda não validado
+
+- Nenhum incremento funcional pendente dos 6 achados; falta apenas commitar,
+  revalidar `git status` limpo e aguardar revisão do integrador.
+
+## Estado das alterações não commitadas
+
+- Todas as alterações funcionais, testes e docs listados acima estão
+  modificados e prontos para um único commit convencional; nenhum binário,
+  cache ou segredo incluído.
+
+## PRs ou identificadores externos
+
+- Nenhum PR aberto; branch `feat/SB-017-studio-automation` 10 commits à
+  frente de `main` antes desta revisão.
+
+## Próximo comando ou alteração concreta a executar
+
+- `git add libs/project/include/ProjectModel.h libs/project/src/ProjectModel.cpp apps/studio/src/gui/MainWindow.cpp apps/studio/src/automation/AutomationDescriptors.cpp apps/studio/src/automation/StudioAutomationMcp.cpp apps/studio/src/automation/StudioAutomationServer.cpp apps/studio/tests/tst_StudioAutomation.cpp apps/studio/tests/tst_StudioAutomationTransport.cpp apps/studio/docs/AUTOMATION.md tasks/SB-017-studio-automation.md tasks/SB-017-CHECKPOINT.md && git commit --no-verify -m 'fix(studio): address SB-017 review P1/P2 findings' && ctest --preset dev --output-on-failure`.

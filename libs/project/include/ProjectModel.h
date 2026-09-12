@@ -28,6 +28,7 @@ public:
     QStringList validate() const;
 
     static bool isKnownType(const QString &type);
+    static bool isValidWidgetName(const QString &name, QString *error = nullptr);
 
 private:
     static bool migrateV1(const QJsonObject &legacy, ProjectModel *out,

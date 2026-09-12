@@ -1,6 +1,6 @@
 # SB-017 — Showbox Studio Automation Interface
 
-Estado: implementação concluída na branch (2026-09-12); aguardando revisão,
+Estado: revisão P1/P2 aplicada na branch (2026-09-12); aguardando revisão,
 sem integração em `main`.
 
 - Objetivo: oferecer uma interface local, versionada e observável para
@@ -31,15 +31,26 @@ sem integração em `main`.
 - Erros possuem forma estável com `code`, `severity`, `component`, `message`,
   `context`, `location` e `suggestion`, quando aplicável.
 - O MCP é um adaptador separado e conversa somente com a interface local.
+  `events.subscribe` não é publicado em `tools/list` (exige conexão
+  persistente); chamadas via MCP recebem erro explícito.
 - A lista de métodos e schemas é centralizada em `AutomationDescriptors` e é
-  reutilizada pelo servidor, `system.describe` e `tools/list`.
+  reutilizada pelo servidor, `system.describe` e `tools/list` (menos o filtro
+  MCP acima).
 - `widget.setProperty` usa propriedades públicas tipadas, inclusive controles
   compostos e `headers`/`rows` de tabelas; metadados Qt e propriedades
-  desconhecidas são recusados.
+  desconhecidas são recusados. Tabela (`headers`+`rows`) e combobox
+  (`items`+`currentIndex`) usam comandos atômicos com undo completo.
+- `widget.add` reutiliza `ProjectModel::isValidWidgetName` (regex canônica e
+  reservados `main`/`showbox`) antes de criar o comando.
+- Ações usam `oneOf` por tipo (`shell` exige `command`; `set` exige
+  `target`/`property`/`value`; `query` exige `target`/`variable`) e o modelo
+  proposto é validado antes de gravar.
 - Erros JSON-RPC têm forma padrão com metadados adicionais em `error.data`;
-  notificações válidas não recebem resposta.
+  notificações válidas não recebem resposta. Erros sem request (parse,
+  limites) usam `"id": null` explícito.
 - `events.subscribe` é por conexão, com filtro validado e payload estável para
-  projeto, seleção, dirty, preview e diagnósticos.
+  projeto, seleção, dirty, preview e diagnósticos. `preview.finished` é
+  emitido uma única vez, pelo sinal com `exitCode`.
 - O transporte impõe 1 MiB por mensagem e 2 MiB por buffer; endpoints ativos
   nunca são removidos durante a recuperação de socket obsoleto.
 - `project.new`/`project.open` exigem `force=true` para descartar alterações
@@ -58,9 +69,11 @@ sem integração em `main`.
 - `showbox-studio-mcp` traduz `initialize`, `tools/list` e `tools/call` para
   o protocolo público, sem acessar o Studio internamente.
 - Testes de transporte automatizados cobrem cliente/servidor reais, framing,
-  notificações, reconexão, filtros, autorização de preview, CLI, MCP e falha
-  de transporte; o único skip permitido é a indisponibilidade de socket local
-  no sandbox.
+  notificações, reconexão, filtros, autorização de preview, modo somente
+  leitura (`readOnly=true` com `-32010`), `id: null`, undo atômico de tabela
+  e combobox, validação de nomes e ações, CLI, MCP (sem `events.subscribe`) e
+  falha de transporte; o skip só ocorre com `SHOWBOX_ALLOW_TRANSPORT_SKIP=1`
+  em sandbox sem socket local, caso contrário `listen` é obrigatório.
 - `just build` e `just test` passam; os comandos e limitações reais ficam no
   checkpoint e no handoff.
 

@@ -69,6 +69,19 @@ QWidget *findAutomationWidget(QWidget *root, const QString &name) {
   return nullptr;
 }
 
+ProjectNode *findAutomationModelNode(QList<ProjectNode> *nodes,
+                                     const QString &name) {
+  if (!nodes)
+    return nullptr;
+  for (ProjectNode &node : *nodes) {
+    if (node.name == name)
+      return &node;
+    if (ProjectNode *child = findAutomationModelNode(&node.children, name))
+      return child;
+  }
+  return nullptr;
+}
+
 QJsonObject automationDiagnostic(const QString &message,
                                  const QString &code = "validation_failed") {
   return QJsonObject{{"code", code},
@@ -129,6 +142,103 @@ QJsonValue nodePropertyValue(const ProjectNode &node, const QString &property) {
   if (property == "rows")
     return node.rows;
   return node.properties.value(property);
+}
+
+struct AutomationTableState {
+  QStringList headers;
+  QList<QStringList> rows;
+};
+
+struct AutomationComboState {
+  QStringList items;
+  int currentIndex = -1;
+};
+
+QJsonArray stringListToJson(const QStringList &list) {
+  QJsonArray result;
+  for (const QString &item : list)
+    result.append(item);
+  return result;
+}
+
+QJsonArray tableRowsToJson(const QList<QStringList> &rows) {
+  QJsonArray result;
+  for (const QStringList &row : rows)
+    result.append(stringListToJson(row));
+  return result;
+}
+
+AutomationTableState readAutomationTableState(QTableWidget *table) {
+  AutomationTableState state;
+  if (!table)
+    return state;
+  for (int column = 0; column < table->columnCount(); ++column) {
+    const QTableWidgetItem *header = table->horizontalHeaderItem(column);
+    state.headers.append(header ? header->text() : QString());
+  }
+  for (int row = 0; row < table->rowCount(); ++row) {
+    QStringList cells;
+    for (int column = 0; column < table->columnCount(); ++column) {
+      const QTableWidgetItem *item = table->item(row, column);
+      cells.append(item ? item->text() : QString());
+    }
+    state.rows.append(cells);
+  }
+  return state;
+}
+
+void applyAutomationTableState(QTableWidget *table,
+                               const AutomationTableState &state) {
+  if (!table)
+    return;
+  const int columns = qMax(state.headers.size(),
+                           state.rows.isEmpty()
+                               ? 0
+                               : [&state] {
+                                   int width = 0;
+                                   for (const QStringList &row : state.rows)
+                                     width = qMax(width, row.size());
+                                   return width;
+                                 }());
+  table->clear();
+  table->setRowCount(state.rows.size());
+  table->setColumnCount(qMax(0, columns));
+  table->setHorizontalHeaderLabels(state.headers);
+  for (int row = 0; row < state.rows.size(); ++row) {
+    const QStringList &cells = state.rows.at(row);
+    for (int column = 0; column < cells.size(); ++column)
+      table->setItem(row, column, new QTableWidgetItem(cells.at(column)));
+  }
+}
+
+AutomationComboState readAutomationComboState(QComboBox *combo) {
+  AutomationComboState state;
+  if (!combo)
+    return state;
+  for (int i = 0; i < combo->count(); ++i)
+    state.items.append(combo->itemText(i));
+  state.currentIndex = combo->currentIndex();
+  return state;
+}
+
+void applyAutomationComboState(QComboBox *combo,
+                               const AutomationComboState &state) {
+  if (!combo)
+    return;
+  combo->blockSignals(true);
+  combo->clear();
+  for (const QString &item : state.items)
+    combo->addItem(item);
+  if (state.items.isEmpty())
+    combo->setCurrentIndex(-1);
+  else
+    combo->setCurrentIndex(qBound(0, state.currentIndex, state.items.size() - 1));
+  combo->blockSignals(false);
+}
+
+QTableWidget *automationTableWidget(QWidget *widget) {
+  auto *custom = qobject_cast<CustomTableWidget *>(widget);
+  return custom ? custom->table() : nullptr;
 }
 
 bool applyTypedAutomationProperty(QWidget *widget, const QString &property,
@@ -349,6 +459,66 @@ private:
   Apply m_apply;
 };
 
+// Comando atômico para tabela: guarda headers+rows antes e depois, de modo
+// que reduzir colunas nunca destrua células de forma irreversível. O undo
+// restaura o estado completo, não apenas a propriedade tocada.
+class AutomationTableCommand final : public QUndoCommand {
+public:
+  AutomationTableCommand(QWidget *widget, QString property,
+                         AutomationTableState oldState,
+                         AutomationTableState newState)
+      : m_widget(widget), m_property(std::move(property)),
+        m_oldState(std::move(oldState)), m_newState(std::move(newState)) {
+    setText("Automation table " + m_property);
+  }
+  void undo() override {
+    if (m_widget)
+      if (QTableWidget *table = automationTableWidget(m_widget))
+        applyAutomationTableState(table, m_oldState);
+  }
+  void redo() override {
+    if (m_widget)
+      if (QTableWidget *table = automationTableWidget(m_widget))
+        applyAutomationTableState(table, m_newState);
+  }
+
+private:
+  QPointer<QWidget> m_widget;
+  QString m_property;
+  AutomationTableState m_oldState;
+  AutomationTableState m_newState;
+};
+
+// Comando atômico para combobox: items e currentIndex viajam juntos. Trocar
+// items sem guardar o índice perdia a seleção no undo; aqui ambos são
+// restaurados.
+class AutomationComboCommand final : public QUndoCommand {
+public:
+  AutomationComboCommand(QWidget *widget, QString property,
+                         AutomationComboState oldState,
+                         AutomationComboState newState)
+      : m_widget(widget), m_property(std::move(property)),
+        m_oldState(std::move(oldState)), m_newState(std::move(newState)) {
+    setText("Automation combobox " + m_property);
+  }
+  void undo() override {
+    if (m_widget)
+      if (QComboBox *combo = m_widget->findChild<QComboBox *>())
+        applyAutomationComboState(combo, m_oldState);
+  }
+  void redo() override {
+    if (m_widget)
+      if (QComboBox *combo = m_widget->findChild<QComboBox *>())
+        applyAutomationComboState(combo, m_newState);
+  }
+
+private:
+  QPointer<QWidget> m_widget;
+  QString m_property;
+  AutomationComboState m_oldState;
+  AutomationComboState m_newState;
+};
+
 } // namespace
 
 MainWindow::MainWindow(QWidget *parent)
@@ -566,8 +736,12 @@ void MainWindow::setupUI() {
           [this, runAction, visualAction, stopAction](bool running) {
     runAction->setEnabled(!running); visualAction->setEnabled(!running);
     stopAction->setEnabled(running);
-    emit automationEvent(running ? "preview.started" : "preview.finished",
-                         QJsonObject{{"running", running}});
+    // O término é publicado exclusivamente por previewFinished (com
+    // exitCode). Emitir preview.finished aqui duplicaria o evento: finish()
+    // emite runningChanged(false) seguido de previewFinished(code).
+    if (running)
+      emit automationEvent("preview.started",
+                           QJsonObject{{"running", true}});
   });
 
   // Atalho global para Delete
@@ -1007,9 +1181,10 @@ bool MainWindow::automationAddWidget(const QString &type, const QString &name,
       *error = "Tipo de componente desconhecido: " + type;
     return false;
   }
-  if (name.isEmpty()) {
+  QString nameError;
+  if (!ProjectModel::isValidWidgetName(name, &nameError)) {
     if (error)
-      *error = "O nome do componente não pode ser vazio.";
+      *error = nameError;
     return false;
   }
   if (findAutomationWidget(m_canvas, name)) {
@@ -1109,6 +1284,121 @@ bool MainWindow::automationSetProperty(const QString &name,
       *error = "Propriedade não é mutável no contrato público: " + property;
     return false;
   }
+  // Propriedades compostas viajam com seus dependentes para que o undo seja
+  // atômico: tabela guarda headers+rows; combobox guarda items+currentIndex.
+  if (type == "table" && (property == "headers" || property == "rows")) {
+    QTableWidget *table = automationTableWidget(widget);
+    if (!table) {
+      if (error)
+        *error = "Tabela sem controle associado.";
+      return false;
+    }
+    const AutomationTableState oldState = readAutomationTableState(table);
+    AutomationTableState newState = oldState;
+    if (property == "headers") {
+      if (!jsonStringArray(value)) {
+        if (error)
+          *error = "A propriedade headers exige uma lista de strings.";
+        return false;
+      }
+      QStringList headers;
+      for (const QJsonValue &item : value.toArray())
+        headers.append(item.toString());
+      newState.headers = headers;
+      // Ajustar linhas à nova largura sem perder dados além do truncamento
+      // explícito; o estado antigo completo permanece no comando para undo.
+      for (QStringList &row : newState.rows) {
+        while (row.size() > headers.size())
+          row.removeLast();
+        while (row.size() < headers.size())
+          row.append(QString());
+      }
+    } else {
+      if (!jsonStringMatrix(value)) {
+        if (error)
+          *error = "A propriedade rows exige uma matriz de strings.";
+        return false;
+      }
+      QList<QStringList> rows;
+      int width = 0;
+      for (const QJsonValue &rowValue : value.toArray()) {
+        QStringList cells;
+        for (const QJsonValue &cell : rowValue.toArray())
+          cells.append(cell.toString());
+        width = qMax(width, cells.size());
+        rows.append(cells);
+      }
+      newState.rows = rows;
+      // Expandir cabeçalhos quando as linhas exigirem mais colunas; nunca
+      // encolher cabeçalhos aqui para não perder rótulos.
+      while (newState.headers.size() < width)
+        newState.headers.append(QString());
+      for (QStringList &row : newState.rows) {
+        while (row.size() < qMax(newState.headers.size(), width))
+          row.append(QString());
+      }
+    }
+    m_controller->undoStack()->push(
+        new AutomationTableCommand(widget, property, oldState, newState));
+    m_propEditor->setTargetWidget(widget);
+    if (!automationDiagnostics().isEmpty()) {
+      m_controller->undoStack()->undo();
+      if (error)
+        *error = "A alteração produziria um projeto inválido.";
+      return false;
+    }
+    return true;
+  }
+  if (type == "combobox" && (property == "items" || property == "currentIndex")) {
+    QComboBox *combo = widget->findChild<QComboBox *>();
+    if (!combo) {
+      if (error)
+        *error = "ComboBox sem controle associado.";
+      return false;
+    }
+    const AutomationComboState oldState = readAutomationComboState(combo);
+    AutomationComboState newState = oldState;
+    if (property == "items") {
+      if (!jsonStringArray(value)) {
+        if (error)
+          *error = "A propriedade items exige uma lista de strings.";
+        return false;
+      }
+      QStringList items;
+      for (const QJsonValue &item : value.toArray())
+        items.append(item.toString());
+      newState.items = items;
+      if (items.isEmpty())
+        newState.currentIndex = -1;
+      else if (oldState.currentIndex < 0)
+        newState.currentIndex = 0;
+      else
+        newState.currentIndex = qMin(oldState.currentIndex, items.size() - 1);
+    } else {
+      int index = 0;
+      if (!jsonInteger(value, &index)) {
+        if (error)
+          *error = "A propriedade currentIndex exige número inteiro.";
+        return false;
+      }
+      if (index < -1 || index >= combo->count()) {
+        if (error)
+          *error = "currentIndex fora dos limites do ComboBox.";
+        return false;
+      }
+      newState.currentIndex = index;
+    }
+    m_controller->undoStack()->push(
+        new AutomationComboCommand(widget, property, oldState, newState));
+    m_propEditor->setTargetWidget(widget);
+    if (!automationDiagnostics().isEmpty()) {
+      m_controller->undoStack()->undo();
+      if (error)
+        *error = "A alteração produziria um projeto inválido.";
+      return false;
+    }
+    return true;
+  }
   const ProjectNode node = ProjectWidgetMapper::toNode(widget);
   const QJsonValue oldValue = nodePropertyValue(node, property);
   if (oldValue.isUndefined()) {
@@ -1152,6 +1442,25 @@ bool MainWindow::automationSetActions(const QString &name,
   }
   const QString encoded =
       QString::fromUtf8(QJsonDocument(actions).toJson(QJsonDocument::Compact));
+  // Validar o modelo proposto antes de mutar: evita gravar ações que deixam
+  // o projeto inválido (shell sem command, set/query incompletos, destinos
+  // inexistentes). Nenhum comando entra na pilha quando inválido.
+  {
+    ProjectModel proposed = ProjectWidgetMapper::toModel(m_canvas);
+    ProjectNode *node = findAutomationModelNode(&proposed.widgets, name);
+    if (!node) {
+      if (error)
+        *error = "Componente não encontrado no modelo: " + name;
+      return false;
+    }
+    node->actions = encoded;
+    const QStringList issues = proposed.validate();
+    if (!issues.isEmpty()) {
+      if (error)
+        *error = issues.first();
+      return false;
+    }
+  }
   const QString oldValue = widget->property("showbox_actions").toString();
   m_controller->undoStack()->push(new PropertyChangeCommand(
       widget, "showbox_actions", oldValue, encoded));

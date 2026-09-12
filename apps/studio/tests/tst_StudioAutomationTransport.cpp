@@ -30,6 +30,7 @@ private slots:
     void cleanup();
     void framingValidationAndNotifications();
     void eventsAreFilteredAndReconnectWorks();
+    void readOnlyServerRejectsMutations();
     void cliAndMcpUseThePublicSocket();
 
 private:
@@ -55,7 +56,15 @@ void tst_StudioAutomationTransport::init() {
         m_server = nullptr;
         delete m_window;
         m_window = nullptr;
-        QSKIP(qPrintable("sockets locais indisponíveis neste ambiente: " + error));
+        // Skip somente mediante condição ambiental explícita. Em ambientes
+        // normais o listen é obrigatório: mascarar regressões como skip
+        // deixaria o CI verde diante de colisões ou falhas reais.
+        // Para reconhecer um sandbox sem socket local, execute com
+        // SHOWBOX_ALLOW_TRANSPORT_SKIP=1.
+        if (qEnvironmentVariable("SHOWBOX_ALLOW_TRANSPORT_SKIP") == "1") {
+            QSKIP(qPrintable("sockets locais indisponíveis neste ambiente: " + error));
+        }
+        QFAIL(qPrintable("QLocalServer.listen falhou; regressão de transporte: " + error));
     }
     m_socket = new QLocalSocket(this);
     m_socket->connectToServer(m_socketName);
@@ -133,6 +142,8 @@ void tst_StudioAutomationTransport::framingValidationAndNotifications() {
 
     const QJsonObject invalid = sendLine("not-json");
     QCOMPARE(invalid.value("error").toObject().value("code").toInt(), -32700);
+    QVERIFY(invalid.contains("id"));
+    QVERIFY(invalid.value("id").isNull());
     const QJsonObject unknown = sendLine(
         R"({"jsonrpc":"2.0","id":3,"method":"no.such.method"})");
     QCOMPARE(unknown.value("error").toObject().value("code").toInt(), -32601);
@@ -153,6 +164,8 @@ void tst_StudioAutomationTransport::framingValidationAndNotifications() {
     QVERIFY(m_socket->waitForBytesWritten(1000));
     const QJsonObject oversized = readLine();
     QCOMPARE(oversized.value("error").toObject().value("code").toInt(), -32031);
+    QVERIFY(oversized.contains("id"));
+    QVERIFY(oversized.value("id").isNull());
     QTRY_VERIFY_WITH_TIMEOUT(m_socket->state() == QLocalSocket::UnconnectedState, 1000);
 }
 
@@ -194,6 +207,56 @@ void tst_StudioAutomationTransport::eventsAreFilteredAndReconnectWorks() {
     const QJsonObject response = sendLine(
         R"({"jsonrpc":"2.0","id":12,"method":"preview.status"})");
     QCOMPARE(response.value("id").toInt(), 12);
+}
+
+void tst_StudioAutomationTransport::readOnlyServerRejectsMutations() {
+    MainWindow readOnlyWindow;
+    const QString readOnlyName = m_socketName + "-ro";
+    StudioAutomationServer readOnlyServer(&readOnlyWindow, true, false);
+    QString error;
+    QVERIFY2(readOnlyServer.listen(readOnlyName, &error),
+             qPrintable("servidor readOnly deveria escutar: " + error));
+    QLocalSocket readOnlySocket;
+    readOnlySocket.connectToServer(readOnlyName);
+    QVERIFY2(readOnlySocket.waitForConnected(1000),
+             qPrintable(readOnlySocket.errorString()));
+    std::function<QJsonObject(const QJsonObject &)> roCall =
+        [&](const QJsonObject &request) -> QJsonObject {
+        const QByteArray line =
+            QJsonDocument(request).toJson(QJsonDocument::Compact) + '\n';
+        if (readOnlySocket.write(line) != line.size())
+            return {};
+        if (!readOnlySocket.waitForBytesWritten(1000))
+            return {};
+        QElapsedTimer timer;
+        timer.start();
+        while (!readOnlySocket.canReadLine() && timer.elapsed() < 1000) {
+            QCoreApplication::processEvents(QEventLoop::AllEvents, 10);
+            QTest::qWait(1);
+        }
+        if (!readOnlySocket.canReadLine())
+            return {};
+        QJsonParseError parseError;
+        const QJsonDocument doc =
+            QJsonDocument::fromJson(readOnlySocket.readLine(), &parseError);
+        if (parseError.error != QJsonParseError::NoError || !doc.isObject())
+            return {};
+        return doc.object();
+    };
+    QJsonObject described = roCall(
+        QJsonObject{{"jsonrpc", "2.0"}, {"id", 30}, {"method", "system.describe"}});
+    QVERIFY(!described.isEmpty());
+    QVERIFY(described.value("result").toObject().value("readOnly").toBool());
+    QJsonObject rejected = roCall(
+        QJsonObject{{"jsonrpc", "2.0"}, {"id", 31}, {"method", "widget.add"},
+                    {"params", QJsonObject{{"type", "label"}, {"name", "ro_label"}}}});
+    QVERIFY(!rejected.isEmpty());
+    QCOMPARE(rejected.value("error").toObject().value("code").toInt(), -32010);
+    QJsonObject snapshot = roCall(
+        QJsonObject{{"jsonrpc", "2.0"}, {"id", 32}, {"method", "project.snapshot"}});
+    QVERIFY(!snapshot.isEmpty());
+    QVERIFY(snapshot.value("result").isObject());
+    readOnlySocket.disconnectFromServer();
 }
 
 void tst_StudioAutomationTransport::cliAndMcpUseThePublicSocket() {

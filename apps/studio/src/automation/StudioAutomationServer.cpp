@@ -95,8 +95,10 @@ void StudioAutomationServer::onReadyRead() {
     QByteArray &buffer = m_buffers[socket];
     buffer += socket->readAll();
     if (buffer.size() > showbox::automation::MaxBufferBytes) {
+        // Sem request identificável o JSON-RPC exige id null explícito
+        // (QJsonValue() seria Undefined e poderia omitir o campo).
         writeResponse(socket, showbox::automation::makeError(
-                                  QJsonValue(), -32030, "error", "transport",
+                                  QJsonValue(QJsonValue::Null), -32030, "error", "transport",
                                   "Buffer de entrada excedeu o limite.",
                                   QJsonObject{{"maxBufferBytes", showbox::automation::MaxBufferBytes}},
                                   {}, "Reduza a mensagem e envie uma linha por vez."));
@@ -110,7 +112,7 @@ void StudioAutomationServer::onReadyRead() {
             break;
         if (newline > showbox::automation::MaxMessageBytes) {
             writeResponse(socket, showbox::automation::makeError(
-                                      QJsonValue(), -32031, "error", "transport",
+                                      QJsonValue(QJsonValue::Null), -32031, "error", "transport",
                                       "Mensagem excedeu o limite de tamanho.",
                                       QJsonObject{{"maxMessageBytes", showbox::automation::MaxMessageBytes}},
                                       {}, "Reduza a solicitação JSON."));
@@ -129,7 +131,7 @@ void StudioAutomationServer::onReadyRead() {
         if (parseError.error != QJsonParseError::NoError ||
             !document.isObject()) {
             response = showbox::automation::makeError(
-                QJsonValue(), -32700, "error", "automation",
+                QJsonValue(QJsonValue::Null), -32700, "error", "automation",
                 "JSON-RPC inválido.", {}, {},
                 "Envie um objeto JSON completo em uma única linha.");
         } else {

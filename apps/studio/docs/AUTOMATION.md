@@ -43,8 +43,8 @@ transporte ou erro JSON-RPC.
 ## Métodos
 
 A descoberta por `system.describe` é a fonte da lista de métodos e dos
-`inputSchema` JSON Schema. A mesma lista e os mesmos schemas são publicados em
-`tools/list` pelo MCP. Os métodos são:
+`inputSchema` JSON Schema. Os mesmos schemas são publicados em `tools/list`
+pelo MCP, exceto `events.subscribe` (ver abaixo). Os métodos são:
 
 - observação: `system.describe`, `system.capabilities`, `project.snapshot`,
   `ui.tree`, `diagnostics.list`, `export.validate`, `preview.status`,
@@ -58,12 +58,20 @@ A descoberta por `system.describe` é a fonte da lista de métodos e dos
 - execução/exportação: `preview.start`, `preview.stop`, `export.bash`.
 
 Os schemas são estritos (`additionalProperties: false`), com tipos, enums,
-limites de comprimento/quantidade e campos obrigatórios. A propriedade
-`widget.setProperty` é tipada conforme o tipo do componente e o modelo do
-`ProjectWidgetMapper`: controles compostos como `textbox`, `combobox`,
-`listbox` e `table` alteram seus controles reais, incluindo `items`,
-`headers` e `rows`. Metadados Qt (`objectName`, `showbox_type`,
-`showbox_actions`) e propriedades desconhecidas são rejeitados.
+limites de comprimento/quantidade e campos obrigatórios. Ações usam `oneOf`
+por tipo: `shell` exige `command`; `set` exige `target`/`property`/`value`;
+`query` exige `target`/`variable`. O modelo proposto é validado antes de
+gravar, de modo que mutações que deixariam o projeto inválido são recusadas
+sem tocar na pilha de undo. `widget.add` reutiliza a validação canônica de
+identificadores (`^[A-Za-z_][A-Za-z0-9_]*$`, reservados `main`/`showbox`).
+A propriedade `widget.setProperty` é tipada conforme o tipo do componente e
+o modelo do `ProjectWidgetMapper`: controles compostos como `textbox`,
+`combobox`, `listbox` e `table` alteram seus controles reais, incluindo
+`items`, `headers` e `rows`. Alterações em `table.headers`/`rows` e
+`combobox.items`/`currentIndex` são atômicas: o comando guarda o estado
+completo e o undo restaura dados e seleção. Metadados Qt (`objectName`,
+`showbox_type`, `showbox_actions`) e propriedades desconhecidas são
+rejeitados.
 
 `project.new` e `project.open` recusam descartar alterações não salvas sem
 `force: true`; a resposta informa `discarded` quando o descarte foi explícito.
@@ -73,10 +81,12 @@ Alterações de propriedades entram na pilha do Studio e participam de
 Mensagens são objetos JSON-RPC 2.0 delimitados por LF. Notificações válidas,
 sem `id`, não recebem resposta. `id` aceita string, número ou `null`; ids de
 outro tipo, JSON inválido, método desconhecido e parâmetros inválidos usam os
-códigos JSON-RPC padrão. Erros do Studio seguem `{code, message, data}`; os
-campos `severity`, `component`, `context`, `location` e `suggestion` ficam em
-`data`. O limite é 1 MiB por linha e 2 MiB por buffer de conexão; excedê-lo
-produz erro de transporte e encerra a conexão.
+códigos JSON-RPC padrão. Erros sem request identificável (parse, limites)
+respondem com `"id": null` explícito. Erros do Studio seguem
+`{code, message, data}`; os campos `severity`, `component`, `context`,
+`location` e `suggestion` ficam em `data`. O limite é 1 MiB por linha e
+2 MiB por buffer de conexão; excedê-lo produz erro de transporte e encerra a
+conexão.
 
 `events.subscribe` mantém a assinatura por conexão. Uma lista vazia assina
 todos os eventos públicos; os nomes são validados. As notificações usam a
@@ -84,7 +94,8 @@ forma estável `{"method":"events.event","params":{"name":...,"data":...}}`
 e cobrem `project.changed`, `selection.changed`, `dirty.changed`,
 `preview.started`, `preview.output`, `preview.finished` e
 `diagnostics.changed`. A assinatura é descartada no disconnect e não é
-herdada por uma reconexão.
+herdada por uma reconexão. `preview.finished` é emitido uma única vez, pelo
+sinal com `exitCode`; `runningChanged(false)` apenas atualiza a UI.
 
 Snapshots e árvores usam o modelo versionado do projeto e expõem somente
 identificadores estáveis (`type`, `name`, propriedades, ações e filhos). Não
@@ -94,8 +105,11 @@ fazem parte do contrato ponteiros, classes Qt ou nomes de objetos internos.
 
 `showbox-studio-mcp` é um processo separado, via stdio. Ele implementa
 `initialize`, `tools/list` e `tools/call`, traduzindo cada ferramenta para o
-socket público. O adaptador não acessa o Studio, QWidget ou componentes
-internos diretamente:
+socket público. `events.subscribe` não é publicado como ferramenta MCP, pois
+cada `tools/call` usa uma conexão temporária e não poderia entregar
+notificações; chamadas diretas a ele pelo MCP recebem erro explícito. Use o
+socket JSON-RPC para assinaturas. O adaptador não acessa o Studio, QWidget
+ou componentes internos diretamente:
 
 ```sh
 showbox-studio-mcp --socket /tmp/showbox-studio.sock
@@ -106,8 +120,11 @@ O protocolo público é o núcleo portátil; MCP é somente um consumidor.
 ## Validação
 
 Além dos testes de facade, `tst_StudioAutomationTransport` usa um servidor e
-cliente reais para validar framing parcial, múltiplas mensagens, JSON inválido,
-métodos/parâmetros inválidos, notificações, limites, autenticação de preview,
-filtros e reconexão de eventos, CLI, MCP e falhas de transporte. A validação
-de socket local é executada fora do sandbox quando o ambiente bloqueia
+cliente reais para validar framing parcial, múltiplas mensagens, JSON inválido
+(com `id: null`), métodos/parâmetros inválidos, notificações, limites (com
+`id: null`), autenticação de preview, filtros e reconexão de eventos, modo
+somente leitura (`readOnly=true` recusa mutações com `-32010`), CLI, MCP e
+falhas de transporte. O `listen` é obrigatório: o skip só ocorre com
+`SHOWBOX_ALLOW_TRANSPORT_SKIP=1` em sandbox sem socket local. A validação de
+socket local é executada fora do sandbox quando o ambiente bloqueia
 `QLocalServer` com `EPERM`.

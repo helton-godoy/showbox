@@ -245,6 +245,28 @@ bool ProjectModel::isKnownType(const QString &type) {
     return showbox::catalog::isKnownType(type);
 }
 
+bool ProjectModel::isValidWidgetName(const QString &name, QString *error) {
+    if (name.isEmpty()) {
+        if (error)
+            *error = "O nome do componente não pode ser vazio.";
+        return false;
+    }
+    if (!isIdentifier(name)) {
+        if (error)
+            *error = QString("Nome inválido (%1): use letras, dígitos e sublinhado, "
+                             "começando por letra ou sublinhado.")
+                         .arg(name);
+        return false;
+    }
+    if (isReservedName(name)) {
+        if (error)
+            *error = QString("Nome reservado (%1) não pode ser usado em componentes.")
+                         .arg(name);
+        return false;
+    }
+    return true;
+}
+
 QJsonObject ProjectModel::toJson() const {
     QJsonObject json;
     json["format"] = "showbox";

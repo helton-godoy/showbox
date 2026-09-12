@@ -51,17 +51,29 @@ QJsonObject arraySchema(const QJsonObject &items,
 }
 
 QJsonObject actionSchema() {
-    const QJsonObject typeSchema{
-        {"type", "string"},
-        {"enum", QJsonArray{"shell", "set", "query"}}};
-    return objectSchema(
-        QJsonObject{{"type", typeSchema},
-                    {"command", stringSchema("Comando Bash, quando type=shell")},
+    const QJsonObject shellAction = objectSchema(
+        QJsonObject{{"type", QJsonObject{{"type", "string"},
+                                        {"enum", QJsonArray{"shell"}}}},
+                    {"command", stringSchema("Comando Bash, quando type=shell")}},
+        QJsonArray{"type", "command"});
+    const QJsonObject setAction = objectSchema(
+        QJsonObject{{"type", QJsonObject{{"type", "string"},
+                                        {"enum", QJsonArray{"set"}}}},
                     {"target", stringSchema("Nome do componente de destino")},
                     {"property", stringSchema("Propriedade de destino")},
-                    {"value", stringSchema("Valor literal")},
+                    {"value", stringSchema("Valor literal")}},
+        QJsonArray{"type", "target", "property", "value"});
+    const QJsonObject queryAction = objectSchema(
+        QJsonObject{{"type", QJsonObject{{"type", "string"},
+                                        {"enum", QJsonArray{"query"}}}},
+                    {"target", stringSchema("Nome do componente de destino")},
                     {"variable", stringSchema("Variável de consulta")}},
-        QJsonArray{"type"});
+        QJsonArray{"type", "target", "variable"});
+    QJsonArray options;
+    options.append(shellAction);
+    options.append(setAction);
+    options.append(queryAction);
+    return QJsonObject{{"oneOf", options}};
 }
 
 QJsonObject stringArraySchema(const QString &description = {}) {
@@ -208,8 +220,14 @@ QJsonArray methodDescriptorJson() {
 }
 
 QJsonArray mcpToolJson() {
+    // events.subscribe exige conexão persistente com entrega assíncrona e
+    // não pode ser sustentado pelo ciclo tools/call (conexão temporária por
+    // chamada). Por isso não é publicado como ferramenta MCP; use o socket
+    // JSON-RPC diretamente para assinaturas.
     QJsonArray result;
     for (const MethodDescriptor &descriptor : methodDescriptors()) {
+        if (descriptor.name == "events.subscribe")
+            continue;
         result.append(QJsonObject{{"name", descriptor.name},
                                   {"description", descriptor.description},
                                   {"inputSchema", descriptor.inputSchema}});

@@ -15,6 +15,10 @@ private slots:
     void facadeMutationsUseStudioServices();
     void textboxPropertyMutationUpdatesSnapshot();
     void compoundPropertiesAndTypesRoundTrip();
+    void compoundUndoIsAtomic();
+    void widgetAddRejectsInvalidNames();
+    void actionSchemasRequireConditionalFields();
+    void mcpDoesNotPublishEventsSubscribe();
     void rejectsUnknownAndInternalProperties();
     void dirtyProjectRequiresForce();
 };
@@ -33,19 +37,31 @@ void tst_StudioAutomation::protocolResponsesHaveStableShape() {
                                QString("context"), QString("location"),
                                QString("suggestion")})
         QVERIFY2(data.contains(key), qPrintable(key));
+    // Erros sem request identificável usam id null explícito, nunca ausente.
+    const QJsonObject nullId = showbox::automation::makeError(
+        QJsonValue(QJsonValue::Null), -32700, "error", "automation",
+        "JSON-RPC inválido.");
+    QVERIFY(nullId.contains("id"));
+    QVERIFY(nullId.value("id").isNull());
 }
 
 void tst_StudioAutomation::schemasAreCentralAndStrict() {
     const auto &descriptors = showbox::automation::methodDescriptors();
     const QJsonArray mcpTools = showbox::automation::mcpToolJson();
-    QCOMPARE(mcpTools.size(), descriptors.size());
+    // MCP publica todos os métodos exceto events.subscribe, que exige
+    // conexão persistente e não pode ser sustentado por tools/call.
+    QCOMPARE(mcpTools.size(), descriptors.size() - 1);
+    int mcpIndex = 0;
     for (int i = 0; i < descriptors.size(); ++i) {
         const QJsonObject schema = descriptors.at(i).inputSchema;
+        if (descriptors.at(i).name == "events.subscribe")
+            continue;
         QVERIFY(!schema.value("additionalProperties").toBool(true));
-        QCOMPARE(mcpTools.at(i).toObject().value("name").toString(),
+        QCOMPARE(mcpTools.at(mcpIndex).toObject().value("name").toString(),
                  descriptors.at(i).name);
-        QCOMPARE(mcpTools.at(i).toObject().value("inputSchema").toObject(),
+        QCOMPARE(mcpTools.at(mcpIndex).toObject().value("inputSchema").toObject(),
                  schema);
+        ++mcpIndex;
     }
 
     const auto *events = showbox::automation::methodDescriptor("events.subscribe");
@@ -170,6 +186,120 @@ void tst_StudioAutomation::compoundPropertiesAndTypesRoundTrip() {
     QVERIFY(window.automationRedo(&error));
     QCOMPARE(automationNode(window.automationProjectSnapshot().value("widgets").toArray(),
                             "count").value("properties").toObject().value("value").toInt(), 7);
+}
+
+void tst_StudioAutomation::compoundUndoIsAtomic() {
+    MainWindow window;
+    QString error;
+    QVERIFY2(window.automationNew(&error), qPrintable(error));
+    QVERIFY2(window.automationAddWidget("table", "data", {}, &error),
+             qPrintable(error));
+    QVERIFY2(window.automationSetProperty("data", "headers",
+                                          QJsonArray{"A", "B", "C"}, &error),
+             qPrintable(error));
+    QVERIFY2(window.automationSetProperty(
+                 "data", "rows",
+                 QJsonArray{QJsonArray{"1", "2", "3"},
+                            QJsonArray{"4", "5", "6"}},
+                 &error),
+             qPrintable(error));
+    // Reduzir headers trunca a largura, mas o undo deve restaurar os dados.
+    QVERIFY2(window.automationSetProperty("data", "headers",
+                                          QJsonArray{"A"}, &error),
+             qPrintable(error));
+    QCOMPARE(automationNode(window.automationProjectSnapshot().value("widgets").toArray(),
+                            "data").value("headers").toArray().size(), 1);
+    QVERIFY2(window.automationUndo(&error), qPrintable(error));
+    QJsonObject restored = automationNode(
+        window.automationProjectSnapshot().value("widgets").toArray(), "data");
+    QCOMPARE(restored.value("headers").toArray().size(), 3);
+    QCOMPARE(restored.value("rows").toArray().size(), 2);
+    QCOMPARE(restored.value("rows").toArray().at(0).toArray().size(), 3);
+    QCOMPARE(restored.value("rows").toArray().at(0).toArray().at(2).toString(),
+             QString("3"));
+    QVERIFY2(window.automationRedo(&error), qPrintable(error));
+    QCOMPARE(automationNode(window.automationProjectSnapshot().value("widgets").toArray(),
+                            "data").value("headers").toArray().size(), 1);
+
+    QVERIFY2(window.automationAddWidget("combobox", "choice", {}, &error),
+             qPrintable(error));
+    QVERIFY2(window.automationSetProperty("choice", "items",
+                                          QJsonArray{"one", "two", "three"},
+                                          &error),
+             qPrintable(error));
+    QVERIFY2(window.automationSetProperty("choice", "currentIndex", 2, &error),
+             qPrintable(error));
+    QVERIFY2(window.automationSetProperty("choice", "items",
+                                          QJsonArray{"solo"}, &error),
+             qPrintable(error));
+    QVERIFY2(window.automationUndo(&error), qPrintable(error));
+    QJsonObject combo = automationNode(
+        window.automationProjectSnapshot().value("widgets").toArray(), "choice");
+    QCOMPARE(combo.value("items").toArray().size(), 3);
+    QCOMPARE(combo.value("properties").toObject().value("currentIndex").toInt(), 2);
+}
+
+void tst_StudioAutomation::widgetAddRejectsInvalidNames() {
+    MainWindow window;
+    QString error;
+    QVERIFY2(window.automationNew(&error), qPrintable(error));
+    QVERIFY(!window.automationAddWidget("label", "nome inválido", {}, &error));
+    QVERIFY(!window.automationAddWidget("label", "main", {}, &error));
+    QVERIFY(!window.automationAddWidget("label", "showbox", {}, &error));
+    QVERIFY(!window.automationAddWidget("label", "1abc", {}, &error));
+    QVERIFY(!window.automationAddWidget("label", "", {}, &error));
+    QCOMPARE(window.automationProjectSnapshot().value("widgets").toArray().size(), 0);
+    QVERIFY2(window.automationAddWidget("label", "ok_nome", {}, &error),
+             qPrintable(error));
+    QVERIFY(!window.automationAddWidget("label", "ok_nome", {}, &error));
+}
+
+void tst_StudioAutomation::actionSchemasRequireConditionalFields() {
+    QString error;
+    const auto *add = showbox::automation::methodDescriptor("action.add");
+    QVERIFY(add);
+    // shell exige command; set exige target/property/value; query exige target/variable.
+    QVERIFY(!showbox::automation::validateParams(
+        *add, QJsonObject{{"name", "b"}, {"event", "clicked"},
+                          {"action", QJsonObject{{"type", "shell"}}}},
+        &error));
+    QVERIFY(!showbox::automation::validateParams(
+        *add, QJsonObject{{"name", "b"}, {"event", "clicked"},
+                          {"action", QJsonObject{{"type", "set"},
+                                                 {"target", "x"}}}},
+        &error));
+    QVERIFY(!showbox::automation::validateParams(
+        *add, QJsonObject{{"name", "b"}, {"event", "clicked"},
+                          {"action", QJsonObject{{"type", "query"},
+                                                 {"target", "x"}}}},
+        &error));
+    QVERIFY(showbox::automation::validateParams(
+        *add, QJsonObject{{"name", "b"}, {"event", "clicked"},
+                          {"action", QJsonObject{{"type", "shell"},
+                                                 {"command", "echo oi"}}}},
+        &error));
+
+    MainWindow window;
+    QVERIFY2(window.automationNew(&error), qPrintable(error));
+    QVERIFY2(window.automationAddWidget("pushbutton", "run", {}, &error),
+             qPrintable(error));
+    QVERIFY2(window.automationAddWidget("label", "result", {}, &error),
+             qPrintable(error));
+    // Modelo proposto inválido (destino inexistente) não pode ser gravado.
+    QVERIFY(!window.automationSetActions(
+        "run", QJsonObject{{"clicked", QJsonArray{QJsonObject{
+                      {"type", "set"}, {"target", "nope"}, {"property", "text"},
+                      {"value", "x"}}}}}, &error));
+    QVERIFY(window.automationDiagnostics().isEmpty());
+    QVERIFY(window.automationSetActions(
+        "run", QJsonObject{{"clicked", QJsonArray{QJsonObject{
+                      {"type", "shell"}, {"command", "echo oi"}}}}}, &error));
+}
+
+void tst_StudioAutomation::mcpDoesNotPublishEventsSubscribe() {
+    const QJsonArray tools = showbox::automation::mcpToolJson();
+    for (const QJsonValue &value : tools)
+        QVERIFY(value.toObject().value("name").toString() != "events.subscribe");
 }
 
 void tst_StudioAutomation::rejectsUnknownAndInternalProperties() {

@@ -57,6 +57,10 @@ int main(int argc, char **argv) {
             const QString name = params.value("name").toString();
             if (name.isEmpty()) {
                 response = errorResponse(id, "params.name é obrigatório.");
+            } else if (name == "events.subscribe") {
+                response = errorResponse(
+                    id, "events.subscribe exige conexão persistente e não está "
+                        "disponível via MCP; use o socket JSON-RPC diretamente.");
             } else {
                 QString transportError;
                 const QJsonObject rpc = client.call(
