@@ -1,10 +1,10 @@
 # SB-014 — Migrar pins das Actions para runtime Node 24
 
-Estado: proposta (2026-09-12).
+Estado: em andamento (2026-09-12).
 
 - Objetivo: eliminar os avisos de depreciação do Node.js 20 no GitHub Actions
   migrando os pins SHA das actions para releases baseados em Node 24.
-- Base: `99337e7` (`main` com a rodada local da SB-013 integrada via PR #31).
+- Base: `9173524` (`main` com o contrato SB-014 integrado via PR #32).
 - Branch de execução: `chore/SB-014-node24`.
 - Responsável: integrador desta sessão.
 - Dependências: SB-007 (Trunk/actionlint como gate), SB-011 (fluxo trunk-based),
