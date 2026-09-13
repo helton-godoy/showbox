@@ -25,6 +25,8 @@ Somente o integrador altera esta tabela.
 | SB-014  | Migrar pins das Actions para runtime Node 24                            | SB-007, SB-011 | Concluída                      |
 | SB-015  | Estabilidade do Studio (lifetime) e menu File, Edit, View, Help         | SB-010         | Concluída                      |
 | SB-016  | Exportação honesta no toolbox (desabilitar não-exportáveis)             | SB-004, SB-015 | Concluída                      |
+| SB-017  | Showbox Studio Automation Interface (socket local, CLI, MCP)            | SB-004, SB-015 | Concluída e integrada          |
+| SB-018  | Release candidate v1.0.0-rc.6 com SB-017, validação e publicação        | SB-012, SB-017 | Em andamento                   |
 
 ## Marco de produto
 
