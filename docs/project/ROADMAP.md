@@ -3,30 +3,31 @@
 Fonte oficial de prioridades. O diretório v1 registra o ciclo anterior do motor.
 Somente o integrador altera esta tabela.
 
-| Tarefa  | Entrega                                                                 | Dependências   | Estado                         |
-| ------- | ----------------------------------------------------------------------- | -------------- | ------------------------------ |
-| SB-001  | Histórico conciliado, monorepo, build e instruções únicos               | —              | Concluída localmente           |
-| SB-002  | Corrigir exportação/preview e fechar interface → Bash → interface       | SB-001         | Concluída localmente           |
-| SB-003  | Modelo versionado e salvar/reabrir ações sem perdas                     | SB-002         | Concluída localmente           |
-| SB-004  | Catálogo compartilhado de propriedades/eventos suportados               | SB-003         | Concluída localmente           |
-| SB-005  | Pacotes separados, pipeline de release e testes de instalação           | SB-001, SB-002 | Concluída localmente           |
-| SB-006  | Proteção Git remota e transição dos repositórios antigos                | SB-005         | Concluída                      |
-| SB-006A | Correção: segurança de abertura/salvamento e validação de projeto       | SB-005         | Concluída e integrada          |
-| SB-007  | Trunk como ferramenta central de validação (lint, formatação, segredos) | SB-006         | Concluída                      |
-| SB-008  | Primeiro release candidato e validação dos artefatos                    | SB-005, SB-007 | Concluída (rc.3, corretivo P1) |
-| SB-009  | Contrato e validação da versão única (testes do conversor)              | SB-008         | Concluída                      |
-| SB-009A | Correção: ordenação RPM da versão única entre estágios                  | SB-009         | Concluída                      |
-| SB-009B | Testes de ordenação ligados à saída real do conversor                   | SB-009A        | Concluída                      |
-| SB-009C | Smoke RPM valida Version/Release realmente instalados                   | SB-009B        | Concluída                      |
-| SB-010  | Fluxo visual executável de ponta a ponta                                | SB-004         | Concluída                      |
-| SB-011  | Simplificar integração Git para branches de tarefa → main               | SB-006, SB-007 | Concluída                      |
-| SB-012  | Produzir, validar e publicar o release candidate v1.0.0-rc.4            | SB-008–SB-011  | Concluída                      |
-| SB-013  | Validação externa do RC.4 e decisão v1.0.0 vs rc.5                      | SB-010–SB-012  | Concluída (decidido: rc.5)     |
-| SB-014  | Migrar pins das Actions para runtime Node 24                            | SB-007, SB-011 | Concluída                      |
-| SB-015  | Estabilidade do Studio (lifetime) e menu File, Edit, View, Help         | SB-010         | Concluída                      |
-| SB-016  | Exportação honesta no toolbox (desabilitar não-exportáveis)             | SB-004, SB-015 | Concluída                      |
-| SB-017  | Showbox Studio Automation Interface (socket local, CLI, MCP)            | SB-004, SB-015 | Concluída e integrada          |
-| SB-018  | Release candidate v1.0.0-rc.6 com SB-017, validação e publicação        | SB-012, SB-017 | Concluída (rc.6 publicado)     |
+| Tarefa  | Entrega                                                                 | Dependências   | Estado                                                           |
+| ------- | ----------------------------------------------------------------------- | -------------- | ---------------------------------------------------------------- |
+| SB-001  | Histórico conciliado, monorepo, build e instruções únicos               | —              | Concluída localmente                                             |
+| SB-002  | Corrigir exportação/preview e fechar interface → Bash → interface       | SB-001         | Concluída localmente                                             |
+| SB-003  | Modelo versionado e salvar/reabrir ações sem perdas                     | SB-002         | Concluída localmente                                             |
+| SB-004  | Catálogo compartilhado de propriedades/eventos suportados               | SB-003         | Concluída localmente                                             |
+| SB-005  | Pacotes separados, pipeline de release e testes de instalação           | SB-001, SB-002 | Concluída localmente                                             |
+| SB-006  | Proteção Git remota e transição dos repositórios antigos                | SB-005         | Concluída                                                        |
+| SB-006A | Correção: segurança de abertura/salvamento e validação de projeto       | SB-005         | Concluída e integrada                                            |
+| SB-007  | Trunk como ferramenta central de validação (lint, formatação, segredos) | SB-006         | Concluída                                                        |
+| SB-008  | Primeiro release candidato e validação dos artefatos                    | SB-005, SB-007 | Concluída (rc.3, corretivo P1)                                   |
+| SB-009  | Contrato e validação da versão única (testes do conversor)              | SB-008         | Concluída                                                        |
+| SB-009A | Correção: ordenação RPM da versão única entre estágios                  | SB-009         | Concluída                                                        |
+| SB-009B | Testes de ordenação ligados à saída real do conversor                   | SB-009A        | Concluída                                                        |
+| SB-009C | Smoke RPM valida Version/Release realmente instalados                   | SB-009B        | Concluída                                                        |
+| SB-010  | Fluxo visual executável de ponta a ponta                                | SB-004         | Concluída                                                        |
+| SB-011  | Simplificar integração Git para branches de tarefa → main               | SB-006, SB-007 | Concluída                                                        |
+| SB-012  | Produzir, validar e publicar o release candidate v1.0.0-rc.4            | SB-008–SB-011  | Concluída                                                        |
+| SB-013  | Validação externa do RC.4 e decisão v1.0.0 vs rc.5                      | SB-010–SB-012  | Concluída (decidido: rc.5)                                       |
+| SB-014  | Migrar pins das Actions para runtime Node 24                            | SB-007, SB-011 | Concluída                                                        |
+| SB-015  | Estabilidade do Studio (lifetime) e menu File, Edit, View, Help         | SB-010         | Concluída                                                        |
+| SB-016  | Exportação honesta no toolbox (desabilitar não-exportáveis)             | SB-004, SB-015 | Concluída                                                        |
+| SB-017  | Showbox Studio Automation Interface (socket local, CLI, MCP)            | SB-004, SB-015 | Concluída e integrada                                            |
+| SB-018  | Release candidate v1.0.0-rc.6 com SB-017, validação e publicação        | SB-012, SB-017 | Concluída (rc.6 publicado)                                       |
+| SB-019  | Validação autônoma final do RC.6 e decisão de promoção                  | SB-018         | Concluída (recomendado rc.7; descarte com alterações bloqueador) |
 
 ## Marco de produto
 
