@@ -85,9 +85,10 @@
 
 ## PRs ou identificadores externos
 
-- Nenhum PR aberto.
+- PR #40: https://github.com/helton-godoy/showbox/pull/40 (base `main`,
+  HEAD `2be53bd`). Aguardar checks oficiais (transporte e Trunk); se verdes,
+  integrar em `main`.
 
 ## Próximo passo concreto
 
-- Aguardar revisão final de integração na branch
-  `feat/SB-017-studio-automation`. Nenhum comando ou edição pendente.
+- Acompanhar o PR #40. Nenhum comando ou edição pendente nesta tarefa.
