@@ -191,7 +191,12 @@ rpm)
 					exit 1
 				fi
 			}
-			cmplt "${engine_nevr}" "${engine_nevr%%-*}-1"
+			# No estável (release "1") o NEVR do build É o estável (a menos do
+			# sufixo de distro, ex. 1.0.0-1.fc46 == 1.0.0-1); a relação
+			# "precede o estável" só vale para prereleases.
+			if [[ ${SMOKE_RPM_RELEASE} != "1" ]]; then
+				cmplt "${engine_nevr}" "${engine_nevr%%-*}-1"
+			fi
 			cmplt '1.0.0-0.1.alpha9' '1.0.0-0.2.beta1'
 			cmplt '1.0.0-0.2.beta9' '1.0.0-0.3.rc1'
 			cmplt '1.0.0-0.3.rc2' '1.0.0-0.3.rc10'
