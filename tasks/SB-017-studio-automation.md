@@ -1,7 +1,7 @@
 # SB-017 — Showbox Studio Automation Interface
 
-Estado: revisões de robustez aplicadas na branch; aguardando revisão final,
-sem integração em `main`.
+Estado: concluída e integrada em `main` (PR #40, merge `5307ad5`); revisões
+externas aprovadas, gates verdes. Acompanhamento de release em SB-018.
 
 - Objetivo: oferecer uma interface local, versionada e observável para
   automação, testes funcionais, CI e diagnóstico do Showbox Studio.

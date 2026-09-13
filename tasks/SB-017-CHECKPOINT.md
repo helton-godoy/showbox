@@ -8,11 +8,10 @@
 - SHA base: `b5779e3` (`main`, RC.5 integrado).
 - Commits anteriores: `59b2a2e`/`a5fbdee`, `1da4659`, `75042af`, `dab4c58`,
   `d185bdd`, `71c3fa6`.
-- Revisão atual (1 P1 desta rodada): alterações descritas abaixo, incluídas
-  no mesmo commit que este checkpoint (commit único, sem autorreferência de
-  hash documental).
-- Itens já concluídos: base anterior completa mais a correção desta rodada.
-- Item em execução: nenhum; branch candidata à revisão final de integração.
+- Revisão externa aprovada sem novos defeitos; PR #40 integrado em `main`
+  (`5307ad5`, checks verdes).
+- Itens já concluídos: todos; tarefa encerrada.
+- Item em execução: nenhum; acompanhamento de release em SB-018.
 
 ## Entrega desta rodada
 
@@ -69,27 +68,26 @@
 
 ## Falhas conhecidas
 
-- `just doctor`/`just check` bloqueados (Trunk sem cache gravável e sem DNS
-  para `trunk.io`); commits locais usam `--no-verify`.
-- Sem cobertura multiplataforma de `QLocalServer` nem PR/integração em
-  `main` nesta branch.
+- `just doctor`/`just check` passaram no ambiente do integrador (Trunk
+  1.25.0); commits locais usaram `--no-verify` onde o Trunk estava
+  indisponível.
+- Sem cobertura multiplataforma de `QLocalServer`; limitações de transporte
+  registradas no contrato.
 
 ## Trabalho ainda não validado
 
-- Nenhum; aguardar revisão final de integração.
+- Nenhum nesta tarefa.
 
 ## Estado das alterações
 
-- As alterações listadas acima estão incluídas no mesmo commit que esta
-  versão do checkpoint. Após esse commit a árvore fica limpa.
+- Tarefa encerrada e integrada.
 
 ## PRs ou identificadores externos
 
-- PR #40: <https://github.com/helton-godoy/showbox/pull/40> (base `main`).
-  `just doctor` passou; `just check` (Trunk 1.25.0) aplicou autofix de
-  formatação e apontou este MD034, corrigido aqui. Aguardar checks oficiais;
-  se verdes, integrar em `main`.
+- PR #40: <https://github.com/helton-godoy/showbox/pull/40> (base `main`,
+  merge `5307ad5`). Checks oficiais verdes no merge (build-test,
+  sanitizers, trunk-check, SonarCloud).
 
 ## Próximo passo concreto
 
-- Acompanhar o PR #40. Nenhum comando ou edição pendente nesta tarefa.
+- Nenhum nesta tarefa; release em SB-018.
