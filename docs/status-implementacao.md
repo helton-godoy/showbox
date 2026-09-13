@@ -11,8 +11,8 @@
 | Runtime       | stdin no event loop Qt; widgets manipulados na thread GUI                   |
 | Testes        | 9 suítes unitárias, contrato CLI e comparação dourada opcional com o legado |
 | Backends      | Smoke tests aprovados em X11/Xvfb e Wayland/Weston                          |
-| Pacotes       | RC.5 publicado; RC.6 em preparação com SB-017; smokes aprovados no RC.5      |
-| Automação     | SB-017 integrada: socket JSON-RPC local, `showbox-studioctl` e MCP         |
+| Pacotes       | RC.5 publicado; RC.6 em preparação com SB-017; smokes aprovados no RC.5     |
+| Automação     | SB-017 integrada: socket JSON-RPC local, `showbox-studioctl` e MCP          |
 
 Os diretórios `legacy/v1_monolith` e `legacy/v2_incomplete` permanecem somente
 como referência histórica e não participam do alvo moderno. O status detalhado,
