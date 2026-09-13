@@ -30,6 +30,9 @@ private slots:
     void pageTitleUpdatesVisibleTabText();
     void dependentPropertiesRestoreFully();
     void undoRedoEmitSingleEvent();
+    void duplicateDiagnosticsCountAsNew();
+    void projectEventsHaveSingleSource();
+    void setPropertySchemaIsConditional();
     void rejectsUnknownAndInternalProperties();
     void dirtyProjectRequiresForce();
 };
@@ -565,6 +568,106 @@ void tst_StudioAutomation::undoRedoEmitSingleEvent() {
     }
     QCOMPARE(dirty, 1);
     QCOMPARE(diagnostics, 1);
+}
+
+void tst_StudioAutomation::duplicateDiagnosticsCountAsNew() {
+    MainWindow window;
+    QString error;
+    QVERIFY2(window.automationNew(&error), qPrintable(error));
+    QVERIFY2(window.automationAddWidget("pushbutton", "run", {}, &error),
+             qPrintable(error));
+    QVERIFY2(window.automationAddWidget("label", "result", {}, &error),
+             qPrintable(error));
+    // Injetar fora da API duas ocorrências IDÊNTICAS do mesmo diagnóstico.
+    QWidget *run = window.findChild<QWidget *>("run");
+    QVERIFY(run);
+    run->setProperty("showbox_actions",
+                     QString(R"({"clicked":[{"type":"shell","command":""},)"
+                             R"({"type":"shell","command":""}]})"));
+    QCOMPARE(window.automationDiagnostics().size(), 2);
+    // Terceira ocorrência idêntica agrava (multiset) e deve ser recusada.
+    QVERIFY(!window.automationSetActions(
+        "run", QJsonObject{{"clicked", QJsonArray{
+                      QJsonObject{{"type", "shell"}, {"command", ""}},
+                      QJsonObject{{"type", "shell"}, {"command", ""}},
+                      QJsonObject{{"type", "shell"}, {"command", ""}}}}},
+        &error));
+    QCOMPARE(window.automationDiagnostics().size(), 2);
+    QVERIFY(!window.automationRedo(&error));
+    // Correção que reduz a contagem é permitida.
+    QVERIFY2(window.automationSetActions(
+                 "run", QJsonObject{{"clicked", QJsonArray{QJsonObject{
+                               {"type", "shell"}, {"command", "echo oi"}}}}},
+                 &error),
+             qPrintable(error));
+    QVERIFY(window.automationDiagnostics().isEmpty());
+}
+
+namespace {
+int automationEventCount(QSignalSpy *spy, const char *name) {
+    int count = 0;
+    for (const QList<QVariant> &args : *spy) {
+        if (args.value(0).toString() == QString(name))
+            ++count;
+    }
+    return count;
+}
+}
+
+void tst_StudioAutomation::projectEventsHaveSingleSource() {
+    MainWindow window;
+    QString error;
+    QVERIFY2(window.automationNew(&error), qPrintable(error));
+    QVERIFY2(window.automationAddWidget("label", "item", {}, &error),
+             qPrintable(error));
+    QSignalSpy spy(&window, &MainWindow::automationEvent);
+    QVERIFY2(window.automationSetProperty("item", "text", "v1", &error),
+             qPrintable(error));
+    QCOMPARE(automationEventCount(&spy, "project.changed"), 1);
+    spy.clear();
+    QVERIFY2(window.automationSelectWidget("item", &error), qPrintable(error));
+    QCOMPARE(automationEventCount(&spy, "selection.changed"), 1);
+    QCOMPARE(automationEventCount(&spy, "project.changed"), 0);
+    spy.clear();
+    QVERIFY2(window.automationUndo(&error), qPrintable(error));
+    QCOMPARE(automationEventCount(&spy, "project.changed"), 1);
+    spy.clear();
+    QVERIFY2(window.automationNew(true, &error), qPrintable(error));
+    QCOMPARE(automationEventCount(&spy, "project.changed"), 1);
+    spy.clear();
+    QVERIFY2(window.automationStopPreview(&error), qPrintable(error));
+    QCOMPARE(automationEventCount(&spy, "project.changed"), 0);
+}
+
+void tst_StudioAutomation::setPropertySchemaIsConditional() {
+    const auto *descriptor =
+        showbox::automation::methodDescriptor("widget.setProperty");
+    QVERIFY(descriptor);
+    const QJsonObject schema = descriptor->inputSchema;
+    const QJsonArray branches = schema.value("oneOf").toArray();
+    QVERIFY(!branches.isEmpty());
+    bool orientation = false, echo = false, generic = false;
+    for (const QJsonValue &branch : branches) {
+        const QJsonObject properties = branch.toObject().value("properties").toObject();
+        const QJsonArray names =
+            properties.value("property").toObject().value("enum").toArray();
+        const QJsonObject value = properties.value("value").toObject();
+        if (names.contains("orientation") && names.size() == 1) {
+            orientation = true;
+            QVERIFY(value.value("enum").toArray().contains(1));
+            QVERIFY(value.value("enum").toArray().contains(2));
+        } else if (names.contains("echoMode") && names.size() == 1) {
+            echo = true;
+            QCOMPARE(value.value("minimum").toInt(-1), 0);
+            QCOMPARE(value.value("maximum").toInt(-1), 3);
+        } else {
+            generic = true;
+            QVERIFY(!names.contains("orientation"));
+            QVERIFY(!names.contains("echoMode"));
+            QVERIFY(names.contains("text"));
+        }
+    }
+    QVERIFY(orientation && echo && generic);
 }
 
 void tst_StudioAutomation::rejectsUnknownAndInternalProperties() {

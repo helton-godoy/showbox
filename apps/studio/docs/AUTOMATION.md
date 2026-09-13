@@ -58,11 +58,17 @@ pelo MCP, exceto `events.subscribe` (ver abaixo). Os métodos são:
 - execução/exportação: `preview.start`, `preview.stop`, `export.bash`.
 
 Os schemas são estritos (`additionalProperties: false`), com tipos, enums,
-limites de comprimento/quantidade e campos obrigatórios. Ações usam `oneOf`
+limites de comprimento/quantidade e campos obrigatórios. `widget.setProperty`
+publica branches `oneOf` que ligam cada propriedade condicional ao seu valor
+(`orientation`→`{1,2}`, `echoMode`→`0..3`; demais no branch genérico), de modo
+que clientes MCP e geradores JSON Schema descobrem o domínio sem executar
+nada. Ações usam `oneOf`
 por tipo: `shell` exige `command`; `set` exige `target`/`property`/`value`;
 `query` exige `target`/`variable`. O modelo proposto é validado antes de
 gravar, de modo que mutações que deixariam o projeto inválido são recusadas
-sem tocar na pilha de undo. `widget.add` reutiliza a validação canônica de
+sem tocar na pilha de undo. A comparação é por multiset (contagens): uma
+ocorrência adicional de um diagnóstico já presente também conta como
+agravamento e é recusada. `widget.add` reutiliza a validação canônica de
 identificadores (`^[A-Za-z_][A-Za-z0-9_]*$`, reservados `main`/`showbox`).
 O pai precisa ser container do catálogo (`isContainer`); tipos atômicos
 compostos (`textbox`, `combobox`, `listbox`) possuem layout interno mas
@@ -116,6 +122,11 @@ e cobrem `project.changed`, `selection.changed`, `dirty.changed`,
 `diagnostics.changed`. A assinatura é descartada no disconnect e não é
 herdada por uma reconexão. `preview.finished` é emitido uma única vez, pelo
 sinal com `exitCode`; `runningChanged(false)` apenas atualiza a UI.
+O `MainWindow` é a única fonte de eventos: cada operação publica somente
+seus eventos semânticos uma vez (`widget.select` → `selection.changed`;
+`project.new/open/save`, mutações de componentes/ações e `history.undo/redo`
+→ `project.changed`; `preview.start/stop` e `export.bash` não inventam
+`project.changed`). O servidor apenas encaminha, sem evento sintético.
 
 Snapshots e árvores usam o modelo versionado do projeto e expõem somente
 identificadores estáveis (`type`, `name`, propriedades, ações e filhos). Não

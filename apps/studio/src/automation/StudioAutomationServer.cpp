@@ -345,7 +345,10 @@ QJsonObject StudioAutomationServer::dispatchMethod(const QJsonValue &id,
     }
     if (result.isEmpty())
         result = QJsonObject{{"ok", true}};
-    notifyChanged(method);
+    // Sem evento sintético: o MainWindow é a única fonte (facade emite
+    // project.changed/selection.changed uma vez por operação; preview emite
+    // seus próprios eventos). Emitir aqui duplicava select/new/open/save e
+    // inventava project.changed para preview/export.
     return makeResult(id, result);
 }
 
@@ -355,13 +358,6 @@ void StudioAutomationServer::writeResponse(QLocalSocket *socket,
         return;
     socket->write(QJsonDocument(response).toJson(QJsonDocument::Compact) + '\n');
     socket->flush();
-}
-
-void StudioAutomationServer::notifyChanged(const QString &method) {
-    const QString event = method == "widget.select" ? "selection.changed"
-                                                     : "project.changed";
-    notifyEvent(event, QJsonObject{{"source", "automation"},
-                                   {"method", method}});
 }
 
 void StudioAutomationServer::onStudioEvent(const QString &name,

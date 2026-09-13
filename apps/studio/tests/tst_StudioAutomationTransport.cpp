@@ -30,6 +30,7 @@ private slots:
     void cleanup();
     void framingValidationAndNotifications();
     void eventsAreFilteredAndReconnectWorks();
+    void projectEventsHaveSingleSourceOverSocket();
     void readOnlyServerRejectsMutations();
     void cliAndMcpUseThePublicSocket();
 
@@ -207,6 +208,104 @@ void tst_StudioAutomationTransport::eventsAreFilteredAndReconnectWorks() {
     const QJsonObject response = sendLine(
         R"({"jsonrpc":"2.0","id":12,"method":"preview.status"})");
     QCOMPARE(response.value("id").toInt(), 12);
+}
+
+void tst_StudioAutomationTransport::projectEventsHaveSingleSourceOverSocket() {
+    // Assina tudo e conta: cada método publica seus eventos semânticos uma
+    // única vez (sem duplicação nem project.changed inventado).
+    writeJson(QJsonObject{{"jsonrpc", "2.0"}, {"id", 40},
+                          {"method", "events.subscribe"},
+                          {"params", QJsonObject{{"events", QJsonArray{}}}}});
+    QVERIFY(readLine().value("result").toObject().value("subscribed").toBool());
+    auto collect = [&](int id, const QJsonObject &request,
+                       int drainMs = 200) -> QList<QJsonObject> {
+        writeJson(request);
+        QList<QJsonObject> events;
+        QJsonObject response;
+        // Lê até a resposta com o id esperado, guardando notificações.
+        QElapsedTimer overall;
+        overall.start();
+        while (overall.elapsed() < 2000) {
+            const QJsonObject message = readLine();
+            if (message.value("method").toString() == "events.event") {
+                events.append(message);
+                continue;
+            }
+            if (message.value("id").toInt(-1) == id) {
+                response = message;
+                break;
+            }
+        }
+        if (response.isEmpty()) {
+            QTest::qFail("sem resposta do servidor", __FILE__, __LINE__);
+            return QList<QJsonObject>();
+        }
+        // Drena por drainMs para flagrar duplicatas tardias.
+        QElapsedTimer drain;
+        drain.start();
+        while (drain.elapsed() < drainMs) {
+            QCoreApplication::processEvents(QEventLoop::AllEvents, 10);
+            if (!m_socket->canReadLine()) {
+                if (!m_socket->waitForReadyRead(20))
+                    continue;
+            }
+            while (m_socket->canReadLine()) {
+                QJsonParseError parseError;
+                const QJsonDocument doc = QJsonDocument::fromJson(
+                    m_socket->readLine(), &parseError);
+                if (parseError.error == QJsonParseError::NoError &&
+                    doc.isObject() &&
+                    doc.object().value("method").toString() == "events.event")
+                    events.append(doc.object());
+            }
+        }
+        return events;
+    };
+    auto named = [](const QList<QJsonObject> &events, const QString &name) {
+        int count = 0;
+        for (const QJsonObject &event : events) {
+            if (event.value("params").toObject().value("name").toString() == name)
+                ++count;
+        }
+        return count;
+    };
+    // widget.select: um selection.changed, nenhum project.changed.
+    QList<QJsonObject> events = collect(
+        41, QJsonObject{{"jsonrpc", "2.0"}, {"id", 41},
+                        {"method", "widget.select"},
+                        {"params", QJsonObject{{"name", "lbl_welcome"}}}});
+    QCOMPARE(named(events, "selection.changed"), 1);
+    QCOMPARE(named(events, "project.changed"), 0);
+    // project.new: um project.changed.
+    events = collect(42, QJsonObject{{"jsonrpc", "2.0"}, {"id", 42},
+                                    {"method", "project.new"},
+                                    {"params", QJsonObject{{"force", true}}}});
+    QCOMPARE(named(events, "project.changed"), 1);
+    // preview.start negado: erro e nenhum project.changed inventado.
+    writeJson(QJsonObject{{"jsonrpc", "2.0"}, {"id", 43},
+                          {"method", "preview.start"},
+                          {"params", QJsonObject{}}});
+    const QJsonObject denied = readLine();
+    QCOMPARE(denied.value("error").toObject().value("code").toInt(), -32011);
+    QElapsedTimer quiet;
+    quiet.start();
+    int lateProject = 0;
+    while (quiet.elapsed() < 200) {
+        QCoreApplication::processEvents(QEventLoop::AllEvents, 10);
+        if (!m_socket->canReadLine() && !m_socket->waitForReadyRead(20))
+            continue;
+        while (m_socket->canReadLine()) {
+            QJsonParseError parseError;
+            const QJsonDocument doc =
+                QJsonDocument::fromJson(m_socket->readLine(), &parseError);
+            if (parseError.error == QJsonParseError::NoError && doc.isObject() &&
+                doc.object().value("method").toString() == "events.event" &&
+                doc.object().value("params").toObject().value("name").toString() ==
+                    "project.changed")
+                ++lateProject;
+        }
+    }
+    QCOMPARE(lateProject, 0);
 }
 
 void tst_StudioAutomationTransport::readOnlyServerRejectsMutations() {

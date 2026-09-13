@@ -95,12 +95,18 @@ bool automationParentAcceptsChildren(QWidget *parent, QWidget *canvas) {
 
 bool automationDiagnosticsAllow(const QStringList &before,
                                 const QStringList &after) {
-  // Permite correções incrementais: só recusa quando a mutação introduz
-  // diagnósticos novos. Comparação por conjunto (ordem irrelevante).
-  const QSet<QString> beforeSet(before.begin(), before.end());
+  // Permite correções incrementais: só recusa quando a mutação aumenta a
+  // contagem de algum diagnóstico. Comparação como multiset (QSet perderia
+  // multiplicidade: duas issues idênticas — ex. dois shells vazios —
+  // mascarariam o agravamento).
+  QHash<QString, int> remaining;
+  for (const QString &issue : before)
+    remaining[issue]++;
   for (const QString &issue : after) {
-    if (!beforeSet.contains(issue))
+    const int count = remaining.value(issue, 0);
+    if (count <= 0)
       return false;
+    remaining[issue] = count - 1;
   }
   return true;
 }
@@ -1396,6 +1402,9 @@ bool MainWindow::automationAddWidget(const QString &type, const QString &name,
   m_controller->undoStack()->push(new AddWidgetCommand(m_canvas, widget, parent));
   m_controller->manageWidget(widget);
   m_inspector->updateHierarchy(m_canvas);
+  emit automationEvent("project.changed", QJsonObject{{"source", "automation"},
+                                                      {"operation", "add"},
+                                                      {"name", name}});
   return true;
 }
 
@@ -1409,6 +1418,9 @@ bool MainWindow::automationRemoveWidget(const QString &name, QString *error) {
   m_controller->undoStack()->push(new DeleteWidgetCommand(m_canvas, {widget}));
   m_controller->selectWidget(nullptr);
   m_inspector->updateHierarchy(m_canvas);
+  emit automationEvent("project.changed", QJsonObject{{"source", "automation"},
+                                                      {"operation", "remove"},
+                                                      {"name", name}});
   return true;
 }
 
@@ -1446,6 +1458,9 @@ bool MainWindow::automationMoveWidget(const QString &name,
   }
   m_controller->undoStack()->push(new MoveWidgetCommand(widget, parent, index));
   m_inspector->updateHierarchy(m_canvas);
+  emit automationEvent("project.changed", QJsonObject{{"source", "automation"},
+                                                      {"operation", "move"},
+                                                      {"name", name}});
   return true;
 }
 
@@ -1539,6 +1554,9 @@ bool MainWindow::automationSetProperty(const QString &name,
     m_controller->undoStack()->push(
         new AutomationTableCommand(widget, property, oldState, newState));
     m_propEditor->setTargetWidget(widget);
+    emit automationEvent("project.changed", QJsonObject{{"source", "automation"},
+                                                        {"operation", "setProperty"},
+                                                        {"name", name}});
     return true;
   }
   if (type == "combobox" && (property == "items" || property == "currentIndex")) {
@@ -1598,6 +1616,9 @@ bool MainWindow::automationSetProperty(const QString &name,
     m_controller->undoStack()->push(
         new AutomationComboCommand(widget, property, oldState, newState));
     m_propEditor->setTargetWidget(widget);
+    emit automationEvent("project.changed", QJsonObject{{"source", "automation"},
+                                                        {"operation", "setProperty"},
+                                                        {"name", name}});
     return true;
   }
   const ProjectNode oldSnap = ProjectWidgetMapper::toNode(widget);
@@ -1640,6 +1661,9 @@ bool MainWindow::automationSetProperty(const QString &name,
   m_controller->undoStack()->push(
       new AutomationSnapshotCommand(widget, property, oldSnap, newSnap));
   m_propEditor->setTargetWidget(widget);
+  emit automationEvent("project.changed", QJsonObject{{"source", "automation"},
+                                                      {"operation", "setProperty"},
+                                                      {"name", name}});
   return true;
 }
 
@@ -1671,13 +1695,17 @@ bool MainWindow::automationSetActions(const QString &name,
     node->actions = encoded;
     const QStringList after = proposed.validate();
     if (!automationDiagnosticsAllow(before, after)) {
-      QSet<QString> beforeSet(before.begin(), before.end());
+      QHash<QString, int> remaining;
+      for (const QString &issue : before)
+        remaining[issue]++;
       QString firstNew;
       for (const QString &issue : after) {
-        if (!beforeSet.contains(issue)) {
+        const int count = remaining.value(issue, 0);
+        if (count <= 0) {
           firstNew = issue;
           break;
         }
+        remaining[issue] = count - 1;
       }
       if (error)
         *error = firstNew.isEmpty() ? "A alteração produziria um projeto inválido."
@@ -1691,6 +1719,9 @@ bool MainWindow::automationSetActions(const QString &name,
   m_controller->undoStack()->push(new PropertyChangeCommand(
       widget, "showbox_actions", oldValue, encoded));
   m_actionEditor->setTargetWidget(widget);
+  emit automationEvent("project.changed", QJsonObject{{"source", "automation"},
+                                                      {"operation", "setActions"},
+                                                      {"name", name}});
   return true;
 }
 
@@ -1704,6 +1735,8 @@ bool MainWindow::automationUndo(QString *error) {
   // onUndoIndexChanged no construtor. Chamar de novo duplicaria
   // dirty.changed e diagnostics.changed para os assinantes.
   m_controller->undoStack()->undo();
+  emit automationEvent("project.changed", QJsonObject{{"source", "automation"},
+                                                      {"operation", "undo"}});
   return true;
 }
 
@@ -1714,6 +1747,8 @@ bool MainWindow::automationRedo(QString *error) {
     return false;
   }
   m_controller->undoStack()->redo();
+  emit automationEvent("project.changed", QJsonObject{{"source", "automation"},
+                                                      {"operation", "redo"}});
   return true;
 }
 

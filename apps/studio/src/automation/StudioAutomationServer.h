@@ -33,7 +33,6 @@ private:
                                const QJsonObject &params,
                                QLocalSocket *socket);
     void writeResponse(QLocalSocket *socket, const QJsonObject &response);
-    void notifyChanged(const QString &method);
     void notifyEvent(const QString &name, const QJsonObject &data);
     bool isMutation(const QString &method) const;
 

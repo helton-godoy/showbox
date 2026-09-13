@@ -7,70 +7,71 @@
   `/home/helton/Public/fork_dialogbox/showbox`.
 - SHA base: `b5779e3` (`main`, RC.5 integrado).
 - Commits anteriores: `59b2a2e`/`a5fbdee` (revisão nº 1), `1da4659`
-  (containers, redo/dirty, enums).
-- Revisão atual (2 P1 + 2 P2 desta rodada): alterações descritas abaixo,
+  (containers/redo/dirty/enums), `75042af` (abas lógicas, snapshot, eventos).
+- Revisão atual (2 P1 + 1 P2 desta rodada): alterações descritas abaixo,
   incluídas no mesmo commit que este checkpoint (commit único, sem
   autorreferência de hash documental).
-- Itens já concluídos: base anterior completa mais as 4 correções desta rodada.
+- Itens já concluídos: base anterior completa mais as 3 correções desta rodada.
 - Item em execução: nenhum; aguardar revisão do integrador.
 
 ## Entrega desta rodada
 
-- P1 abas: `automationLogicalTabs`/`automationDetachFromLogicalParent`
-  (inline em `StudioCommands.h`); `MoveWidgetCommand` captura pai lógico,
-  índice e título; `DeleteWidgetCommand` idem (`tabTitle`); `Canvas` usa o
-  detach lógico (corrige páginas sob `QStackedWidget` interno).
-- P1 snapshot: `applyAutomationSnapshot` + `AutomationSnapshotCommand`
-  (substitui `AutomationPropertyCommand`); pré-validação com restauração
-  completa; ordem segura (spin min/max/value, checkable→checked);
-  `title` de página com `setTabText` (em `applyTyped` e no snapshot).
-- P2 eventos: removidas chamadas manuais a `onUndoIndexChanged` em
-  `automationUndo`/`automationRedo` (sinal `indexChanged` já cobre).
-- Testes novos: `tabMoveUndoRestoresIndexAndTitle`,
-  `pageTitleUpdatesVisibleTabText`, `dependentPropertiesRestoreFully`
-  (spin clamp + checkable), `undoRedoEmitSingleEvent`.
+- P1 eventos: removido `notifyChanged` do servidor (+ declaração no header);
+  `MainWindow` emite `project.changed` exatamente 1× em add/remove/move/
+  setProperty (3 caminhos)/setActions/undo/redo; `select` só via controller;
+  preview/export sem evento inventado. Servidor só encaminha `automationEvent`.
+- P1 multiset: `automationDiagnosticsAllow` e relato de `setActions` contam
+  ocorrências (terceira issue idêntica é recusada; correção que reduz passa).
+- P2 schema: `setPropertyBranches` publica `oneOf` propriedade→valor
+  (orientation→{1,2}, echoMode→0..3, genérico sem ambos); checagem imperativa
+  movida para antes da genérica (mensagens específicas preservadas).
+- Testes novos: `duplicateDiagnosticsCountAsNew`,
+  `projectEventsHaveSingleSource`, `setPropertySchemaIsConditional` (facade) e
+  `projectEventsHaveSingleSourceOverSocket` (select/new/preview.start negado).
 
 ## Arquivos incluídos nesta revisão
 
-- `apps/studio/src/core/StudioCommands.h`
-- `apps/studio/src/gui/Canvas.cpp`
+- `apps/studio/src/automation/StudioAutomationServer.cpp`
+- `apps/studio/src/automation/StudioAutomationServer.h`
+- `apps/studio/src/automation/AutomationDescriptors.cpp`
 - `apps/studio/src/gui/MainWindow.cpp`
 - `apps/studio/tests/tst_StudioAutomation.cpp`
+- `apps/studio/tests/tst_StudioAutomationTransport.cpp`
 - `apps/studio/docs/AUTOMATION.md`
 - `tasks/SB-017-studio-automation.md`
 - `tasks/SB-017-CHECKPOINT.md`
 
 ## Decisões e justificativas
 
-- Pai lógico em vez de `parentWidget()` cru para páginas: detalhe
-  `QStackedWidget` do Qt quebrava remoção e undo de abas.
-- Snapshot completo em vez de valor único: setters Qt têm efeitos colaterais
-  entre dependentes; só o estado integral restaura sem resíduos.
-- Snapshot normalizado (pós-apply) alimenta redo: converge com a semântica Qt.
-- Sem handler manual pós-undo/redo: `indexChanged` já publica; duplicava
-  eventos para assinantes.
+- Fonte única na facade em vez de síntese no servidor: só o `MainWindow`
+  conhece a semântica (select não muda projeto; preview/export também não).
+- Multiset em vez de conjunto: mensagens de validação se repetem por
+  ocorrência e cada repetição é um defeito real.
+- `oneOf` no schema + imperativa antes: máquinas leem o contrato, humanos
+  recebem o erro específico; ambas impõem o mesmo domínio.
 
 ## Comandos executados e resultados (neste host, com socket local)
 
-- `cmake --build --preset dev` — concluído (só warnings preexistentes).
+- `cmake --build --preset dev` — concluído.
 - `ctest --preset dev --output-on-failure` — 28/28 aprovados.
 - `QT_QPA_PLATFORM=offscreen build/dev/bin/tst_StudioAutomation -v1` —
-  23/23 aprovados.
-- E2E offscreen real (`tabs` A/B, `page` p1, move p1→B@0, undo): ordem e
-  conteúdo restaurados; `title` de página aplicado com sucesso.
+  26/26 aprovados.
+- `QT_QPA_PLATFORM=offscreen build/dev/bin/tst_StudioAutomationTransport -v1` —
+  7/7 aprovados, 0 skipped.
 - `git diff --check` — sem erros.
 
 ## Evidência de transporte (honesta sobre ambientes)
 
-- Neste host há socket local: `tst_StudioAutomationTransport` 6/6 executado.
+- Neste host há socket local: transporte 7/7 executado de verdade (inclui o
+  novo teste de fonte única para select/new/preview negado).
 - No sandbox do revisor (sem `QLocalServer`): a suíte padrão falha em
-  `listen` (comportamento intencional da política obrigatória); com
-  `SHOWBOX_ALLOW_TRANSPORT_SKIP=1`, 28/28 com 4 skips (não aprovação).
+  `listen` (comportamento intencional); com `SHOWBOX_ALLOW_TRANSPORT_SKIP=1`,
+  skips explícitos, não aprovação.
 
 ## Testes aprovados (neste host)
 
-- `tst_StudioAutomation`: 23 passed, 0 failed.
-- `tst_StudioAutomationTransport`: 6 passed, 0 failed, 0 skipped.
+- `tst_StudioAutomation`: 26 passed, 0 failed.
+- `tst_StudioAutomationTransport`: 7 passed, 0 failed, 0 skipped.
 - Suíte completa: 28/28 passed.
 
 ## Falhas conhecidas

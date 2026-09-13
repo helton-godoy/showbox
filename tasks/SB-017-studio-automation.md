@@ -56,6 +56,11 @@ revisão, sem integração em `main`.
 - Abas pelo `QTabWidget` lógico (índice/título originais) em mover/remover;
   `title` de página sincroniza `setTabText` com undo. `undo`/`redo` emitem
   um único `dirty.changed`/`diagnostics.changed` (sem handler manual duplo).
+- Fonte única de eventos no `MainWindow` (servidor só encaminha, sem
+  `notifyChanged`): `select`→`selection.changed`; new/open/save, mutações e
+  undo/redo→`project.changed` (1×); preview/export sem `project.changed`
+  inventado. Diagnósticos por multiset (contagens). `setProperty` com `oneOf`
+  propriedade→valor no schema público.
 - Ações usam `oneOf` por tipo (`shell` exige `command`; `set` exige
   `target`/`property`/`value`; `query` exige `target`/`variable`) e o modelo
   proposto é validado antes de gravar.

@@ -117,6 +117,50 @@ QJsonObject propertyValueSchema(const QString &type) {
     return enumArray;
 }
 
+QJsonObject propertyEnumSchema(const QStringList &properties,
+                               const QString &description = {}) {
+    QJsonArray values;
+    for (const QString &property : properties)
+        values.append(property);
+    QJsonObject result{{"type", "string"}, {"enum", values}};
+    if (!description.isEmpty())
+        result["description"] = description;
+    return result;
+}
+
+// Branches legíveis por máquinas que relacionam cada propriedade condicional
+// ao schema do seu valor (orientation→1|2, echoMode→0..3). Clientes MCP e
+// geradores baseados em JSON Schema descobrem o domínio sem executar nada;
+// a validação imperativa posterior mantém mensagens específicas.
+QJsonObject setPropertyBranches(const QJsonObject &name) {
+    const QJsonArray required{"name", "property", "value"};
+    QJsonObject orientationBranch = objectSchema(
+        QJsonObject{{"name", name},
+                    {"property", propertyEnumSchema({"orientation"})},
+                    {"value", QJsonObject{{"type", "integer"},
+                                          {"enum", QJsonArray{1, 2}}}}},
+        required);
+    QJsonObject echoBranch = objectSchema(
+        QJsonObject{{"name", name},
+                    {"property", propertyEnumSchema({"echoMode"})},
+                    {"value", QJsonObject{{"type", "integer"},
+                                          {"minimum", 0}, {"maximum", 3}}}},
+        required);
+    QStringList generic = mutableProperties("all");
+    generic.removeAll("orientation");
+    generic.removeAll("echoMode");
+    QJsonObject genericBranch = objectSchema(
+        QJsonObject{{"name", name},
+                    {"property", propertyEnumSchema(generic)},
+                    {"value", jsonValueSchema()}},
+        required);
+    QJsonArray options;
+    options.append(orientationBranch);
+    options.append(echoBranch);
+    options.append(genericBranch);
+    return QJsonObject{{"oneOf", options}};
+}
+
 QList<MethodDescriptor> buildDescriptors() {
     const QJsonObject empty = objectSchema({});
     const QJsonObject name = stringSchema("Identificador público do componente");
@@ -169,10 +213,21 @@ QList<MethodDescriptor> buildDescriptors() {
                       QJsonArray{"name"})},
         {"widget.setProperty", "Altera uma propriedade pública tipada "
           "(orientation: 1|2; echoMode: 0..3).", true,
-         objectSchema(QJsonObject{{"name", name},
-                                  {"property", propertyValueSchema("all")},
-                                  {"value", jsonValueSchema()}},
-                      QJsonArray{"name", "property", "value"})},
+         [name] {
+             QJsonObject schema = objectSchema(
+                 QJsonObject{{"name", name},
+                             {"property", propertyValueSchema("all")},
+                             {"value", jsonValueSchema()}},
+                 QJsonArray{"name", "property", "value"});
+             // oneOf documenta e impõe a relação propriedade→valor para
+             // validadores JSON Schema externos; o validador interno avalia
+             // os branches e mantém a checagem imperativa com mensagens
+             // específicas.
+             const QJsonObject branches = setPropertyBranches(name);
+             for (auto it = branches.begin(); it != branches.end(); ++it)
+                 schema[it.key()] = it.value();
+             return schema;
+         }()},
         {"action.add", "Adiciona uma ação a um evento.", true,
          objectSchema(QJsonObject{{"name", name}, {"event", actionEventSchema},
                                   {"action", actionSchema()}},
@@ -368,9 +423,8 @@ bool validateParams(const MethodDescriptor &descriptor,
             *error = "Tipo ou limite inválido para " + path + ".";
         return valid;
     };
-    if (!validate(QJsonObject(params), descriptor.inputSchema, "params"))
-        return false;
-    // Domínios fechados publicados no contrato: recusar em vez de normalizar.
+    // Domínios fechados antes da validação genérica: mantém mensagens
+    // específicas (o oneOf do schema impõe o mesmo para clientes externos).
     if (descriptor.name == "widget.setProperty") {
         const QString property = params.value("property").toString();
         const QJsonValue value = params.value("value");
@@ -394,7 +448,7 @@ bool validateParams(const MethodDescriptor &descriptor,
             }
         }
     }
-    return true;
+    return validate(QJsonObject(params), descriptor.inputSchema, "params");
 }
 
 } // namespace showbox::automation
