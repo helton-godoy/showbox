@@ -95,8 +95,18 @@ deb)
 			showbox --help | grep -qi stdin
 			showbox-studio --version
 			dpkg -s showbox-studio >/dev/null
+			command -v showbox-studioctl >/dev/null
+			command -v showbox-studio-mcp >/dev/null
+			showbox-studioctl --help | grep -qi socket
+			showbox-studio-mcp --help | grep -qi socket
+			dpkg -L showbox-studio | grep -q '/showbox-studioctl$'
+			dpkg -L showbox-studio | grep -q '/showbox-studio-mcp$'
 			if dpkg -L showbox | grep -q '/showbox-studio$'; then
 				echo "FALHA: showbox-studio dentro do pacote do motor" >&2
+				exit 1
+			fi
+			if dpkg -L showbox | grep -q 'showbox-studioctl\|showbox-studio-mcp'; then
+				echo "FALHA: ferramentas de automação dentro do pacote do motor" >&2
 				exit 1
 			fi
 			echo "smoke deb ${SMOKE_DISTRO}: OK"
@@ -123,6 +133,12 @@ rpm)
 			showbox --version
 			showbox --help | grep -qi stdin
 			showbox-studio --version
+			command -v showbox-studioctl >/dev/null
+			command -v showbox-studio-mcp >/dev/null
+			showbox-studioctl --help | grep -qi socket
+			showbox-studio-mcp --help | grep -qi socket
+			rpm -ql showbox-studio | grep -q '/showbox-studioctl$'
+			rpm -ql showbox-studio | grep -q '/showbox-studio-mcp$'
 			engine_version="$(rpm -q --qf '%{VERSION}' showbox)"
 			engine_release="$(rpm -q --qf '%{RELEASE}' showbox)"
 			studio_version="$(rpm -q --qf '%{VERSION}' showbox-studio)"
@@ -153,6 +169,10 @@ rpm)
 			rpm -q showbox-studio >/dev/null
 			if rpm -ql showbox | grep -q '/showbox-studio$'; then
 				echo "FALHA: showbox-studio dentro do pacote do motor" >&2
+				exit 1
+			fi
+			if rpm -ql showbox | grep -q 'showbox-studioctl\|showbox-studio-mcp'; then
+				echo "FALHA: ferramentas de automação dentro do pacote do motor" >&2
 				exit 1
 			fi
 			# Ordenação RPM com o comparador real (rpmdevtools). O NEVR do build

@@ -66,6 +66,8 @@ editor, action editor and project files (sbp format).
 
 %files studio
 %{_bindir}/showbox-studio
+%{_bindir}/showbox-studioctl
+%{_bindir}/showbox-studio-mcp
 %{_datadir}/applications/showbox-studio.desktop
 %{_datadir}/icons/hicolor/scalable/apps/showbox-studio.svg
 
