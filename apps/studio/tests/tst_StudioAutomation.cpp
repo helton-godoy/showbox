@@ -1,5 +1,7 @@
 #include <QtTest>
 #include <QJsonArray>
+#include <QSignalSpy>
+#include <QTabWidget>
 
 #include "automation/AutomationProtocol.h"
 #include "automation/AutomationDescriptors.h"
@@ -24,6 +26,10 @@ private slots:
     void incrementalFixOnInvalidProject();
     void actionUndoRestoresDirty();
     void enumsAreStrict();
+    void tabMoveUndoRestoresIndexAndTitle();
+    void pageTitleUpdatesVisibleTabText();
+    void dependentPropertiesRestoreFully();
+    void undoRedoEmitSingleEvent();
     void rejectsUnknownAndInternalProperties();
     void dirtyProjectRequiresForce();
 };
@@ -437,6 +443,128 @@ void tst_StudioAutomation::enumsAreStrict() {
     QVERIFY(!window.automationSetProperty("entry", "echoMode", 99, &error));
     QVERIFY2(window.automationSetProperty("entry", "echoMode", 2, &error),
              qPrintable(error));
+}
+
+void tst_StudioAutomation::tabMoveUndoRestoresIndexAndTitle() {
+    MainWindow window;
+    QString error;
+    QVERIFY2(window.automationNew(&error), qPrintable(error));
+    QVERIFY2(window.automationAddWidget("tabs", "tabsA", {}, &error),
+             qPrintable(error));
+    QVERIFY2(window.automationAddWidget("tabs", "tabsB", {}, &error),
+             qPrintable(error));
+    QVERIFY2(window.automationAddWidget("page", "p1", "tabsA", &error),
+             qPrintable(error));
+    QVERIFY2(window.automationAddWidget("page", "p2", "tabsA", &error),
+             qPrintable(error));
+    auto childrenOf = [&](const char *tabs) {
+        const QJsonArray widgets =
+            window.automationProjectSnapshot().value("widgets").toArray();
+        return automationNode(widgets, tabs).value("children").toArray();
+    };
+    QCOMPARE(childrenOf("tabsA").size(), 3); // página padrão + p1 + p2
+    QCOMPARE(childrenOf("tabsA").last().toObject().value("name").toString(),
+             QString("p2"));
+    QVERIFY2(window.automationMoveWidget("p1", "tabsB", 0, &error),
+             qPrintable(error));
+    QCOMPARE(childrenOf("tabsB").first().toObject().value("name").toString(),
+             QString("p1"));
+    QVERIFY2(window.automationUndo(&error), qPrintable(error));
+    const QJsonArray back = childrenOf("tabsA");
+    QCOMPARE(back.size(), 3);
+    QCOMPARE(back.at(1).toObject().value("name").toString(), QString("p1"));
+    QVERIFY2(window.automationRedo(&error), qPrintable(error));
+    QCOMPARE(childrenOf("tabsB").first().toObject().value("name").toString(),
+             QString("p1"));
+}
+
+void tst_StudioAutomation::pageTitleUpdatesVisibleTabText() {
+    MainWindow window;
+    QString error;
+    QVERIFY2(window.automationNew(&error), qPrintable(error));
+    QVERIFY2(window.automationAddWidget("tabs", "tabs", {}, &error),
+             qPrintable(error));
+    QVERIFY2(window.automationAddWidget("page", "page", "tabs", &error),
+             qPrintable(error));
+    QTabWidget *tabs = window.findChild<QTabWidget *>("tabs");
+    QVERIFY(tabs);
+    QWidget *page = window.findChild<QWidget *>("page");
+    QVERIFY(page);
+    const int index = tabs->indexOf(page);
+    QVERIFY(index >= 0);
+    QVERIFY2(window.automationSetProperty("page", "title", "Renamed", &error),
+             qPrintable(error));
+    QCOMPARE(tabs->tabText(index), QString("Renamed"));
+    QVERIFY2(window.automationUndo(&error), qPrintable(error));
+    QVERIFY(tabs->tabText(tabs->indexOf(page)) != QString("Renamed"));
+    QVERIFY2(window.automationRedo(&error), qPrintable(error));
+    QCOMPARE(tabs->tabText(tabs->indexOf(page)), QString("Renamed"));
+}
+
+void tst_StudioAutomation::dependentPropertiesRestoreFully() {
+    MainWindow window;
+    QString error;
+    QVERIFY2(window.automationNew(&error), qPrintable(error));
+    QVERIFY2(window.automationAddWidget("spinbox", "count", {}, &error),
+             qPrintable(error));
+    QVERIFY2(window.automationSetProperty("count", "value", 50, &error),
+             qPrintable(error));
+    // Elevar o mínimo prende value em 90 no Qt; o undo deve restaurar
+    // mínimo E valor originais, sem resíduo.
+    QVERIFY2(window.automationSetProperty("count", "minimum", 90, &error),
+             qPrintable(error));
+    QCOMPARE(automationNode(window.automationProjectSnapshot().value("widgets").toArray(),
+                            "count").value("properties").toObject()
+                 .value("value").toInt(), 90);
+    QVERIFY2(window.automationUndo(&error), qPrintable(error));
+    QJsonObject restored = automationNode(
+        window.automationProjectSnapshot().value("widgets").toArray(), "count");
+    QCOMPARE(restored.value("properties").toObject().value("minimum").toInt(), 0);
+    QCOMPARE(restored.value("properties").toObject().value("value").toInt(), 50);
+
+    QVERIFY2(window.automationAddWidget("checkbox", "flag", {}, &error),
+             qPrintable(error));
+    QVERIFY2(window.automationSetProperty("flag", "checked", true, &error),
+             qPrintable(error));
+    QVERIFY2(window.automationSetProperty("flag", "checkable", false, &error),
+             qPrintable(error));
+    QVERIFY2(window.automationUndo(&error), qPrintable(error));
+    QJsonObject flag = automationNode(
+        window.automationProjectSnapshot().value("widgets").toArray(), "flag");
+    QCOMPARE(flag.value("properties").toObject().value("checkable").toBool(), true);
+    QCOMPARE(flag.value("properties").toObject().value("checked").toBool(), true);
+}
+
+void tst_StudioAutomation::undoRedoEmitSingleEvent() {
+    MainWindow window;
+    QString error;
+    QVERIFY2(window.automationNew(&error), qPrintable(error));
+    QVERIFY2(window.automationAddWidget("label", "item", {}, &error),
+             qPrintable(error));
+    QVERIFY2(window.automationSetProperty("item", "text", "v1", &error),
+             qPrintable(error));
+    QSignalSpy spy(&window, &MainWindow::automationEvent);
+    QVERIFY2(window.automationUndo(&error), qPrintable(error));
+    int dirty = 0, diagnostics = 0;
+    for (const QList<QVariant> &args : spy) {
+        if (args.value(0).toString() == "dirty.changed")
+            ++dirty;
+        if (args.value(0).toString() == "diagnostics.changed")
+            ++diagnostics;
+    }
+    QCOMPARE(dirty, 1);
+    QCOMPARE(diagnostics, 1);
+    spy.clear();
+    QVERIFY2(window.automationRedo(&error), qPrintable(error));
+    dirty = diagnostics = 0;
+    for (const QList<QVariant> &args : spy) {
+        if (args.value(0).toString() == "dirty.changed")
+            ++dirty;
+        if (args.value(0).toString() == "diagnostics.changed")
+            ++diagnostics;
+    }
+    QCOMPARE(dirty, 1);
+    QCOMPARE(diagnostics, 1);
 }
 
 void tst_StudioAutomation::rejectsUnknownAndInternalProperties() {

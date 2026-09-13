@@ -69,7 +69,9 @@ compostos (`textbox`, `combobox`, `listbox`) possuem layout interno mas
 rejeitam filhos — filhos ali sumiriam do snapshot e da serialização, pois o
 mapeamento só percorre containers. A inserção é específica por container
 (`tabs` via `addTab`/`insertTab`, `scrollarea` via widget de conteúdo,
-demais via layout). A mesma regra vale para `widget.move`.
+demais via layout). A mesma regra vale para `widget.move`. Páginas usam o
+`QTabWidget` lógico (nunca o `QStackedWidget` interno) com índice e título
+originais, de modo que mover/desfazer páginas preserva aba, ordem e texto.
 A propriedade `widget.setProperty` é tipada conforme o tipo do componente e
 o modelo do `ProjectWidgetMapper`: controles compostos como `textbox`,
 `combobox`, `listbox` e `table` alteram seus controles reais, incluindo
@@ -87,8 +89,14 @@ Alterações de propriedades e ações entram na pilha do Studio e participam de
 `history.undo`/`history.redo`. Mutações são pré-validadas antes do `push`:
 uma operação recusada nunca entra na pilha de `redo`, e diagnósticos são
 comparados (antes/depois) para permitir correções incrementais em projetos
-já inválidos. Ações automatizadas usam somente a semântica `clean` do undo
+já inválidos. Comandos de propriedade guardam snapshots completos do modelo
+(`spin` min/max/value, `checkable`/`checked` etc. em ordem segura), de modo
+que tentativas recusadas e undos não deixam resíduos em dependentes. O
+`título` de páginas sincroniza o texto visível da aba (`setTabText`) com o
+mesmo undo. Ações automatizadas usam somente a semântica `clean` do undo
 stack, de modo que `history.undo` até o índice limpo restaura `dirty=false`.
+`undo`/`redo` publicam exatamente um `dirty.changed` e um
+`diagnostics.changed` por operação (sem chamadas manuais duplicadas).
 
 Mensagens são objetos JSON-RPC 2.0 delimitados por LF. Notificações válidas,
 sem `id`, não recebem resposta. `id` aceita string, número ou `null`; ids de

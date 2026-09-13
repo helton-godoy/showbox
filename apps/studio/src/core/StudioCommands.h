@@ -12,6 +12,48 @@
 #include <QUndoCommand>
 #include <QWidget>
 
+// Representação pública de parentesco com abas: após addTab/insertTab o pai
+// direto da página é o QStackedWidget interno, detalhe de implementação do
+// Qt. Toda lógica de mover/remover/restaurar páginas deve usar o QTabWidget
+// lógico (via indexOf), índice e texto visível — nunca o pai direto cru.
+inline QTabWidget *automationLogicalTabs(QWidget *widget, int *indexOut = nullptr) {
+  if (!widget)
+    return nullptr;
+  if (auto *direct = qobject_cast<QTabWidget *>(widget->parentWidget())) {
+    const int index = direct->indexOf(widget);
+    if (index >= 0) {
+      if (indexOut)
+        *indexOut = index;
+      return direct;
+    }
+  }
+  if (QWidget *parent = widget->parentWidget()) {
+    if (auto *tabs = qobject_cast<QTabWidget *>(parent->parentWidget())) {
+      const int index = tabs->indexOf(widget);
+      if (index >= 0) {
+        if (indexOut)
+          *indexOut = index;
+        return tabs;
+      }
+    }
+  }
+  return nullptr;
+}
+
+inline void automationDetachFromLogicalParent(QWidget *widget) {
+  if (!widget)
+    return;
+  int tabIndex = -1;
+  if (QTabWidget *tabs = automationLogicalTabs(widget, &tabIndex)) {
+    tabs->removeTab(tabIndex);
+    return;
+  }
+  if (QWidget *parent = widget->parentWidget()) {
+    if (parent->layout())
+      parent->layout()->removeWidget(widget);
+  }
+}
+
 class AddWidgetCommand : public QUndoCommand {
 public:
   AddWidgetCommand(Canvas *canvas, QWidget *widget, QWidget *parent = nullptr,
@@ -73,6 +115,7 @@ public:
     QPointer<QWidget> widget;
     QPointer<QWidget> parent;
     int index = -1;
+    QString tabTitle;
   };
 
   DeleteWidgetCommand(Canvas *canvas, QList<QWidget *> widgets,
@@ -81,10 +124,17 @@ public:
     for (QWidget *w : widgets) {
       WidgetInfo info;
       info.widget = w;
-      info.parent = w->parentWidget();
-      info.index = (info.parent && info.parent->layout())
-                       ? info.parent->layout()->indexOf(w)
-                       : -1;
+      int tabIndex = -1;
+      if (QTabWidget *tabs = automationLogicalTabs(w, &tabIndex)) {
+        info.parent = tabs;
+        info.index = tabIndex;
+        info.tabTitle = tabs->tabText(tabIndex);
+      } else {
+        info.parent = w->parentWidget();
+        info.index = (info.parent && info.parent->layout())
+                         ? info.parent->layout()->indexOf(w)
+                         : -1;
+      }
       m_widgetsInfo.append(info);
     }
     setText(QString("Delete %1 items").arg(widgets.size()));
@@ -99,12 +149,16 @@ public:
       QWidget *parent = info.parent.data();
       if (!parent || parent == m_canvas.data()) {
         m_canvas->addWidget(info.widget.data());
+      } else if (auto *tabs = qobject_cast<QTabWidget *>(parent)) {
+        QString title = info.tabTitle;
+        if (title.isEmpty())
+          title = info.widget->property("title").toString();
+        if (title.isEmpty())
+          title = info.widget->objectName();
+        tabs->insertTab(qMax(0, info.index), info.widget.data(), title);
       } else {
         info.widget->setParent(parent);
-        if (auto *tabs = qobject_cast<QTabWidget *>(parent)) {
-          tabs->insertTab(info.index, info.widget.data(),
-                          info.widget->property("title").toString());
-        } else if (parent->layout()) {
+        if (parent->layout()) {
           if (auto *box = qobject_cast<QBoxLayout *>(parent->layout())) {
             box->insertWidget(info.index, info.widget.data());
           } else {
@@ -163,13 +217,18 @@ public:
                     QUndoCommand *parent = nullptr)
       : QUndoCommand(parent), m_widget(widget), m_newParent(newParent),
         m_newIndex(newIndex) {
-    m_oldParent = widget->parentWidget();
-
-    // Tentar obter o index antigo se estiver em um layout
-    if (m_oldParent && m_oldParent->layout()) {
-      m_oldIndex = m_oldParent->layout()->indexOf(widget);
+    // Pai lógico: para páginas, o QTabWidget (não o QStackedWidget interno).
+    int tabIndex = -1;
+    if (QTabWidget *tabs = automationLogicalTabs(widget, &tabIndex)) {
+      m_oldParent = tabs;
+      m_oldIndex = tabIndex;
+      m_oldTitle = tabs->tabText(tabIndex);
     } else {
-      m_oldIndex = -1;
+      m_oldParent = widget->parentWidget();
+      m_oldIndex = (m_oldParent && m_oldParent->layout())
+                       ? m_oldParent->layout()->indexOf(widget)
+                       : -1;
+      m_oldTitle = widget->property("title").toString();
     }
 
     setText(QString("Move %1 to %2")
@@ -182,26 +241,30 @@ public:
   void redo() override { applyMove(m_newParent.data(), m_newIndex); }
 
 private:
+  QString resolveTabTitle(QWidget *tabsParent) const {
+    if (tabsParent == m_oldParent.data() && !m_oldTitle.isEmpty())
+      return m_oldTitle;
+    QString title = m_widget->property("title").toString();
+    if (title.isEmpty() && !m_oldTitle.isEmpty() &&
+        m_widget->property("showbox_type").toString() == "page")
+      title = m_oldTitle;
+    if (title.isEmpty())
+      title = m_widget->objectName();
+    if (title.isEmpty())
+      title = QString("Tab");
+    return title;
+  }
+
   void applyMove(QWidget *parent, int index) {
     if (!parent || m_widget.isNull())
       return;
 
-    // Remover do QTabWidget de origem antes de reparentar, senão a aba
-    // antiga permanece vazia.
-    if (QWidget *current = m_widget->parentWidget()) {
-      if (current != parent) {
-        if (auto *oldTabs = qobject_cast<QTabWidget *>(current)) {
-          const int tabIndex = oldTabs->indexOf(m_widget.data());
-          if (tabIndex >= 0)
-            oldTabs->removeTab(tabIndex);
-        }
-      }
-    }
+    // Destacar do pai lógico de origem (páginas via removeTab; demais via
+    // remoção do layout). Sempre destacar quando houver pai lógico, pois
+    // reinserir no mesmo pai com índice também é reordenação.
+    automationDetachFromLogicalParent(m_widget.data());
     if (auto *tabs = qobject_cast<QTabWidget *>(parent)) {
-      QString title = m_widget->property("title").toString();
-      if (title.isEmpty())
-        title = m_widget->objectName().isEmpty() ? QString("Tab")
-                                                 : m_widget->objectName();
+      const QString title = resolveTabTitle(parent);
       if (index >= 0)
         tabs->insertTab(index, m_widget.data(), title);
       else
@@ -248,6 +311,7 @@ private:
   QPointer<QWidget> m_newParent;
   int m_oldIndex = -1;
   int m_newIndex = -1;
+  QString m_oldTitle;
 };
 
 class GroupWidgetsCommand : public QUndoCommand {

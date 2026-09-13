@@ -264,6 +264,141 @@ QTableWidget *automationTableWidget(QWidget *widget) {
   return custom ? custom->table() : nullptr;
 }
 
+QStringList automationStringList(const QJsonArray &array) {
+  QStringList result;
+  for (const QJsonValue &item : array)
+    result.append(item.toString());
+  return result;
+}
+
+// Restaura o estado público completo de um widget a partir de um snapshot do
+// modelo. Setters Qt possuem efeitos colaterais (setMinimum ajusta value,
+// setCheckable afeta checked); por isso undo, redo e restauração pós-validação
+// aplicam TODOS os campos dependentes em ordem segura, nunca só a propriedade
+// tocada. Sem isso, tentativas recusadas e undos deixam resíduos.
+void applyAutomationSnapshot(QWidget *widget, const ProjectNode &node) {
+  if (!widget)
+    return;
+  const QString type = showbox::catalog::canonicalType(
+      widget->property("showbox_type").toString());
+  const QJsonObject props = node.properties;
+  auto intOr = [&props](const char *key, int fallback) {
+    return props.contains(key) ? props[key].toInt(fallback) : fallback;
+  };
+
+  if (type == "table") {
+    if (QTableWidget *table = automationTableWidget(widget)) {
+      AutomationTableState state;
+      state.headers = automationStringList(node.headers);
+      for (const QJsonValue &row : node.rows)
+        state.rows.append(automationStringList(row.toArray()));
+      applyAutomationTableState(table, state);
+    }
+  } else if (type == "combobox") {
+    if (QComboBox *combo = widget->findChild<QComboBox *>()) {
+      AutomationComboState state;
+      state.items = automationStringList(node.items);
+      state.currentIndex = props.value("currentIndex").toInt(-1);
+      applyAutomationComboState(combo, state);
+    }
+  } else if (type == "listbox") {
+    if (auto *list = widget->findChild<QListWidget *>()) {
+      list->clear();
+      for (const QString &item : automationStringList(node.items))
+        list->addItem(item);
+    }
+  } else if (type == "textbox") {
+    if (QLineEdit *edit = automationLineEdit(widget)) {
+      if (props.contains("text"))
+        edit->setText(props["text"].toString());
+      if (props.contains("placeholder"))
+        edit->setPlaceholderText(props["placeholder"].toString());
+      if (props.contains("readOnly"))
+        edit->setReadOnly(props["readOnly"].toBool());
+      if (props.contains("echoMode"))
+        edit->setEchoMode(
+            static_cast<QLineEdit::EchoMode>(intOr("echoMode", 0)));
+    }
+  } else if (type == "textview") {
+    if (auto *text = qobject_cast<QTextEdit *>(widget)) {
+      if (props.contains("plainText"))
+        text->setPlainText(props["plainText"].toString());
+      if (props.contains("readOnly"))
+        text->setReadOnly(props["readOnly"].toBool());
+    }
+  } else if (type == "spinbox") {
+    // Ordem: limites primeiro, valor depois (Qt normaliza value no intervalo).
+    if (auto *spin = qobject_cast<QSpinBox *>(widget)) {
+      if (props.contains("minimum"))
+        spin->setMinimum(props["minimum"].toInt());
+      if (props.contains("maximum"))
+        spin->setMaximum(props["maximum"].toInt());
+      if (props.contains("value"))
+        spin->setValue(props["value"].toInt());
+      if (props.contains("singleStep"))
+        spin->setSingleStep(props["singleStep"].toInt());
+    }
+  } else if (type == "slider" || type == "progressbar") {
+    const Qt::Orientation orientation =
+        intOr("orientation", 1) == 2 ? Qt::Vertical : Qt::Horizontal;
+    if (auto *slider = qobject_cast<QSlider *>(widget)) {
+      if (props.contains("minimum"))
+        slider->setMinimum(props["minimum"].toInt());
+      if (props.contains("maximum"))
+        slider->setMaximum(props["maximum"].toInt());
+      if (props.contains("value"))
+        slider->setValue(props["value"].toInt());
+      if (props.contains("orientation"))
+        slider->setOrientation(orientation);
+    } else if (auto *progress = qobject_cast<QProgressBar *>(widget)) {
+      if (props.contains("minimum"))
+        progress->setMinimum(props["minimum"].toInt());
+      if (props.contains("maximum"))
+        progress->setMaximum(props["maximum"].toInt());
+      if (props.contains("value"))
+        progress->setValue(props["value"].toInt());
+      if (props.contains("orientation"))
+        progress->setOrientation(orientation);
+    }
+  }
+
+  // checkable antes de checked: desativar checkable pode limpar checked no Qt.
+  if (auto *button = qobject_cast<QAbstractButton *>(widget)) {
+    if (type == "button" || type == "checkbox" || type == "radiobutton") {
+      if (props.contains("text"))
+        button->setText(props["text"].toString());
+      if (props.contains("checkable"))
+        button->setCheckable(props["checkable"].toBool());
+      if (props.contains("checked"))
+        button->setChecked(props["checked"].toBool());
+    }
+  } else if (auto *label = qobject_cast<QLabel *>(widget)) {
+    if (type == "label" && props.contains("text"))
+      label->setText(props["text"].toString());
+  }
+  if (auto *group = qobject_cast<QGroupBox *>(widget)) {
+    if (props.contains("title"))
+      group->setTitle(props["title"].toString());
+    if (props.contains("checkable"))
+      group->setCheckable(props["checkable"].toBool());
+    if (props.contains("checked"))
+      group->setChecked(props["checked"].toBool());
+  }
+  if (type == "page" && props.contains("title")) {
+    const QString title = props["title"].toString();
+    widget->setProperty("title", title);
+    // Texto visível da aba acompanha a propriedade, com undo junto.
+    int tabIndex = -1;
+    if (QTabWidget *tabs = automationLogicalTabs(widget, &tabIndex))
+      tabs->setTabText(tabIndex, title);
+  }
+
+  if (props.contains("enabled"))
+    widget->setEnabled(props["enabled"].toBool());
+  if (props.contains("width") && props.contains("height"))
+    widget->resize(props["width"].toInt(), props["height"].toInt());
+}
+
 bool applyTypedAutomationProperty(QWidget *widget, const QString &property,
                                   const QJsonValue &value, QString *error) {
   const QString type = showbox::catalog::canonicalType(
@@ -443,8 +578,12 @@ bool applyTypedAutomationProperty(QWidget *widget, const QString &property,
   } else if (property == "title") {
     if (auto *group = qobject_cast<QGroupBox *>(widget))
       group->setTitle(value.toString());
-    else if (type == "page")
+    else if (type == "page") {
       widget->setProperty("title", value.toString());
+      int tabIndex = -1;
+      if (QTabWidget *tabs = automationLogicalTabs(widget, &tabIndex))
+        tabs->setTabText(tabIndex, value.toString());
+    }
   } else if (auto *spin = qobject_cast<QSpinBox *>(widget)) {
     int number = 0;
     jsonInteger(value, &number);
@@ -472,26 +611,32 @@ bool applyTypedAutomationProperty(QWidget *widget, const QString &property,
   return true;
 }
 
-class AutomationPropertyCommand final : public QUndoCommand {
+// Comando genérico de propriedade: guarda snapshots completos do modelo.
+// Necessário porque setters Qt têm efeitos colaterais entre propriedades
+// dependentes (spin min/max/value, checkable/checked); restaurar só a
+// propriedade tocada deixaria resíduos no undo e em tentativas recusadas.
+class AutomationSnapshotCommand final : public QUndoCommand {
 public:
-  using Apply = std::function<bool(QWidget *, const QString &, const QJsonValue &, QString *)>;
-  AutomationPropertyCommand(QWidget *widget, QString property,
-                             QJsonValue oldValue, QJsonValue newValue,
-                             Apply apply)
+  AutomationSnapshotCommand(QWidget *widget, QString property,
+                            ProjectNode oldState, ProjectNode newState)
       : m_widget(widget), m_property(std::move(property)),
-        m_oldValue(std::move(oldValue)), m_newValue(std::move(newValue)),
-        m_apply(std::move(apply)) {
+        m_oldState(std::move(oldState)), m_newState(std::move(newState)) {
     setText("Automation property " + m_property);
   }
-  void undo() override { if (m_widget) m_apply(m_widget, m_property, m_oldValue, nullptr); }
-  void redo() override { if (m_widget) m_apply(m_widget, m_property, m_newValue, nullptr); }
+  void undo() override {
+    if (m_widget)
+      applyAutomationSnapshot(m_widget, m_oldState);
+  }
+  void redo() override {
+    if (m_widget)
+      applyAutomationSnapshot(m_widget, m_newState);
+  }
 
 private:
   QPointer<QWidget> m_widget;
   QString m_property;
-  QJsonValue m_oldValue;
-  QJsonValue m_newValue;
-  Apply m_apply;
+  ProjectNode m_oldState;
+  ProjectNode m_newState;
 };
 
 // Comando atômico para tabela: guarda headers+rows antes e depois, de modo
@@ -1455,39 +1600,45 @@ bool MainWindow::automationSetProperty(const QString &name,
     m_propEditor->setTargetWidget(widget);
     return true;
   }
-  const ProjectNode node = ProjectWidgetMapper::toNode(widget);
-  const QJsonValue oldValue = nodePropertyValue(node, property);
-  if (oldValue.isUndefined()) {
+  const ProjectNode oldSnap = ProjectWidgetMapper::toNode(widget);
+  if (nodePropertyValue(oldSnap, property).isUndefined()) {
     if (error)
       *error = "Propriedade não está disponível no snapshot: " + property;
     return false;
   }
-  // Pré-validação sem poluir redo: aplica direto, compara diagnósticos e
-  // restaura antes do push. Só entra na pilha o que não cria issues novas.
+  // Validação + normalização no widget vivo, com restauração COMPLETA antes
+  // do push: applyTyped pode tocar dependentes, então voltar só a propriedade
+  // deixaria resíduos. O snapshot capturado após aplicar é a realidade
+  // normalizada pelo Qt e alimenta redo/undo sem divergência.
+  ProjectNode newSnap;
   {
-    const QStringList before =
-        ProjectWidgetMapper::toModel(m_canvas).validate();
+    ProjectModel current = ProjectWidgetMapper::toModel(m_canvas);
+    const QStringList before = current.validate();
     QString applyError;
     if (!applyTypedAutomationProperty(widget, property, value, &applyError)) {
       if (error)
         *error = applyError;
       return false;
     }
-    const QStringList after =
-        ProjectWidgetMapper::toModel(m_canvas).validate();
-    applyTypedAutomationProperty(widget, property, oldValue, nullptr);
-    if (!automationDiagnosticsAllow(before, after)) {
+    newSnap = ProjectWidgetMapper::toNode(widget);
+    applyAutomationSnapshot(widget, oldSnap);
+    // Revalidar o modelo proposto (estado normalizado) sem mutar o vivo.
+    ProjectModel proposed = current;
+    if (ProjectNode *target =
+            findAutomationModelNode(&proposed.widgets, oldSnap.name)) {
+      if (property == "items")
+        target->items = newSnap.items;
+      else
+        target->properties[property] = nodePropertyValue(newSnap, property);
+    }
+    if (!automationDiagnosticsAllow(before, proposed.validate())) {
       if (error)
         *error = "A alteração produziria um projeto inválido.";
       return false;
     }
   }
-  m_controller->undoStack()->push(new AutomationPropertyCommand(
-      widget, property, oldValue, value,
-      [](QWidget *target, const QString &key, const QJsonValue &newValue,
-         QString *applyError) {
-        return applyTypedAutomationProperty(target, key, newValue, applyError);
-      }));
+  m_controller->undoStack()->push(
+      new AutomationSnapshotCommand(widget, property, oldSnap, newSnap));
   m_propEditor->setTargetWidget(widget);
   return true;
 }
@@ -1549,8 +1700,10 @@ bool MainWindow::automationUndo(QString *error) {
       *error = "Não há alterações para desfazer.";
     return false;
   }
+  // Sem chamada manual: undo() emite indexChanged, já conectado a
+  // onUndoIndexChanged no construtor. Chamar de novo duplicaria
+  // dirty.changed e diagnostics.changed para os assinantes.
   m_controller->undoStack()->undo();
-  onUndoIndexChanged();
   return true;
 }
 
@@ -1561,7 +1714,6 @@ bool MainWindow::automationRedo(QString *error) {
     return false;
   }
   m_controller->undoStack()->redo();
-  onUndoIndexChanged();
   return true;
 }
 

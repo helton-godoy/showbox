@@ -48,9 +48,14 @@ revisão, sem integração em `main`.
   via layout) em `StudioCommands`.
 - Mutações de propriedade/ação são pré-validadas antes do `push` (diagnósticos
   antes/depois, permitindo fixes incrementais); recusadas nunca entram em
-  `redo`. Ações usam só a semântica `clean` do undo stack (`dirty` restaurado
-  pelo undo). Enums estritos: `orientation` 1|2 e `echoMode` 0..3 no schema
-  (`validateParams`) e na facade.
+  `redo`. Comandos de propriedade guardam snapshots completos
+  (`AutomationSnapshotCommand` com ordem segura) para dependentes (`spin`,
+  `checkable`). Ações usam só a semântica `clean` do undo stack (`dirty`
+  restaurado pelo undo). Enums estritos: `orientation` 1|2 e `echoMode` 0..3
+  no schema (`validateParams`) e na facade.
+- Abas pelo `QTabWidget` lógico (índice/título originais) em mover/remover;
+  `title` de página sincroniza `setTabText` com undo. `undo`/`redo` emitem
+  um único `dirty.changed`/`diagnostics.changed` (sem handler manual duplo).
 - Ações usam `oneOf` por tipo (`shell` exige `command`; `set` exige
   `target`/`property`/`value`; `query` exige `target`/`variable`) e o modelo
   proposto é validado antes de gravar.

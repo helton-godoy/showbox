@@ -89,17 +89,10 @@ void Canvas::removeWidget(QWidget *widget) {
   // Remover do layout do Canvas se for filho direto
   if (widget->parentWidget() == this) {
     m_layout->removeWidget(widget);
-  } else if (auto *parent = widget->parentWidget()) {
-    // Remover de um TabWidget
-    if (auto *tabs = qobject_cast<QTabWidget *>(parent)) {
-      int idx = tabs->indexOf(widget);
-      if (idx >= 0)
-        tabs->removeTab(idx);
-    }
-    // Remover de um layout genérico
-    else if (parent->layout()) {
-      parent->layout()->removeWidget(widget);
-    }
+  } else if (widget->parentWidget()) {
+    // Páginas vivem sob o QStackedWidget interno: remover pelo QTabWidget
+    // lógico, nunca pelo pai direto cru.
+    automationDetachFromLogicalParent(widget);
   }
 
   widget->hide();
