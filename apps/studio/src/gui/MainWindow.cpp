@@ -705,6 +705,34 @@ private:
   AutomationComboState m_newState;
 };
 
+// SB-020: geometria (x/y/width/height) é volátil — o layout a recalcula a
+// cada resize/reconstrução. A impressão digital de sujeira a ignora para não
+// gerar falsos positivos; todo o resto (texto, linhas, itens, ações,
+// estrutura) participa.
+void stripVolatileGeometry(QJsonObject &widgetJson) {
+  if (widgetJson.contains("properties") &&
+      widgetJson.value("properties").isObject()) {
+    QJsonObject props = widgetJson.value("properties").toObject();
+    props.remove("x");
+    props.remove("y");
+    props.remove("width");
+    props.remove("height");
+    widgetJson["properties"] = props;
+  }
+  if (widgetJson.contains("children") &&
+      widgetJson.value("children").isArray()) {
+    QJsonArray children = widgetJson.value("children").toArray();
+    for (int i = 0; i < children.size(); ++i) {
+      if (!children.at(i).isObject())
+        continue;
+      QJsonObject childObject = children.at(i).toObject();
+      stripVolatileGeometry(childObject);
+      children[i] = childObject;
+    }
+    widgetJson["children"] = children;
+  }
+}
+
 } // namespace
 
 MainWindow::MainWindow(QWidget *parent)
@@ -843,6 +871,11 @@ MainWindow::MainWindow(QWidget *parent)
 
   // Atualizar hierarquia inicial
   m_inspector->updateHierarchy(m_canvas);
+
+  // SB-020: a janela recém-criada (com os widgets de exemplo) é o estado
+  // salvo de referência. Sem isso, a impressão digital começaria vazia e a
+  // janela já abriria "suja".
+  updateSavedFingerprint();
 }
 
 MainWindow::~MainWindow() {
@@ -1151,19 +1184,8 @@ void MainWindow::onRunClicked() {
 }
 
 void MainWindow::onSaveClicked() {
-  QString fileName = QFileDialog::getSaveFileName(
-      this, "Save Project", "", "Showbox Project (*.sbxproj)");
-  if (fileName.isEmpty())
-    return;
-
-  if (!fileName.endsWith(".sbxproj"))
-    fileName += ".sbxproj";
-
-  if (saveProjectTo(fileName, "gui", nullptr)) {
-    statusBar()->showMessage("Projeto salvo com sucesso: " + fileName);
-  } else {
-    statusBar()->showMessage("Erro ao salvar projeto.");
-  }
+  if (saveProjectInteractive())
+    statusBar()->showMessage("Projeto salvo com sucesso.");
 }
 
 void MainWindow::onOpenClicked() {
@@ -1193,6 +1215,7 @@ void MainWindow::onOpenClicked() {
     m_inspector->updateHierarchy(m_canvas);
     m_projectDirectory = QFileInfo(fileName).absolutePath();
     m_suppressProjectChanged = false;
+    markDocumentSaved();
     publishDocumentState("gui", QJsonObject{{"operation", "open"}});
     const QStringList errors = serializer.errors();
     statusBar()->showMessage(errors.isEmpty()
@@ -1209,24 +1232,71 @@ void MainWindow::onOpenClicked() {
   }
 }
 
+bool MainWindow::saveProjectInteractive() {
+  QString fileName = QFileDialog::getSaveFileName(
+      this, "Save Project", "", "Showbox Project (*.sbxproj)");
+  if (fileName.isEmpty())
+    return false;
+
+  if (!fileName.endsWith(".sbxproj"))
+    fileName += ".sbxproj";
+
+  if (saveProjectTo(fileName, "gui", nullptr)) {
+    statusBar()->showMessage("Projeto salvo com sucesso: " + fileName);
+    return true;
+  }
+  statusBar()->showMessage("Erro ao salvar projeto.");
+  return false;
+}
+
 bool MainWindow::confirmDiscardIfModified() {
   if (!hasUnsavedChanges())
     return true;
 
   const QMessageBox::StandardButton answer = QMessageBox::question(
       this, "Showbox Studio",
-      "O projeto atual tem alterações não salvas. Descartar?",
-      QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
-  return answer == QMessageBox::Yes;
+      "O projeto atual tem alterações não salvas.\n"
+      "Deseja salvá-las antes de continuar?",
+      QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel,
+      QMessageBox::Save);
+  if (answer == QMessageBox::Save)
+    return saveProjectInteractive();
+  return answer == QMessageBox::Discard;
+}
+
+QString MainWindow::documentFingerprint() const {
+  if (!m_canvas)
+    return {};
+  QJsonObject json = ProjectWidgetMapper::toModel(m_canvas).toJson();
+  if (json.contains("widgets") && json.value("widgets").isArray()) {
+    QJsonArray widgets = json.value("widgets").toArray();
+    for (int i = 0; i < widgets.size(); ++i) {
+      if (!widgets.at(i).isObject())
+        continue;
+      QJsonObject widgetObject = widgets.at(i).toObject();
+      stripVolatileGeometry(widgetObject);
+      widgets[i] = widgetObject;
+    }
+    json["widgets"] = widgets;
+  }
+  return QString::fromUtf8(
+      QJsonDocument(json).toJson(QJsonDocument::Compact));
+}
+
+void MainWindow::updateSavedFingerprint() {
+  m_savedFingerprint = documentFingerprint();
 }
 
 bool MainWindow::hasUnsavedChanges() const {
-  return m_actionsModified || !m_controller->undoStack()->isClean();
+  if (m_actionsModified || !m_controller->undoStack()->isClean())
+    return true;
+  return documentFingerprint() != m_savedFingerprint;
 }
 
 void MainWindow::markDocumentSaved() {
   m_controller->undoStack()->setClean();
   m_actionsModified = false;
+  updateSavedFingerprint();
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {

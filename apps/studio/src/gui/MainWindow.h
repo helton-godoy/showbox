@@ -87,6 +87,7 @@ private:
   void createToolbox(int style);
   void populateToolbox(AbstractToolbox *toolbox);
   bool confirmDiscardIfModified();
+  bool saveProjectInteractive();
   void onUndoIndexChanged();
   // Empilha com atribuição de origem para o project.changed do caminho comum:
   // o QUndoStack emite indexChanged de forma síncrona, então o handler lê e
@@ -110,6 +111,13 @@ private:
 
   QString m_projectDirectory;
   bool m_actionsModified = false;
+  // Impressão digital do modelo salvo (SB-020): cobre edições diretas no
+  // canvas (tabela, texto, spin, combo) que não empilham undo nem marcam
+  // m_actionsModified. Sem ela, Undo após agrupar voltava a pilha a limpa
+  // com o modelo diferente do salvo e o fechamento perdia dados sem avisar.
+  QString m_savedFingerprint;
+  QString documentFingerprint() const;
+  void updateSavedFingerprint();
   // Operação de automação em voo para o project.changed do caminho comum.
   // Consumido e limpo sincronamente pelo indexChanged de cada push/undo/redo.
   QString m_pendingStackOperation;
