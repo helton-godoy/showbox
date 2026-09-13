@@ -30,6 +30,7 @@ de fechamento com alterações: o Studio encerrou sem confirmação de descarte
 observável. A SB-020 corrigiu com impressão digital do modelo e diálogo
 Save/Discard/Cancel (`tst_DiscardProtection`, 10 casos); o prerelease
 `v1.0.0-rc.7` foi publicado e a repetição SB-019r (A–F verdes, descarte
-comprovado nos três botões) recomenda promover `v1.0.0`. Nenhuma tag estável
-foi criada até aqui. O RC.5 permanece publicado como histórico, o RC.4
-como histórico e o RC.3 como draft.
+comprovado nos três botões) recomenda promover `v1.0.0`. A SB-021 promoveu:
+`v1.0.0` publicada como estável (tag sobre `c4bb487`, sete assets, smokes
+aprovados). O RC.7 permanece publicado como prerelease histórico, o RC.5
+como histórico, o RC.4 como histórico e o RC.3 como draft.
