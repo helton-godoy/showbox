@@ -29,8 +29,10 @@ recomendação de promover `v1.0.0`).
   `closeEvent`, `onNewClicked`, `onOpenClicked` e `onDemoClicked`. Manter o
   comportamento `force` da automação sem GUI.
 - Testes offscreen de regressão sem modal: projeto limpo; push marca sujo;
-  save limpa; edição direta de tabela/texto marca sujo; cenário SB-019
-  (load→edita tabela→agrupa→desagrupa/undo→ainda sujo); save volta a limpo.
+  save limpa; edição direta de tabela/texto marca sujo; regressão
+  equivalente ao SB-019 (load→edita tabela→adiciona→undo→ainda sujo;
+  `Add/Undo` em vez de `Group/Undo`, mesma condição causal: pilha limpa com
+  modelo diferente do salvo); save volta a limpo.
 - `just doctor`, `just build`, `just test`, `just check` verdes; PR com
   `build-test`, `sanitizers`, `trunk-check` e SonarCloud.
 
@@ -43,8 +45,11 @@ recomendação de promover `v1.0.0`).
 
 ## Aceite
 
-- Fechar/Novo/Abrir com edição direta (incluindo cenário SB-019) exige
-  confirmação `Save/Discard/Cancel`; `Cancel` não perde dados.
+- Fechar/Novo/Abrir com edição direta (incluindo a regressão equivalente
+  ao SB-019) exige confirmação `Save/Discard/Cancel`; `Cancel` não perde
+  dados. Os testes dos três botões exercitam o fechamento (função
+  `confirmDiscardIfModified` compartilhada com Novo/Abrir/Demo); diálogos
+  ponta a ponta próprios de Novo/Abrir/Demo ficam como dívida de cobertura.
 - `just test` com os novos casos verdes; sem regressão nos 28 existentes.
 - `rc.7` publicado como prerelease e SB-019 repetida sobre ele.
 
@@ -58,15 +63,16 @@ recomendação de promover `v1.0.0`).
     `Save/Discard/Cancel` com `saveProjectInteractive()` em
     `closeEvent`/`onNewClicked`/`onOpenClicked`/`onDemoClicked`; automação
     `force` inalterada (sem GUI).
-  - `tst_DiscardProtection` (9 casos): janela limpa, push suja, save limpa,
-    edição direta de tabela/texto suja, cenário SB-019 segue sujo após undo,
-    `Discard` fecha, `Cancel` mantém, close limpo sem diálogo.
+  - `tst_DiscardProtection` (10 casos): janela limpa, push suja, save limpa,
+    edição direta de tabela/texto suja, regressão equivalente ao SB-019 segue
+    suja após undo, `Discard`/`Cancel`/`Save` de ponta a ponta, close limpo
+    sem diálogo.
 - Commit `1b0814f` (fix) + `8dff7c8` (teste sem orfao p/ LSan). Validações
   locais: `ctest` **29/29** (28 existentes + nova suíte), `trunk check` sem
   issues, ASan/LSan locais limpos nas suítes com `MainWindow`.
 - Integração: PR #46 (merge `e3359f7`; `build-test`, `sanitizers`,
-  `trunk-check` e SonarCloud verdes). Achado no caminho: o cenário SB-019 do
-  teste deixava widget órfão no undo de Add (vazamento só de teste);
+  `trunk-check` e SonarCloud verdes). Achado no caminho: a regressão
+  equivalente ao SB-019 no teste deixava widget órfão no undo de Add (vazamento só de teste);
   corrigido com `redo` no próprio teste; registrado como backlog investigar
   o mesmo padrão no produto (`AddWidgetCommand` guarda `QPointer` sem posse).
 - Cobertura do caminho Save: PR #49 (`test(studio): cobre caminho Save`,
@@ -94,11 +100,11 @@ recomendação de promover `v1.0.0`).
     `showbox_1.0.0.rc7-1_debian13_amd64.deb`;
   - `c1a3451923224e09a654b464445e26d842d755c5a734d9eb529e89ef8685d292`
     `showbox-1.0.0-0.3.rc7.fc46.x86_64.rpm`;
-  - `2120536c041d8d3c7cd0cf5fa0baa866a8307244395ae44109faed196fabc44c`
+  - `2120536c041c8d3c7cd0cf5fa0baa866a8307244395ae44109faed196fabc44c`
     `showbox-studio_1.0.0.rc7-1_ubuntu24.04_amd64.deb`;
   - `fc40fad6a1f52ad4c44e907717fcfd2a7aa4fc44ac85993fd95c781826595664`
     `showbox-studio_1.0.0.rc7-1_debian13_amd64.deb`;
-  - `9e0d93daf2ebfa638bc4746bedecbf8220edecf10dd1ed777164f2ad9d48`
+  - `9e0d93daf2ebfa638bc4746bedecbf8220edecf10dd1edeb1d777164f2ad9d48`
     `showbox-studio-1.0.0-0.3.rc7.fc46.x86_64.rpm`;
   - `f8ec2d723a86c017d5883cb0397c116e8b66326fc2bb60ebd0a4de1188bda967`
     `ShowBox-Studio-1.0.0-rc.7-x86_64.AppImage`.
