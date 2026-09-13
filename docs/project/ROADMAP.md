@@ -28,6 +28,7 @@ Somente o integrador altera esta tabela.
 | SB-017  | Showbox Studio Automation Interface (socket local, CLI, MCP)            | SB-004, SB-015 | Concluída e integrada                                            |
 | SB-018  | Release candidate v1.0.0-rc.6 com SB-017, validação e publicação        | SB-012, SB-017 | Concluída (rc.6 publicado)                                       |
 | SB-019  | Validação autônoma final do RC.6 e decisão de promoção                  | SB-018         | Concluída (recomendado rc.7; descarte com alterações bloqueador) |
+| SB-020  | Corretivo rc.7 do descarte (fingerprint + Save/Discard/Cancel)          | SB-019         | Concluída e integrada (rc.7 publicado; SB-019r recomenda v1.0.0) |
 
 ## Marco de produto
 

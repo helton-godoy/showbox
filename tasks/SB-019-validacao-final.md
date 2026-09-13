@@ -1,6 +1,7 @@
 # SB-019 — Plano de testes para promoção a v1.0.0
 
-Estado: validação concluída em 13/09/2026; decisão: recomendar `rc.7`.
+Estado: repetição sobre `rc.7` concluída em 13/09/2026; decisão: promover
+`v1.0.0` (detalhes em "Repetição (SB-019r)" ao final).
 
 - Objetivo: avaliar o status do Showbox (motor) e do Showbox Studio e
   decidir, com evidências, entre publicar `v1.0.0` ou abrir corretivos.
@@ -161,3 +162,66 @@ e avaliar `rc.7` em vez de `v1.0.0`.
 de alterações é uma falha reproduzível/contratual potencialmente destrutiva,
 portanto bloqueia a promoção e requer `rc.7` com correção e nova execução de
 SB-019. Nenhuma tag ou release estável foi criada nesta validação.
+
+## Repetição (SB-019r) — RC.7 com SB-020
+
+Execução em 13/09/2026 sobre o prerelease `v1.0.0-rc.7` (SB-020 integrada),
+`main` em `927ae6c` (+`c9e71b9` docs e `830b9fb` teste Save, sem produto
+alterado). Metodologia: blocos A–B no host + contêineres podman limpos;
+blocos C–F em contêiner dedicado (`showbox-sb020-gui`, ubuntu:24.04, debs
+rc.7 instalados, Xvfb+openbox+xdotool+scrot); evidências em `build/sb019r`
+(ignorado). Roteiro de referência: `docs/testing/SB-019-reproducao.md`.
+
+- Bloco A: **verde** — `just doctor`, `just build`, `just test` (**29/29**,
+  inclui `tst_DiscardProtection` com 10 casos), `just check` limpo;
+  transporte `tst_StudioAutomationTransport` 7/7 real; CI da `main`
+  (`build-test`, `sanitizers`, `trunk-check`) verde nos pushes `927ae6c` e
+  `830b9fb`; SonarCloud sem bugs novos (`neutral`, como no rc.6).
+- Bloco B: **verde** — sete assets baixados com SHA-256 conferidos (ver
+  SB-020); `install_smoke.sh` OK em Ubuntu, Debian, RPM Fedora e AppImage,
+  todos `1.0.0-rc.7` com `showbox-studioctl` e MCP presentes.
+- Bloco C: **verde** — trio campo/botão/rótulo + ação Bash montados no
+  Studio empacotado; preview executou e o clique atualizou o rótulo
+  (`37-preview-action.png`: `abc` → `Olá: abc`); salvo, reaberto com
+  fidelidade e limpo; Bash exportado executado **sem o Studio** contra o
+  motor instalado (`42-exported-action.png`: `xyz` → `Olá: xyz`).
+- Bloco D: **verde** — save/reopen fiel e limpo; preview com log de
+  stdout/stderr e exit code; exportação gerou `.sh` executável; projeto com
+  `gridlayout` recusado com mensagem explícita (`export.validate`
+  `valid:false`, `preview.start` → `-32020` "ainda não exportável").
+- Bloco E: **verde** — sem `--automation` não há socket (cliente exit 2);
+  describe (protocolo 1), add/setProperty, snapshot, tree e diagnostics;
+  erros RPC com exit≠0; MCP `initialize`/`tools/list` (24 tools, sem
+  `events.subscribe`) e `tools/call` p/ ele com erro explícito;
+  `preview.start` sem autorização → `-32011`, read-only → `-32010`;
+  com autorização, preview inicia/para com status; eventos em janelas
+  isoladas: `selection.changed` 1×, `preview.finished` 1× sem
+  `project.changed` inventado; regressões SB-017 amostradas (undo atômico
+  de tabela, nomes inválidos/reservados recusados, abas mover/desfazer).
+- Bloco F: **verde (bloqueador corrigido)** — 2º diálogo (abas, tabela,
+  combobox, spin) + sessão de 30 min sem crash/travamento (`f-session.log`
+  30 iterações); estilo Tree aplicado; menu Help abre (diálogo About não
+  confirmado por foco do harness — cosmético). Descarte no produto:
+  fechar com sujeira (Ctrl+Q e X da janela) apresenta
+  "O projeto atual tem alterações não salvas. Deseja salvá-las antes de
+  continuar?" com **Save/Discard/Cancel** (`70-`, `74-`, `91-*.png`);
+  **Cancel** mantém janela e dados; **Save** abre o "Save Project" funcional;
+  **Discard** fecha com teardown limpo (`92-*.png`, socket removido). O
+  caminho Save→arquivo→fecha é provado pelo teste `closeWithSavePersistsAndCloses`
+  no CI (PR #49). Em nenhum momento houve perda sem confirmação.
+- Limitações do harness (não do produto): `xdotool windowclose` direto não
+  dispara o `WM_DELETE` observável no openbox (janelas somem com o app vivo
+  e dados intactos — fail-safe); botões do `QFileDialog` não respondem a
+  eventos sintetizados (coberto pelo teste automatizado); agrupar via GUI
+  não exercitado (coberto por undo/redo e testes). About e agrupamento ficam
+  como verificação manual complementar.
+- Consulta antes da decisão: nenhuma issue aberta; PRs #46, #47 e #49
+  integrados (o #49 é só teste, sem produto alterado).
+
+### Julgamento (SB-019r)
+
+`v1.0.0` **pode ser promovida**: A–E 100% verdes sobre o rc.7 instalado,
+bloco F sem bloqueadores (descarte comprovado nos três botões) e zero
+pendências bloqueadoras. Promoção sugerida: `VERSION=1.0.0`, PR, tag
+`v1.0.0`, validação dos artefatos estáveis e publicação estável (mesmo
+roteiro SB-018), a critério do mantenedor.
