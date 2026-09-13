@@ -131,6 +131,13 @@ chamadas de automação registram `source: "automation"` e a `operation`
 `project.new/open/save` e ações via editor (fora do stack) têm emissão
 explícita própria; `preview.start/stop` e `export.bash` não inventam
 `project.changed`. O servidor apenas encaminha, sem evento sintético.
+`new/open/demo` são transações observáveis: durante a reconstrução só o
+`project.changed` é suprimido (flag específica), os sinais nativos do
+`QUndoStack` continuam atualizando dirty e as QActions, e o evento sai após
+o estado final — o snapshot no momento do evento já reflete o novo projeto.
+`save` (GUI e facade, fluxo único) publica `project.changed` e
+`dirty.changed=false`, pois `setClean()` sozinho não passa por
+`indexChanged`.
 
 Snapshots e árvores usam o modelo versionado do projeto e expõem somente
 identificadores estáveis (`type`, `name`, propriedades, ações e filhos). Não

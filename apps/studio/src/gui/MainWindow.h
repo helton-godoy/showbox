@@ -111,6 +111,14 @@ private:
   // Operação de automação em voo para o project.changed do caminho comum.
   // Consumido e limpo sincronamente pelo indexChanged de cada push/undo/redo.
   QString m_pendingStackOperation;
+  // Transação de documento (new/open/demo): suprime SOMENTE o project.changed
+  // do caminho comum durante a reconstrução. Os sinais nativos do QUndoStack
+  // (indexChanged, cleanChanged, canUndo/RedoChanged) continuam fluindo, de
+  // modo que dirty e as QActions de Undo/Redo se atualizam. O project.changed
+  // sai explicitamente após o estado final instalado (snapshot consistente).
+  bool m_suppressProjectChanged = false;
+  bool saveProjectTo(const QString &fileName, const QString &source,
+                     QString *error);
 
   // Live Preview
   PreviewManager *m_previewManager;

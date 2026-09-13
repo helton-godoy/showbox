@@ -6,33 +6,33 @@
 - Branch/worktree: `feat/SB-017-studio-automation`,
   `/home/helton/Public/fork_dialogbox/showbox`.
 - SHA base: `b5779e3` (`main`, RC.5 integrado).
-- Commits anteriores: `59b2a2e`/`a5fbdee`, `1da4659`, `75042af`, `dab4c58`.
-- Revisão atual (1 P1 + 1 P2 desta rodada): alterações descritas abaixo,
+- Commits anteriores: `59b2a2e`/`a5fbdee`, `1da4659`, `75042af`, `dab4c58`,
+  `d185bdd`.
+- Revisão atual (2 P1 + 1 P2 desta rodada): alterações descritas abaixo,
   incluídas no mesmo commit que este checkpoint (commit único, sem
   autorreferência de hash documental).
-- Itens já concluídos: base anterior completa mais as 2 correções desta rodada.
+- Itens já concluídos: base anterior completa mais as 3 correções desta rodada.
 - Item em execução: nenhum; branch candidata à revisão final de integração.
 
 ## Entrega desta rodada
 
-- P1 caminho comum: `pushUndoCommand` + `m_pendingStackOperation` (header +
-  `MainWindow.cpp`); `onUndoIndexChanged` publica `project.changed` 1× com
-  `source` gui/automation e `operation`; emissões individuais removidas de
-  add/remove/move/setProperty×3/setActions/undo/redo; `clear()` bloqueado em
-  new/open (emissão explícita com `discarded` continua única).
-- P2 schema por tipo: `setPropertyBranches` com 8 branches (orientation,
-  echoMode, boolean, string, integer, dimensões ≥ 0, listas, matriz);
-  cobertura total das 20 propriedades mutáveis verificada em teste.
-- Testes novos: `guiStackEditsPublishProjectChanged` (delete via slot + undo
-  via QAction, source gui), branches por tipo + rejeições schema em
-  `setPropertySchemaIsConditional`, `projectEventsHaveSingleSourceOverSocket`
-  (inalterado, ainda verde com a nova fonte).
+- P1 sem QSignalBlocker: `m_suppressProjectChanged` suprime SOMENTE o
+  `project.changed` no handler; `indexChanged`/`cleanChanged`/
+  `canUndo/RedoChanged` fluem (dirty e QActions atualizam). new/open da
+  facade trocaram o bloqueio pela flag.
+- P1 transações GUI: `onNewClicked`/`onOpenClicked`/`onDemoClicked` suprimem
+  durante a reconstrução e emitem `project.changed` (source gui) após o
+  estado final — snapshot no evento já é o novo projeto.
+- P2 save unificado: `saveProjectTo(file, source, error)` usado por
+  `automationSave` e `onSaveClicked`; publica `project.changed` e
+  `dirty.changed=false` (setClean não passa por indexChanged).
+- Teste novo: `documentTransactionsAreObservable` (1 evento com snapshot
+  vazio, QActions desabilitadas, dirty=false no save).
 
 ## Arquivos incluídos nesta revisão
 
 - `apps/studio/src/gui/MainWindow.h`
 - `apps/studio/src/gui/MainWindow.cpp`
-- `apps/studio/src/automation/AutomationDescriptors.cpp`
 - `apps/studio/tests/tst_StudioAutomation.cpp`
 - `apps/studio/docs/AUTOMATION.md`
 - `tasks/SB-017-studio-automation.md`
@@ -40,24 +40,22 @@
 
 ## Decisões e justificativas
 
-- Marcador síncrono em vez de heurística: `push`/`undo`/`redo` emitem
-  `indexChanged` na mesma pilha de chamadas, então a atribuição de origem é
-  determinística sem adivinhar chamador.
-- GUI empilha direto (sem marcador → "gui"); new/open GUI herdam cobertura
-  pelo `clear()` quando o Qt emite `indexChanged`, sem regressão caso não.
-- 8 branches em vez de um genérico: cada propriedade cai em exatamente um
-  branch, então MCP recebe `-32602` pré-execução para tipos incompatíveis.
+- Flag específica em vez de QSignalBlocker: bloquear o QObject calava sinais
+  funcionais (QActions obsoletas, dirty perdido); suprimir só a publicação
+  mantém ambos.
+- Evento após estado final (não antes): assinante que lê snapshot no evento
+  vê o projeto novo; sem segundo evento corretivo.
+- Fluxo único de save: GUI e facade partilham `saveProjectTo`, eliminando a
+  divergência de eventos.
 
 ## Comandos executados e resultados (neste host, com socket local)
 
 - `cmake --build --preset dev` — concluído.
 - `ctest --preset dev --output-on-failure` — 28/28 aprovados.
 - `QT_QPA_PLATFORM=offscreen build/dev/bin/tst_StudioAutomation -v1` —
-  27/27 aprovados.
+  28/28 aprovados.
 - `QT_QPA_PLATFORM=offscreen build/dev/bin/tst_StudioAutomationTransport -v1` —
   7/7 aprovados, 0 skipped.
-- E2E offscreen real: add→1 project.changed (automation/add)+dirty+diag;
-  select→só selection.changed; export→só resposta, zero eventos.
 - `git diff --check` — sem erros.
 
 ## Evidência de transporte (honesta sobre ambientes)
@@ -68,7 +66,7 @@
 
 ## Testes aprovados (neste host)
 
-- `tst_StudioAutomation`: 27 passed, 0 failed.
+- `tst_StudioAutomation`: 28 passed, 0 failed.
 - `tst_StudioAutomationTransport`: 7 passed, 0 failed, 0 skipped.
 - Suíte completa: 28/28 passed.
 

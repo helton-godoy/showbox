@@ -38,7 +38,6 @@
 #include <QMessageBox>
 #include <QProcess>
 #include <QSettings>
-#include <QSignalBlocker>
 #include <QStatusBar>
 #include <QTabWidget>
 #include <QTextEdit>
@@ -892,7 +891,10 @@ void MainWindow::onUndoIndexChanged() {
   if (!m_pendingStackOperation.isEmpty())
     project["operation"] = m_pendingStackOperation;
   m_pendingStackOperation.clear();
-  emit automationEvent("project.changed", project);
+  // Durante transações de documento o evento sai após o estado final; aqui
+  // publicam-se dirty/diagnostics nativos normalmente.
+  if (!m_suppressProjectChanged)
+    emit automationEvent("project.changed", project);
   emit automationEvent("dirty.changed", QJsonObject{{"dirty", hasUnsavedChanges()}});
   emit automationEvent("diagnostics.changed",
                        QJsonObject{{"count", automationDiagnostics().size()}});
@@ -1063,6 +1065,7 @@ void MainWindow::onNewClicked() {
 
   m_previewManager->stop();
   m_controller->selectWidget(nullptr);
+  m_suppressProjectChanged = true;
   m_controller->undoStack()->clear();
   m_canvas->clear();
   m_actionEditor->setTargetWidget(nullptr);
@@ -1071,6 +1074,9 @@ void MainWindow::onNewClicked() {
   m_actionsModified = false;
   m_projectDirectory = QDir::currentPath();
   markDocumentSaved();
+  m_suppressProjectChanged = false;
+  emit automationEvent("project.changed", QJsonObject{{"source", "gui"},
+                                                      {"operation", "new"}});
   statusBar()->showMessage("Novo projeto criado.");
 }
 
@@ -1141,10 +1147,7 @@ void MainWindow::onSaveClicked() {
   if (!fileName.endsWith(".sbxproj"))
     fileName += ".sbxproj";
 
-  ProjectSerializer serializer;
-  if (serializer.save(fileName, m_canvas, m_factory)) {
-    markDocumentSaved();
-    m_projectDirectory = QFileInfo(fileName).absolutePath();
+  if (saveProjectTo(fileName, "gui", nullptr)) {
     statusBar()->showMessage("Projeto salvo com sucesso: " + fileName);
   } else {
     statusBar()->showMessage("Erro ao salvar projeto.");
@@ -1166,6 +1169,7 @@ void MainWindow::onOpenClicked() {
   if (serializer.load(fileName, m_factory, widgets)) {
     m_actionsModified = false;
     m_controller->selectWidget(nullptr);
+    m_suppressProjectChanged = true;
     m_controller->undoStack()->clear();
     m_canvas->clear();
     m_inspector->updateHierarchy(nullptr);
@@ -1176,6 +1180,9 @@ void MainWindow::onOpenClicked() {
     }
     m_inspector->updateHierarchy(m_canvas);
     m_projectDirectory = QFileInfo(fileName).absolutePath();
+    m_suppressProjectChanged = false;
+    emit automationEvent("project.changed", QJsonObject{{"source", "gui"},
+                                                        {"operation", "open"}});
     const QStringList errors = serializer.errors();
     statusBar()->showMessage(errors.isEmpty()
                                  ? "Projeto carregado: " + fileName
@@ -1307,13 +1314,11 @@ bool MainWindow::automationNew(bool force, QString *error) {
   if (m_previewManager)
     m_previewManager->stop();
   m_controller->selectWidget(nullptr);
-  {
-    // Suprimir o project.changed do caminho comum: new/open têm emissão
-    // explícita própria (com discarded). Sem isso, o clear() geraria evento
-    // duplicado caso o Qt emita indexChanged aqui.
-    const QSignalBlocker blocker(m_controller->undoStack());
-    m_controller->undoStack()->clear();
-  }
+  // Transação observável: só o project.changed é suprimido durante a
+  // reconstrução; os sinais nativos da pilha continuam atualizando dirty e
+  // as QActions. O evento sai após o estado final (ver abaixo).
+  m_suppressProjectChanged = true;
+  m_controller->undoStack()->clear();
   m_canvas->clear();
   m_actionEditor->setTargetWidget(nullptr);
   m_propEditor->setTargetWidget(nullptr);
@@ -1321,6 +1326,7 @@ bool MainWindow::automationNew(bool force, QString *error) {
   m_actionsModified = false;
   m_projectDirectory = QDir::currentPath();
   markDocumentSaved();
+  m_suppressProjectChanged = false;
   emit automationEvent("project.changed", QJsonObject{{"source", "automation"},
                                                        {"operation", "new"},
                                                        {"discarded", force}});
@@ -1353,10 +1359,8 @@ bool MainWindow::automationOpen(const QString &fileName, bool force,
   }
   m_previewManager->stop();
   m_controller->selectWidget(nullptr);
-  {
-    const QSignalBlocker blocker(m_controller->undoStack());
-    m_controller->undoStack()->clear();
-  }
+  m_suppressProjectChanged = true;
+  m_controller->undoStack()->clear();
   m_canvas->clear();
   for (QWidget *widget : widgets) {
     m_canvas->addWidget(widget);
@@ -1365,6 +1369,7 @@ bool MainWindow::automationOpen(const QString &fileName, bool force,
   m_inspector->updateHierarchy(m_canvas);
   m_projectDirectory = QFileInfo(fileName).absolutePath();
   markDocumentSaved();
+  m_suppressProjectChanged = false;
   emit automationEvent("project.changed", QJsonObject{{"source", "automation"},
                                                        {"operation", "open"},
                                                        {"discarded", force}});
@@ -1377,6 +1382,11 @@ bool MainWindow::automationSave(const QString &fileName, QString *error) {
       *error = "O caminho do projeto não pode ser vazio.";
     return false;
   }
+  return saveProjectTo(fileName, "automation", error);
+}
+
+bool MainWindow::saveProjectTo(const QString &fileName, const QString &source,
+                               QString *error) {
   ProjectSerializer serializer;
   if (!serializer.save(fileName, m_canvas, m_factory)) {
     if (error)
@@ -1385,8 +1395,12 @@ bool MainWindow::automationSave(const QString &fileName, QString *error) {
   }
   m_projectDirectory = QFileInfo(fileName).absolutePath();
   markDocumentSaved();
-  emit automationEvent("project.changed", QJsonObject{{"source", "automation"},
-                                                       {"operation", "save"}});
+  emit automationEvent("project.changed", QJsonObject{{"source", source},
+                                                      {"operation", "save"}});
+  // setClean() emite cleanChanged, não indexChanged: sem esta linha, quem
+  // mantém dirty por eventos jamais saberia que o documento está limpo.
+  emit automationEvent("dirty.changed",
+                       QJsonObject{{"dirty", hasUnsavedChanges()}});
   return true;
 }
 
@@ -1894,6 +1908,7 @@ void MainWindow::onDemoClicked() {
   if (!confirmDiscardIfModified())
     return;
   m_controller->selectWidget(nullptr);
+  m_suppressProjectChanged = true;
   m_controller->undoStack()->clear();
   m_canvas->clear();
   m_actionsModified = false;
@@ -1912,5 +1927,8 @@ void MainWindow::onDemoClicked() {
   m_inspector->updateHierarchy(m_canvas);
   m_controller->selectWidget(button);
   m_actionsModified = true;
+  m_suppressProjectChanged = false;
+  emit automationEvent("project.changed", QJsonObject{{"source", "gui"},
+                                                      {"operation", "demo"}});
   statusBar()->showMessage("Demonstração criada. Use Executar aplicação ou Prévia visual.");
 }

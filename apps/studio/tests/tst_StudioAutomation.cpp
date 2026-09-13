@@ -3,6 +3,7 @@
 #include <QMap>
 #include <QSignalSpy>
 #include <QTabWidget>
+#include <QTemporaryDir>
 
 #include "automation/AutomationProtocol.h"
 #include "automation/AutomationDescriptors.h"
@@ -35,6 +36,7 @@ private slots:
     void projectEventsHaveSingleSource();
     void setPropertySchemaIsConditional();
     void guiStackEditsPublishProjectChanged();
+    void documentTransactionsAreObservable();
     void rejectsUnknownAndInternalProperties();
     void dirtyProjectRequiresForce();
 };
@@ -737,6 +739,58 @@ void tst_StudioAutomation::guiStackEditsPublishProjectChanged() {
     undoAction->trigger();
     QCOMPARE(automationEventCount(&spy, "project.changed"), 1);
     QVERIFY(!window.automationProjectSnapshot().value("widgets").toArray().isEmpty());
+}
+
+void tst_StudioAutomation::documentTransactionsAreObservable() {
+    MainWindow window;
+    QString error;
+    QVERIFY2(window.automationNew(&error), qPrintable(error));
+    QVERIFY2(window.automationAddWidget("label", "keep", {}, &error),
+             qPrintable(error));
+    window.markDocumentSaved();
+    // Snapshot observado no momento de cada project.changed.
+    QList<int> widgetCounts;
+    QObject::connect(&window, &MainWindow::automationEvent, &window,
+                     [&](const QString &name, const QJsonObject &) {
+                         if (name == "project.changed") {
+                             widgetCounts.append(
+                                 window.automationProjectSnapshot()
+                                     .value("widgets").toArray().size());
+                         }
+                     });
+    // Transição pela GUI: um único project.changed, já com o estado final.
+    QVERIFY(QMetaObject::invokeMethod(&window, "onNewClicked"));
+    QCOMPARE(widgetCounts.size(), 1);
+    QCOMPARE(widgetCounts.first(), 0);
+    // Pilha vazia: ações nativas de Undo/Redo acompanham (sem bloqueio).
+    QAction *undoAction = nullptr;
+    QAction *redoAction = nullptr;
+    for (QAction *action : window.findChildren<QAction *>()) {
+        if (action->shortcut() == QKeySequence::Undo)
+            undoAction = action;
+        if (action->shortcut() == QKeySequence::Redo)
+            redoAction = action;
+    }
+    QVERIFY(undoAction && redoAction);
+    QVERIFY(!undoAction->isEnabled());
+    QVERIFY(!redoAction->isEnabled());
+    // Save anuncia a transição para limpo.
+    QSignalSpy spy(&window, &MainWindow::automationEvent);
+    QTemporaryDir tempDir;
+    QVERIFY(tempDir.isValid());
+    const QString path = tempDir.filePath("doc.sbxproj");
+    QVERIFY2(window.automationAddWidget("label", "saved", {}, &error),
+             qPrintable(error));
+    QVERIFY(window.hasUnsavedChanges());
+    QVERIFY2(window.automationSave(path, &error), qPrintable(error));
+    QVERIFY(!window.hasUnsavedChanges());
+    int dirtyFalse = 0;
+    for (const QList<QVariant> &args : spy) {
+        if (args.value(0).toString() == "dirty.changed" &&
+            !args.value(1).toJsonObject().value("dirty").toBool())
+            ++dirtyFalse;
+    }
+    QCOMPARE(dirtyFalse, 1);
 }
 
 void tst_StudioAutomation::rejectsUnknownAndInternalProperties() {
