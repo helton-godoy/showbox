@@ -128,36 +128,40 @@ QJsonObject propertyEnumSchema(const QStringList &properties,
     return result;
 }
 
-// Branches legíveis por máquinas que relacionam cada propriedade condicional
-// ao schema do seu valor (orientation→1|2, echoMode→0..3). Clientes MCP e
-// geradores baseados em JSON Schema descobrem o domínio sem executar nada;
-// a validação imperativa posterior mantém mensagens específicas.
+// Branches legíveis por máquinas que relacionam cada propriedade ao schema
+// do seu valor, agrupadas por tipo. Clientes MCP e validadores JSON Schema
+// rejeitam tipos incompatíveis (-32602) antes da execução; a validação
+// imperativa e a facade mantêm mensagens específicas e checagens dinâmicas
+// (ex. currentIndex dentro dos limites).
 QJsonObject setPropertyBranches(const QJsonObject &name) {
     const QJsonArray required{"name", "property", "value"};
-    QJsonObject orientationBranch = objectSchema(
-        QJsonObject{{"name", name},
-                    {"property", propertyEnumSchema({"orientation"})},
-                    {"value", QJsonObject{{"type", "integer"},
-                                          {"enum", QJsonArray{1, 2}}}}},
-        required);
-    QJsonObject echoBranch = objectSchema(
-        QJsonObject{{"name", name},
-                    {"property", propertyEnumSchema({"echoMode"})},
-                    {"value", QJsonObject{{"type", "integer"},
-                                          {"minimum", 0}, {"maximum", 3}}}},
-        required);
-    QStringList generic = mutableProperties("all");
-    generic.removeAll("orientation");
-    generic.removeAll("echoMode");
-    QJsonObject genericBranch = objectSchema(
-        QJsonObject{{"name", name},
-                    {"property", propertyEnumSchema(generic)},
-                    {"value", jsonValueSchema()}},
-        required);
+    const QJsonObject booleanValue{{"type", "boolean"}};
+    const QJsonObject stringValue = stringSchema();
+    const QJsonObject integerValue{{"type", "integer"}};
+    auto branch = [&](const QStringList &properties,
+                      const QJsonObject &value) {
+        return objectSchema(QJsonObject{{"name", name},
+                                        {"property", propertyEnumSchema(properties)},
+                                        {"value", value}},
+                            required);
+    };
     QJsonArray options;
-    options.append(orientationBranch);
-    options.append(echoBranch);
-    options.append(genericBranch);
+    options.append(branch({"orientation"}, QJsonObject{{"type", "integer"},
+                                                       {"enum", QJsonArray{1, 2}}}));
+    options.append(branch({"echoMode"}, QJsonObject{{"type", "integer"},
+                                                    {"minimum", 0},
+                                                    {"maximum", 3}}));
+    options.append(branch({"enabled", "readOnly", "checked", "checkable"},
+                          booleanValue));
+    options.append(branch({"text", "placeholder", "plainText", "title"},
+                          stringValue));
+    options.append(branch({"value", "minimum", "maximum", "singleStep",
+                           "currentIndex"},
+                          integerValue));
+    options.append(branch({"width", "height"}, QJsonObject{{"type", "integer"},
+                                                           {"minimum", 0}}));
+    options.append(branch({"items", "headers"}, stringArraySchema()));
+    options.append(branch({"rows"}, stringMatrixSchema()));
     return QJsonObject{{"oneOf", options}};
 }
 

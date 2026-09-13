@@ -1,7 +1,7 @@
 # SB-017 — Showbox Studio Automation Interface
 
-Estado: segunda revisão P1/P2 aplicada na branch (2026-09-12); aguardando
-revisão, sem integração em `main`.
+Estado: revisões de robustez aplicadas na branch; aguardando revisão final,
+sem integração em `main`.
 
 - Objetivo: oferecer uma interface local, versionada e observável para
   automação, testes funcionais, CI e diagnóstico do Showbox Studio.
@@ -56,11 +56,14 @@ revisão, sem integração em `main`.
 - Abas pelo `QTabWidget` lógico (índice/título originais) em mover/remover;
   `title` de página sincroniza `setTabText` com undo. `undo`/`redo` emitem
   um único `dirty.changed`/`diagnostics.changed` (sem handler manual duplo).
-- Fonte única de eventos no `MainWindow` (servidor só encaminha, sem
-  `notifyChanged`): `select`→`selection.changed`; new/open/save, mutações e
-  undo/redo→`project.changed` (1×); preview/export sem `project.changed`
+- Fonte única de eventos no caminho comum do `QUndoStack`
+  (`onUndoIndexChanged`, servidor só encaminha): mutações e undo/redo da GUI
+  e da automação publicam `project.changed` 1× (`source` gui/automation com
+  `operation`); `select`→`selection.changed`; new/open/save e ações via
+  editor têm emissão explícita; preview/export sem `project.changed`
   inventado. Diagnósticos por multiset (contagens). `setProperty` com `oneOf`
-  propriedade→valor no schema público.
+  por tipo no schema público (boolean, string, integer, dimensões,
+  orientation, echoMode, listas e matrizes).
 - Ações usam `oneOf` por tipo (`shell` exige `command`; `set` exige
   `target`/`property`/`value`; `query` exige `target`/`variable`) e o modelo
   proposto é validado antes de gravar.

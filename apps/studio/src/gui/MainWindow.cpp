@@ -38,6 +38,7 @@
 #include <QMessageBox>
 #include <QProcess>
 #include <QSettings>
+#include <QSignalBlocker>
 #include <QStatusBar>
 #include <QTabWidget>
 #include <QTextEdit>
@@ -867,6 +868,12 @@ MainWindow::~MainWindow() {
   m_factory = nullptr;
 }
 
+void MainWindow::pushUndoCommand(QUndoCommand *cmd, const QString &operation) {
+  m_pendingStackOperation = operation;
+  m_controller->undoStack()->push(cmd);
+  m_pendingStackOperation.clear();
+}
+
 void MainWindow::onUndoIndexChanged() {
   if (m_controller->selectedWidget()) {
     m_propEditor->setTargetWidget(m_controller->selectedWidget());
@@ -875,6 +882,17 @@ void MainWindow::onUndoIndexChanged() {
     m_actionEditor->setTargetWidget(m_controller->selectedWidget());
   }
   m_inspector->updateHierarchy(m_canvas);
+  // Caminho comum do QUndoStack: cobre mutações e undo/redo vindos da GUI e
+  // da automação com exatamente um project.changed. A origem vem do marcador
+  // consumido aqui (push/undo/redo de automação o preenchem; GUI empilha
+  // direto e cai em "gui"). project.new/open/save e ações via editor
+  // (fora do stack) mantêm emissão explícita própria.
+  QJsonObject project{{"source", m_pendingStackOperation.isEmpty() ? QString("gui")
+                                                                   : QString("automation")}};
+  if (!m_pendingStackOperation.isEmpty())
+    project["operation"] = m_pendingStackOperation;
+  m_pendingStackOperation.clear();
+  emit automationEvent("project.changed", project);
   emit automationEvent("dirty.changed", QJsonObject{{"dirty", hasUnsavedChanges()}});
   emit automationEvent("diagnostics.changed",
                        QJsonObject{{"count", automationDiagnostics().size()}});
@@ -1289,7 +1307,13 @@ bool MainWindow::automationNew(bool force, QString *error) {
   if (m_previewManager)
     m_previewManager->stop();
   m_controller->selectWidget(nullptr);
-  m_controller->undoStack()->clear();
+  {
+    // Suprimir o project.changed do caminho comum: new/open têm emissão
+    // explícita própria (com discarded). Sem isso, o clear() geraria evento
+    // duplicado caso o Qt emita indexChanged aqui.
+    const QSignalBlocker blocker(m_controller->undoStack());
+    m_controller->undoStack()->clear();
+  }
   m_canvas->clear();
   m_actionEditor->setTargetWidget(nullptr);
   m_propEditor->setTargetWidget(nullptr);
@@ -1329,7 +1353,10 @@ bool MainWindow::automationOpen(const QString &fileName, bool force,
   }
   m_previewManager->stop();
   m_controller->selectWidget(nullptr);
-  m_controller->undoStack()->clear();
+  {
+    const QSignalBlocker blocker(m_controller->undoStack());
+    m_controller->undoStack()->clear();
+  }
   m_canvas->clear();
   for (QWidget *widget : widgets) {
     m_canvas->addWidget(widget);
@@ -1399,12 +1426,9 @@ bool MainWindow::automationAddWidget(const QString &type, const QString &name,
       *error = "Não foi possível criar o componente: " + type;
     return false;
   }
-  m_controller->undoStack()->push(new AddWidgetCommand(m_canvas, widget, parent));
+  pushUndoCommand(new AddWidgetCommand(m_canvas, widget, parent), "add");
   m_controller->manageWidget(widget);
   m_inspector->updateHierarchy(m_canvas);
-  emit automationEvent("project.changed", QJsonObject{{"source", "automation"},
-                                                      {"operation", "add"},
-                                                      {"name", name}});
   return true;
 }
 
@@ -1415,12 +1439,9 @@ bool MainWindow::automationRemoveWidget(const QString &name, QString *error) {
       *error = "Componente não encontrado: " + name;
     return false;
   }
-  m_controller->undoStack()->push(new DeleteWidgetCommand(m_canvas, {widget}));
+  pushUndoCommand(new DeleteWidgetCommand(m_canvas, {widget}), "remove");
   m_controller->selectWidget(nullptr);
   m_inspector->updateHierarchy(m_canvas);
-  emit automationEvent("project.changed", QJsonObject{{"source", "automation"},
-                                                      {"operation", "remove"},
-                                                      {"name", name}});
   return true;
 }
 
@@ -1456,11 +1477,8 @@ bool MainWindow::automationMoveWidget(const QString &name,
       *error = "O componente pai não possui um layout.";
     return false;
   }
-  m_controller->undoStack()->push(new MoveWidgetCommand(widget, parent, index));
+  pushUndoCommand(new MoveWidgetCommand(widget, parent, index), "move");
   m_inspector->updateHierarchy(m_canvas);
-  emit automationEvent("project.changed", QJsonObject{{"source", "automation"},
-                                                      {"operation", "move"},
-                                                      {"name", name}});
   return true;
 }
 
@@ -1551,12 +1569,10 @@ bool MainWindow::automationSetProperty(const QString &name,
         return false;
       }
     }
-    m_controller->undoStack()->push(
-        new AutomationTableCommand(widget, property, oldState, newState));
+    pushUndoCommand(
+        new AutomationTableCommand(widget, property, oldState, newState),
+        "setProperty");
     m_propEditor->setTargetWidget(widget);
-    emit automationEvent("project.changed", QJsonObject{{"source", "automation"},
-                                                        {"operation", "setProperty"},
-                                                        {"name", name}});
     return true;
   }
   if (type == "combobox" && (property == "items" || property == "currentIndex")) {
@@ -1613,12 +1629,10 @@ bool MainWindow::automationSetProperty(const QString &name,
         return false;
       }
     }
-    m_controller->undoStack()->push(
-        new AutomationComboCommand(widget, property, oldState, newState));
+    pushUndoCommand(
+        new AutomationComboCommand(widget, property, oldState, newState),
+        "setProperty");
     m_propEditor->setTargetWidget(widget);
-    emit automationEvent("project.changed", QJsonObject{{"source", "automation"},
-                                                        {"operation", "setProperty"},
-                                                        {"name", name}});
     return true;
   }
   const ProjectNode oldSnap = ProjectWidgetMapper::toNode(widget);
@@ -1658,12 +1672,10 @@ bool MainWindow::automationSetProperty(const QString &name,
       return false;
     }
   }
-  m_controller->undoStack()->push(
-      new AutomationSnapshotCommand(widget, property, oldSnap, newSnap));
+  pushUndoCommand(
+      new AutomationSnapshotCommand(widget, property, oldSnap, newSnap),
+      "setProperty");
   m_propEditor->setTargetWidget(widget);
-  emit automationEvent("project.changed", QJsonObject{{"source", "automation"},
-                                                      {"operation", "setProperty"},
-                                                      {"name", name}});
   return true;
 }
 
@@ -1716,12 +1728,9 @@ bool MainWindow::automationSetActions(const QString &name,
   const QString oldValue = widget->property("showbox_actions").toString();
   // Somente semântica clean do undo stack: sem m_actionsModified aqui, para
   // que history.undo até o índice limpo volte a dirty=false.
-  m_controller->undoStack()->push(new PropertyChangeCommand(
-      widget, "showbox_actions", oldValue, encoded));
+  pushUndoCommand(new PropertyChangeCommand(
+      widget, "showbox_actions", oldValue, encoded), "setActions");
   m_actionEditor->setTargetWidget(widget);
-  emit automationEvent("project.changed", QJsonObject{{"source", "automation"},
-                                                      {"operation", "setActions"},
-                                                      {"name", name}});
   return true;
 }
 
@@ -1732,11 +1741,11 @@ bool MainWindow::automationUndo(QString *error) {
     return false;
   }
   // Sem chamada manual: undo() emite indexChanged, já conectado a
-  // onUndoIndexChanged no construtor. Chamar de novo duplicaria
-  // dirty.changed e diagnostics.changed para os assinantes.
+  // onUndoIndexChanged no construtor. Chamar de novo duplicaria os eventos.
+  // O caminho comum publica project.changed com operation "undo".
+  m_pendingStackOperation = "undo";
   m_controller->undoStack()->undo();
-  emit automationEvent("project.changed", QJsonObject{{"source", "automation"},
-                                                      {"operation", "undo"}});
+  m_pendingStackOperation.clear();
   return true;
 }
 
@@ -1746,9 +1755,9 @@ bool MainWindow::automationRedo(QString *error) {
       *error = "Não há alterações para refazer.";
     return false;
   }
+  m_pendingStackOperation = "redo";
   m_controller->undoStack()->redo();
-  emit automationEvent("project.changed", QJsonObject{{"source", "automation"},
-                                                      {"operation", "redo"}});
+  m_pendingStackOperation.clear();
   return true;
 }
 

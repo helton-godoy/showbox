@@ -19,6 +19,7 @@ class QDockWidget;
 class QActionGroup;
 class QTabWidget;
 class QCloseEvent;
+class QUndoCommand;
 
 class MainWindow : public QMainWindow {
   Q_OBJECT
@@ -87,6 +88,11 @@ private:
   void populateToolbox(AbstractToolbox *toolbox);
   bool confirmDiscardIfModified();
   void onUndoIndexChanged();
+  // Empilha com atribuição de origem para o project.changed do caminho comum:
+  // o QUndoStack emite indexChanged de forma síncrona, então o handler lê e
+  // consome o marcador antes do retorno. Operações da GUI empilham direto
+  // (marcador vazio → source "gui").
+  void pushUndoCommand(QUndoCommand *cmd, const QString &operation);
 
   Canvas *m_canvas;
   IStudioWidgetFactory *m_factory;
@@ -102,6 +108,9 @@ private:
 
   QString m_projectDirectory;
   bool m_actionsModified = false;
+  // Operação de automação em voo para o project.changed do caminho comum.
+  // Consumido e limpo sincronamente pelo indexChanged de cada push/undo/redo.
+  QString m_pendingStackOperation;
 
   // Live Preview
   PreviewManager *m_previewManager;

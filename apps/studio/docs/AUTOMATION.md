@@ -58,11 +58,11 @@ pelo MCP, exceto `events.subscribe` (ver abaixo). Os métodos são:
 - execução/exportação: `preview.start`, `preview.stop`, `export.bash`.
 
 Os schemas são estritos (`additionalProperties: false`), com tipos, enums,
-limites de comprimento/quantidade e campos obrigatórios. `widget.setProperty`
-publica branches `oneOf` que ligam cada propriedade condicional ao seu valor
-(`orientation`→`{1,2}`, `echoMode`→`0..3`; demais no branch genérico), de modo
-que clientes MCP e geradores JSON Schema descobrem o domínio sem executar
-nada. Ações usam `oneOf`
+limites de comprimento/quantidade e campos obrigatórios. `widget.setProperty` publica branches `oneOf` que ligam cada propriedade ao
+schema do seu valor, por tipo (boolean, string, integer, dimensões ≥ 0,
+`orientation`→`{1,2}`, `echoMode`→`0..3`, listas de strings e matrizes), de
+modo que clientes MCP e geradores JSON Schema descobrem o domínio e recebem
+`-32602` antes de qualquer execução. Ações usam `oneOf`
 por tipo: `shell` exige `command`; `set` exige `target`/`property`/`value`;
 `query` exige `target`/`variable`. O modelo proposto é validado antes de
 gravar, de modo que mutações que deixariam o projeto inválido são recusadas
@@ -122,11 +122,15 @@ e cobrem `project.changed`, `selection.changed`, `dirty.changed`,
 `diagnostics.changed`. A assinatura é descartada no disconnect e não é
 herdada por uma reconexão. `preview.finished` é emitido uma única vez, pelo
 sinal com `exitCode`; `runningChanged(false)` apenas atualiza a UI.
-O `MainWindow` é a única fonte de eventos: cada operação publica somente
-seus eventos semânticos uma vez (`widget.select` → `selection.changed`;
-`project.new/open/save`, mutações de componentes/ações e `history.undo/redo`
-→ `project.changed`; `preview.start/stop` e `export.bash` não inventam
-`project.changed`). O servidor apenas encaminha, sem evento sintético.
+O `MainWindow` é a única fonte de eventos. O caminho comum do `QUndoStack`
+(`onUndoIndexChanged`) publica `project.changed` uma vez por mutação ou
+undo/redo — inclusive para edições feitas pela GUI, com `source: "gui"`;
+chamadas de automação registram `source: "automation"` e a `operation`
+(`add`, `remove`, `move`, `setProperty`, `setActions`, `undo`, `redo`).
+`widget.select` publica só `selection.changed` via controller;
+`project.new/open/save` e ações via editor (fora do stack) têm emissão
+explícita própria; `preview.start/stop` e `export.bash` não inventam
+`project.changed`. O servidor apenas encaminha, sem evento sintético.
 
 Snapshots e árvores usam o modelo versionado do projeto e expõem somente
 identificadores estáveis (`type`, `name`, propriedades, ações e filhos). Não

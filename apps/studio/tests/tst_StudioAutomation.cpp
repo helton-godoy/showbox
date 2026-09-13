@@ -1,5 +1,6 @@
 #include <QtTest>
 #include <QJsonArray>
+#include <QMap>
 #include <QSignalSpy>
 #include <QTabWidget>
 
@@ -33,6 +34,7 @@ private slots:
     void duplicateDiagnosticsCountAsNew();
     void projectEventsHaveSingleSource();
     void setPropertySchemaIsConditional();
+    void guiStackEditsPublishProjectChanged();
     void rejectsUnknownAndInternalProperties();
     void dirtyProjectRequiresForce();
 };
@@ -646,28 +648,95 @@ void tst_StudioAutomation::setPropertySchemaIsConditional() {
     const QJsonObject schema = descriptor->inputSchema;
     const QJsonArray branches = schema.value("oneOf").toArray();
     QVERIFY(!branches.isEmpty());
-    bool orientation = false, echo = false, generic = false;
+    // Cada propriedade mutável aparece em exatamente um branch, com o tipo
+    // de valor correspondente.
+    QMap<QString, QString> valueTypeFor;
     for (const QJsonValue &branch : branches) {
-        const QJsonObject properties = branch.toObject().value("properties").toObject();
+        const QJsonObject properties =
+            branch.toObject().value("properties").toObject();
         const QJsonArray names =
             properties.value("property").toObject().value("enum").toArray();
         const QJsonObject value = properties.value("value").toObject();
-        if (names.contains("orientation") && names.size() == 1) {
-            orientation = true;
+        QVERIFY(!names.isEmpty());
+        for (const QJsonValue &name : names) {
+            QVERIFY2(!valueTypeFor.contains(name.toString()),
+                     qPrintable("propriedade em dois branches: " + name.toString()));
+            valueTypeFor[name.toString()] = value.value("type").toString();
+        }
+        if (names.contains("orientation")) {
+            QCOMPARE(names.size(), 1);
             QVERIFY(value.value("enum").toArray().contains(1));
             QVERIFY(value.value("enum").toArray().contains(2));
-        } else if (names.contains("echoMode") && names.size() == 1) {
-            echo = true;
+        }
+        if (names.contains("echoMode")) {
+            QCOMPARE(names.size(), 1);
             QCOMPARE(value.value("minimum").toInt(-1), 0);
             QCOMPARE(value.value("maximum").toInt(-1), 3);
-        } else {
-            generic = true;
-            QVERIFY(!names.contains("orientation"));
-            QVERIFY(!names.contains("echoMode"));
-            QVERIFY(names.contains("text"));
         }
     }
-    QVERIFY(orientation && echo && generic);
+    for (const QString &property :
+         showbox::automation::mutableProperties("all"))
+        QVERIFY2(valueTypeFor.contains(property), qPrintable(property));
+    QCOMPARE(valueTypeFor.value("enabled"), QString("boolean"));
+    QCOMPARE(valueTypeFor.value("text"), QString("string"));
+    QCOMPARE(valueTypeFor.value("value"), QString("integer"));
+    QCOMPARE(valueTypeFor.value("items"), QString("array"));
+    QCOMPARE(valueTypeFor.value("rows"), QString("array"));
+    // Tipos incompatíveis são recusados no schema (-32602), antes da execução.
+    const auto *setProp =
+        showbox::automation::methodDescriptor("widget.setProperty");
+    QString error;
+    const auto rejects = [&](const char *property, const QJsonValue &value) {
+        return !showbox::automation::validateParams(
+            *setProp, QJsonObject{{"name", "w"},
+                                 {"property", property},
+                                 {"value", value}},
+            &error);
+    };
+    QVERIFY(rejects("enabled", "yes"));
+    QVERIFY(rejects("width", QJsonArray{"1"}));
+    QVERIFY(rejects("text", 42));
+    QVERIFY(rejects("items", "one"));
+    QVERIFY(rejects("rows", QJsonArray{"not-array"}));
+    QVERIFY(rejects("width", -1));
+    QVERIFY(showbox::automation::validateParams(
+        *setProp, QJsonObject{{"name", "w"}, {"property", "text"},
+                             {"value", "ok"}},
+        &error));
+}
+
+void tst_StudioAutomation::guiStackEditsPublishProjectChanged() {
+    MainWindow window;
+    QString error;
+    QVERIFY2(window.automationNew(&error), qPrintable(error));
+    QVERIFY2(window.automationAddWidget("label", "item", {}, &error),
+             qPrintable(error));
+    QVERIFY2(window.automationSelectWidget("item", &error), qPrintable(error));
+    QSignalSpy spy(&window, &MainWindow::automationEvent);
+    // Edição iniciada pela GUI (slot privado) empilha direto no QUndoStack:
+    // o caminho comum publica project.changed com source "gui".
+    QVERIFY(QMetaObject::invokeMethod(&window, "onDeleteClicked"));
+    QCOMPARE(automationEventCount(&spy, "project.changed"), 1);
+    QString source;
+    for (const QList<QVariant> &args : spy) {
+        if (args.value(0).toString() == "project.changed")
+            source =
+                args.value(1).toJsonObject().value("source").toString();
+    }
+    QCOMPARE(source, QString("gui"));
+    spy.clear();
+    // Undo iniciado pela GUI (QAction de Edit/toolbar, sem facade).
+    QAction *undoAction = nullptr;
+    for (QAction *action : window.findChildren<QAction *>()) {
+        if (action->shortcut() == QKeySequence::Undo) {
+            undoAction = action;
+            break;
+        }
+    }
+    QVERIFY(undoAction);
+    undoAction->trigger();
+    QCOMPARE(automationEventCount(&spy, "project.changed"), 1);
+    QVERIFY(!window.automationProjectSnapshot().value("widgets").toArray().isEmpty());
 }
 
 void tst_StudioAutomation::rejectsUnknownAndInternalProperties() {
