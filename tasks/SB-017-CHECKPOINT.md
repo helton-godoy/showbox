@@ -85,9 +85,10 @@
 
 ## PRs ou identificadores externos
 
-- PR #40: https://github.com/helton-godoy/showbox/pull/40 (base `main`,
-  HEAD `2be53bd`). Aguardar checks oficiais (transporte e Trunk); se verdes,
-  integrar em `main`.
+- PR #40: <https://github.com/helton-godoy/showbox/pull/40> (base `main`).
+  `just doctor` passou; `just check` (Trunk 1.25.0) aplicou autofix de
+  formatação e apontou este MD034, corrigido aqui. Aguardar checks oficiais;
+  se verdes, integrar em `main`.
 
 ## Próximo passo concreto
 
