@@ -23,7 +23,10 @@ A SB-011 encerrou a branch intermediária `integration/showbox-v1`. A `main` é 
 única branch permanente de desenvolvimento e recebe mudanças somente por pull
 request com `build-test`, `sanitizers` e `trunk-check` obrigatórios.
 
-O candidato público atual é o prerelease `v1.0.0-rc.6`, produzido a partir
-da `main` com a SB-017 integrada (socket JSON-RPC, `showbox-studioctl`, MCP).
-O RC.5 permanece publicado como histórico, o RC.4 como histórico e o RC.3
-como draft; janela curta de uso real aberta antes de decidir `v1.0.0`.
+O candidato público avaliado foi o prerelease `v1.0.0-rc.6`, produzido a
+partir da `main` com a SB-017 integrada (socket JSON-RPC, `showbox-studioctl`,
+MCP). A SB-019 concluiu os gates A–E, mas encontrou bloqueio no fluxo gráfico
+de fechamento com alterações: o Studio encerrou sem confirmação de descarte
+observável. A recomendação operacional é corrigir e produzir `rc.7`; nenhuma
+tag estável foi criada. O RC.5 permanece publicado como histórico, o RC.4
+como histórico e o RC.3 como draft.
