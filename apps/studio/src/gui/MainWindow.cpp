@@ -884,18 +884,31 @@ void MainWindow::onUndoIndexChanged() {
   // Caminho comum do QUndoStack: cobre mutações e undo/redo vindos da GUI e
   // da automação com exatamente um project.changed. A origem vem do marcador
   // consumido aqui (push/undo/redo de automação o preenchem; GUI empilha
-  // direto e cai em "gui"). project.new/open/save e ações via editor
-  // (fora do stack) mantêm emissão explícita própria.
-  QJsonObject project{{"source", m_pendingStackOperation.isEmpty() ? QString("gui")
-                                                                   : QString("automation")}};
-  if (!m_pendingStackOperation.isEmpty())
-    project["operation"] = m_pendingStackOperation;
+  // direto e cai em "gui"). Transações de documento suprimem TODOS os eventos
+  // derivados aqui (o estado intermediário — canvas antigo, flags parciais —
+  // não é observável) e publicam o trio coerente após o estado final.
+  if (m_suppressProjectChanged) {
+    m_pendingStackOperation.clear();
+    return;
+  }
+  QJsonObject extra;
+  QString source = "gui";
+  if (!m_pendingStackOperation.isEmpty()) {
+    source = "automation";
+    extra["operation"] = m_pendingStackOperation;
+  }
   m_pendingStackOperation.clear();
-  // Durante transações de documento o evento sai após o estado final; aqui
-  // publicam-se dirty/diagnostics nativos normalmente.
-  if (!m_suppressProjectChanged)
-    emit automationEvent("project.changed", project);
-  emit automationEvent("dirty.changed", QJsonObject{{"dirty", hasUnsavedChanges()}});
+  publishDocumentState(source, extra);
+}
+
+void MainWindow::publishDocumentState(const QString &source,
+                                      const QJsonObject &extra) {
+  QJsonObject project{{"source", source}};
+  for (auto it = extra.begin(); it != extra.end(); ++it)
+    project[it.key()] = it.value();
+  emit automationEvent("project.changed", project);
+  emit automationEvent("dirty.changed",
+                       QJsonObject{{"dirty", hasUnsavedChanges()}});
   emit automationEvent("diagnostics.changed",
                        QJsonObject{{"count", automationDiagnostics().size()}});
 }
@@ -1075,8 +1088,7 @@ void MainWindow::onNewClicked() {
   m_projectDirectory = QDir::currentPath();
   markDocumentSaved();
   m_suppressProjectChanged = false;
-  emit automationEvent("project.changed", QJsonObject{{"source", "gui"},
-                                                      {"operation", "new"}});
+  publishDocumentState("gui", QJsonObject{{"operation", "new"}});
   statusBar()->showMessage("Novo projeto criado.");
 }
 
@@ -1181,8 +1193,7 @@ void MainWindow::onOpenClicked() {
     m_inspector->updateHierarchy(m_canvas);
     m_projectDirectory = QFileInfo(fileName).absolutePath();
     m_suppressProjectChanged = false;
-    emit automationEvent("project.changed", QJsonObject{{"source", "gui"},
-                                                        {"operation", "open"}});
+    publishDocumentState("gui", QJsonObject{{"operation", "open"}});
     const QStringList errors = serializer.errors();
     statusBar()->showMessage(errors.isEmpty()
                                  ? "Projeto carregado: " + fileName
@@ -1327,9 +1338,8 @@ bool MainWindow::automationNew(bool force, QString *error) {
   m_projectDirectory = QDir::currentPath();
   markDocumentSaved();
   m_suppressProjectChanged = false;
-  emit automationEvent("project.changed", QJsonObject{{"source", "automation"},
-                                                       {"operation", "new"},
-                                                       {"discarded", force}});
+  publishDocumentState("automation", QJsonObject{{"operation", "new"},
+                                                 {"discarded", force}});
   return true;
 }
 
@@ -1370,9 +1380,8 @@ bool MainWindow::automationOpen(const QString &fileName, bool force,
   m_projectDirectory = QFileInfo(fileName).absolutePath();
   markDocumentSaved();
   m_suppressProjectChanged = false;
-  emit automationEvent("project.changed", QJsonObject{{"source", "automation"},
-                                                       {"operation", "open"},
-                                                       {"discarded", force}});
+  publishDocumentState("automation", QJsonObject{{"operation", "open"},
+                                                 {"discarded", force}});
   return true;
 }
 
@@ -1928,7 +1937,6 @@ void MainWindow::onDemoClicked() {
   m_controller->selectWidget(button);
   m_actionsModified = true;
   m_suppressProjectChanged = false;
-  emit automationEvent("project.changed", QJsonObject{{"source", "gui"},
-                                                      {"operation", "demo"}});
+  publishDocumentState("gui", QJsonObject{{"operation", "demo"}});
   statusBar()->showMessage("Demonstração criada. Use Executar aplicação ou Prévia visual.");
 }

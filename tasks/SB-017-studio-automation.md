@@ -61,9 +61,9 @@ sem integração em `main`.
   e da automação publicam `project.changed` 1× (`source` gui/automation com
   `operation`); `select`→`selection.changed`; new/open/save e ações via
   editor têm emissão explícita;   preview/export sem `project.changed`
-  inventado. Transações new/open/demo suprimem só o `project.changed`
-  durante a reconstrução (sinais nativos preservados) e emitem após o estado
-  final; save unificado publica `dirty.changed=false`. Diagnósticos por
+  inventado. Transações new/open/demo suprimem os eventos derivados durante
+  a reconstrução (sinais nativos preservados) e publicam o trio coerente
+  após o estado final; save unificado publica `dirty.changed=false`. Diagnósticos por
   multiset (contagens). `setProperty` com `oneOf` por tipo no schema público
   (boolean, string, integer, dimensões, orientation, echoMode, listas e
   matrizes).

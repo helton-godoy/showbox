@@ -7,27 +7,25 @@
   `/home/helton/Public/fork_dialogbox/showbox`.
 - SHA base: `b5779e3` (`main`, RC.5 integrado).
 - Commits anteriores: `59b2a2e`/`a5fbdee`, `1da4659`, `75042af`, `dab4c58`,
-  `d185bdd`.
-- Revisão atual (2 P1 + 1 P2 desta rodada): alterações descritas abaixo,
-  incluídas no mesmo commit que este checkpoint (commit único, sem
-  autorreferência de hash documental).
-- Itens já concluídos: base anterior completa mais as 3 correções desta rodada.
+  `d185bdd`, `71c3fa6`.
+- Revisão atual (1 P1 desta rodada): alterações descritas abaixo, incluídas
+  no mesmo commit que este checkpoint (commit único, sem autorreferência de
+  hash documental).
+- Itens já concluídos: base anterior completa mais a correção desta rodada.
 - Item em execução: nenhum; branch candidata à revisão final de integração.
 
 ## Entrega desta rodada
 
-- P1 sem QSignalBlocker: `m_suppressProjectChanged` suprime SOMENTE o
-  `project.changed` no handler; `indexChanged`/`cleanChanged`/
-  `canUndo/RedoChanged` fluem (dirty e QActions atualizam). new/open da
-  facade trocaram o bloqueio pela flag.
-- P1 transações GUI: `onNewClicked`/`onOpenClicked`/`onDemoClicked` suprimem
-  durante a reconstrução e emitem `project.changed` (source gui) após o
-  estado final — snapshot no evento já é o novo projeto.
-- P2 save unificado: `saveProjectTo(file, source, error)` usado por
-  `automationSave` e `onSaveClicked`; publica `project.changed` e
-  `dirty.changed=false` (setClean não passa por indexChanged).
-- Teste novo: `documentTransactionsAreObservable` (1 evento com snapshot
-  vazio, QActions desabilitadas, dirty=false no save).
+- P1 transação total: `onUndoIndexChanged` suprime os três eventos derivados
+  sob `m_suppressProjectChanged` (antes, só `project.changed`; dirty/diag
+  vazavam com canvas/flags antigos); novo `publishDocumentState`
+  (project+dirty+diagnostics) usado pelo caminho comum e pelos finais de
+  new/open/demo (facade e GUI); `saveProjectTo` inalterado (project+dirty).
+- `QSignalBlocker` removido do `MainWindow.cpp` (sem mais usos no arquivo).
+- Teste `documentTransactionsAreObservable` ampliado: parte de sujeira do
+  editor de ações, verifica trio final do new (1× cada, dirty false, snapshot
+  0), demo (snapshot 3, dirty true anunciado) e open facade (snapshot do
+  arquivo, dirty false); mantém GUI-new, QActions e save.
 
 ## Arquivos incluídos nesta revisão
 
@@ -40,13 +38,12 @@
 
 ## Decisões e justificativas
 
-- Flag específica em vez de QSignalBlocker: bloquear o QObject calava sinais
-  funcionais (QActions obsoletas, dirty perdido); suprimir só a publicação
-  mantém ambos.
-- Evento após estado final (não antes): assinante que lê snapshot no evento
-  vê o projeto novo; sem segundo evento corretivo.
-- Fluxo único de save: GUI e facade partilham `saveProjectTo`, eliminando a
-  divergência de eventos.
+- Suprimir derivados, nunca sinais: o estado intermediário da reconstrução
+  não é observável; os sinais nativos seguem para as QActions.
+- Reuso do `publishDocumentState` nos 5 finais: mesma ordem e conteúdo do
+  caminho comum, sem divergência GUI/facade.
+- Sujeira do editor no teste via `emit editor->actionsChanged()`: reproduz
+  exatamente o caso relatado (`m_actionsModified=true` fora do stack).
 
 ## Comandos executados e resultados (neste host, com socket local)
 

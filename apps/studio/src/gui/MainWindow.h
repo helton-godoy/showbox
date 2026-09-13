@@ -93,6 +93,8 @@ private:
   // consome o marcador antes do retorno. Operações da GUI empilham direto
   // (marcador vazio → source "gui").
   void pushUndoCommand(QUndoCommand *cmd, const QString &operation);
+  void publishDocumentState(const QString &source,
+                            const QJsonObject &extra = {});
 
   Canvas *m_canvas;
   IStudioWidgetFactory *m_factory;
@@ -111,11 +113,10 @@ private:
   // Operação de automação em voo para o project.changed do caminho comum.
   // Consumido e limpo sincronamente pelo indexChanged de cada push/undo/redo.
   QString m_pendingStackOperation;
-  // Transação de documento (new/open/demo): suprime SOMENTE o project.changed
-  // do caminho comum durante a reconstrução. Os sinais nativos do QUndoStack
-  // (indexChanged, cleanChanged, canUndo/RedoChanged) continuam fluindo, de
-  // modo que dirty e as QActions de Undo/Redo se atualizam. O project.changed
-  // sai explicitamente após o estado final instalado (snapshot consistente).
+  // Transação de documento (new/open/demo): suprime os eventos DERIVADOS
+  // (project/dirty/diagnostics) do caminho comum durante a reconstrução. Os
+  // sinais nativos do QUndoStack continuam fluindo, de modo que as QActions
+  // de Undo/Redo se atualizam. O trio coerente sai após o estado final.
   bool m_suppressProjectChanged = false;
   bool saveProjectTo(const QString &fileName, const QString &source,
                      QString *error);

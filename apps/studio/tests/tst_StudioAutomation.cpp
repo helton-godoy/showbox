@@ -5,6 +5,8 @@
 #include <QTabWidget>
 #include <QTemporaryDir>
 
+#include "gui/ActionEditor.h"
+
 #include "automation/AutomationProtocol.h"
 #include "automation/AutomationDescriptors.h"
 #include "gui/MainWindow.h"
@@ -741,6 +743,14 @@ void tst_StudioAutomation::guiStackEditsPublishProjectChanged() {
     QVERIFY(!window.automationProjectSnapshot().value("widgets").toArray().isEmpty());
 }
 
+namespace {
+struct DocumentEventRecord {
+    QString name;
+    QJsonObject data;
+    int widgets = -1;
+};
+}
+
 void tst_StudioAutomation::documentTransactionsAreObservable() {
     MainWindow window;
     QString error;
@@ -748,7 +758,8 @@ void tst_StudioAutomation::documentTransactionsAreObservable() {
     QVERIFY2(window.automationAddWidget("label", "keep", {}, &error),
              qPrintable(error));
     window.markDocumentSaved();
-    // Snapshot observado no momento de cada project.changed.
+    // Transição pela GUI a partir de documento limpo: um único
+    // project.changed, já com o estado final.
     QList<int> widgetCounts;
     QObject::connect(&window, &MainWindow::automationEvent, &window,
                      [&](const QString &name, const QJsonObject &) {
@@ -758,7 +769,6 @@ void tst_StudioAutomation::documentTransactionsAreObservable() {
                                      .value("widgets").toArray().size());
                          }
                      });
-    // Transição pela GUI: um único project.changed, já com o estado final.
     QVERIFY(QMetaObject::invokeMethod(&window, "onNewClicked"));
     QCOMPARE(widgetCounts.size(), 1);
     QCOMPARE(widgetCounts.first(), 0);
@@ -774,11 +784,85 @@ void tst_StudioAutomation::documentTransactionsAreObservable() {
     QVERIFY(undoAction && redoAction);
     QVERIFY(!undoAction->isEnabled());
     QVERIFY(!redoAction->isEnabled());
-    // Save anuncia a transição para limpo.
-    QSignalSpy spy(&window, &MainWindow::automationEvent);
+
+    // Sujeira vinda do editor de ações (fora do QUndoStack) + stack.
+    QVERIFY2(window.automationAddWidget("label", "dirty", {}, &error),
+             qPrintable(error));
+    ActionEditor *editor = window.findChild<ActionEditor *>();
+    QVERIFY(editor);
+    emit editor->actionsChanged();
+    QVERIFY(window.hasUnsavedChanges());
+
+    // Registrador completo: nome, dado e snapshot no momento do evento.
+    QList<DocumentEventRecord> records;
+    QObject::connect(&window, &MainWindow::automationEvent, &window,
+                     [&](const QString &name, const QJsonObject &data) {
+                         records.append(
+                             {name, data,
+                              window.automationProjectSnapshot()
+                                  .value("widgets").toArray().size()});
+                     });
+    auto countNamed = [&](const char *name, int from = 0) {
+        int count = 0;
+        for (int i = from; i < records.size(); ++i) {
+            if (records[i].name == QString(name))
+                ++count;
+        }
+        return count;
+    };
+    auto lastDirty = [&] {
+        for (int i = records.size() - 1; i >= 0; --i) {
+            if (records[i].name == "dirty.changed")
+                return records[i].data.value("dirty").toBool(true);
+        }
+        return true;
+    };
+    auto projectSnapshots = [&] {
+        QList<int> sizes;
+        for (const DocumentEventRecord &record : records) {
+            if (record.name == "project.changed")
+                sizes.append(record.widgets);
+        }
+        return sizes;
+    };
+    // Transição new com sujeira do editor: trio final coerente, sem
+    // dirty=true obsoleto do documento antigo.
+    QVERIFY2(window.automationNew(true, &error), qPrintable(error));
+    QCOMPARE(countNamed("project.changed"), 1);
+    QCOMPARE(projectSnapshots().size(), 1);
+    QCOMPARE(projectSnapshots().first(), 0);
+    QCOMPARE(countNamed("dirty.changed"), 1);
+    QCOMPARE(lastDirty(), false);
+    QCOMPARE(countNamed("diagnostics.changed"), 1);
+    QVERIFY(!window.hasUnsavedChanges());
+
+    // Demo termina suja e anuncia isso (snapshot final com 3 componentes).
+    records.clear();
+    QVERIFY(QMetaObject::invokeMethod(&window, "onDemoClicked"));
+    QCOMPARE(countNamed("project.changed"), 1);
+    QCOMPARE(projectSnapshots().size(), 1);
+    QCOMPARE(projectSnapshots().first(), 3);
+    QCOMPARE(countNamed("dirty.changed"), 1);
+    QCOMPARE(lastDirty(), true);
+
+    // Open restaura o arquivo salvo, com evento sobre o estado final.
     QTemporaryDir tempDir;
     QVERIFY(tempDir.isValid());
     const QString path = tempDir.filePath("doc.sbxproj");
+    QVERIFY2(window.automationSave(path, &error), qPrintable(error));
+    const int savedSize = window.automationProjectSnapshot()
+                              .value("widgets").toArray().size();
+    QVERIFY2(window.automationAddWidget("label", "extra", {}, &error),
+             qPrintable(error));
+    records.clear();
+    QVERIFY2(window.automationOpen(path, true, &error), qPrintable(error));
+    QCOMPARE(countNamed("project.changed"), 1);
+    QCOMPARE(projectSnapshots().size(), 1);
+    QCOMPARE(projectSnapshots().first(), savedSize);
+    QCOMPARE(lastDirty(), false);
+
+    // Save anuncia a transição para limpo, exatamente uma vez.
+    QSignalSpy spy(&window, &MainWindow::automationEvent);
     QVERIFY2(window.automationAddWidget("label", "saved", {}, &error),
              qPrintable(error));
     QVERIFY(window.hasUnsavedChanges());
