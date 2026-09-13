@@ -27,6 +27,9 @@ O candidato público avaliado foi o prerelease `v1.0.0-rc.6`, produzido a
 partir da `main` com a SB-017 integrada (socket JSON-RPC, `showbox-studioctl`,
 MCP). A SB-019 concluiu os gates A–E, mas encontrou bloqueio no fluxo gráfico
 de fechamento com alterações: o Studio encerrou sem confirmação de descarte
-observável. A recomendação operacional é corrigir e produzir `rc.7`; nenhuma
-tag estável foi criada. O RC.5 permanece publicado como histórico, o RC.4
+observável. A SB-020 corrigiu com impressão digital do modelo e diálogo
+Save/Discard/Cancel (`tst_DiscardProtection`, 10 casos); o prerelease
+`v1.0.0-rc.7` foi publicado e a repetição SB-019r (A–F verdes, descarte
+comprovado nos três botões) recomenda promover `v1.0.0`. Nenhuma tag estável
+foi criada até aqui. O RC.5 permanece publicado como histórico, o RC.4
 como histórico e o RC.3 como draft.
