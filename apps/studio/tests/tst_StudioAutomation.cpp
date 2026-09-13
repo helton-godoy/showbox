@@ -730,6 +730,8 @@ void tst_StudioAutomation::guiStackEditsPublishProjectChanged() {
     QCOMPARE(source, QString("gui"));
     spy.clear();
     // Undo iniciado pela GUI (QAction de Edit/toolbar, sem facade).
+    // Guarda explícita de nulidade (cpp:S2259): checagem direta em vez de
+    // contar com o aborto do QVERIFY, opaco ao analisador estático.
     QAction *undoAction = nullptr;
     for (QAction *action : window.findChildren<QAction *>()) {
         if (action->shortcut() == QKeySequence::Undo) {
@@ -737,7 +739,8 @@ void tst_StudioAutomation::guiStackEditsPublishProjectChanged() {
             break;
         }
     }
-    QVERIFY(undoAction);
+    if (undoAction == nullptr)
+        QFAIL("ação Undo não encontrada");
     undoAction->trigger();
     QCOMPARE(automationEventCount(&spy, "project.changed"), 1);
     QVERIFY(!window.automationProjectSnapshot().value("widgets").toArray().isEmpty());
@@ -773,6 +776,8 @@ void tst_StudioAutomation::documentTransactionsAreObservable() {
     QCOMPARE(widgetCounts.size(), 1);
     QCOMPARE(widgetCounts.first(), 0);
     // Pilha vazia: ações nativas de Undo/Redo acompanham (sem bloqueio).
+    // Guarda explícita de nulidade: o QVERIFY não aborta no modelo do
+    // analisador estático (cpp:S2259), então a checagem é feita aqui.
     QAction *undoAction = nullptr;
     QAction *redoAction = nullptr;
     for (QAction *action : window.findChildren<QAction *>()) {
@@ -781,7 +786,8 @@ void tst_StudioAutomation::documentTransactionsAreObservable() {
         if (action->shortcut() == QKeySequence::Redo)
             redoAction = action;
     }
-    QVERIFY(undoAction && redoAction);
+    if (undoAction == nullptr || redoAction == nullptr)
+        QFAIL("ações Undo/Redo não encontradas");
     QVERIFY(!undoAction->isEnabled());
     QVERIFY(!redoAction->isEnabled());
 
