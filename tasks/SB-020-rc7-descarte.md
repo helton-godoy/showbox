@@ -60,8 +60,9 @@ Estado: em execução.
   - `tst_DiscardProtection` (9 casos): janela limpa, push suja, save limpa,
     edição direta de tabela/texto suja, cenário SB-019 segue sujo após undo,
     `Discard` fecha, `Cancel` mantém, close limpo sem diálogo.
-- Commit `1b0814f` (fix). Validações locais: `ctest` **29/29** (28
-  existentes + nova suíte), `trunk check` sem issues.
+- Commit `1b0814f` (fix) + `8dff7c8` (teste sem orfao p/ LSan). Validações
+  locais: `ctest` **29/29** (28 existentes + nova suíte), `trunk check` sem
+  issues, ASan/LSan locais limpos nas suítes com `MainWindow`.
 - Limitação: edição direta no canvas continua permitida (vira sujeira e
   pede confirmação, sem perda silenciosa); desabilitá-la fica como
   backlog/UX. `rc.7` + repetição da SB-019 pendentes após integrar.
