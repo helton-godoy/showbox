@@ -7,3 +7,7 @@ Estado: experimental. O fluxo de ações/exportação da SB-002 tem teste contra
 um subconjunto de componentes. Consulte docs/user/shell-actions.md na raiz
 para o escopo suportado e as limitações.
 A documentação histórica em `docs/` deste módulo não é a especificação vigente.
+
+A interface local opcional para automação, testes e diagnóstico está documentada
+em [docs/AUTOMATION.md](docs/AUTOMATION.md). Ela permanece desligada sem
+`--automation`.
