@@ -150,6 +150,11 @@ void tst_DiscardProtection::sb019ScenarioStaysDirtyAfterUndo() {
     // A pilha voltou ao indice limpo, mas a celula editada permanece.
     QVERIFY(window.hasUnsavedChanges());
 
+    // Reanexar o widget do comando desfeito: sem o redo, ele ficaria orfao
+    // (AddWidgetCommand guarda QPointer sem posse) e vazaria no teardown.
+    QVERIFY(window.automationRedo(&error));
+    QVERIFY(window.hasUnsavedChanges());
+
     // Salvar volta a limpar de verdade.
     QVERIFY(window.automationSave(path, &error));
     QVERIFY(!window.hasUnsavedChanges());
