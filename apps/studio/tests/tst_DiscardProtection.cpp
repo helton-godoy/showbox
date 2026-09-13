@@ -1,4 +1,5 @@
 #include <QtTest>
+#include <QFileDialog>
 #include <QLineEdit>
 #include <QMessageBox>
 #include <QPushButton>
@@ -38,6 +39,27 @@ void clickMessageBoxButton(QMessageBox::StandardButton which) {
         }
     }
 }
+
+// Preenche o QFileDialog como um usuário (selectFile() programático não
+// seleciona o nome e deixa o Save desabilitado) e confirma no botão.
+void acceptSaveDialog(const QString &directory, const QString &fileName) {
+    for (QWidget *top : QApplication::topLevelWidgets()) {
+        auto *dialog = qobject_cast<QFileDialog *>(top);
+        if (!dialog || !dialog->isVisible())
+            continue;
+        dialog->setDirectory(directory);
+        if (QLineEdit *edit = dialog->findChild<QLineEdit *>()) {
+            edit->clear();
+            QTest::keyClicks(edit, fileName);
+        }
+        for (QPushButton *button : dialog->findChildren<QPushButton *>()) {
+            if (button->text().contains("Save") && button->isVisible() &&
+                button->isEnabled())
+                QTest::mouseClick(button, Qt::LeftButton);
+        }
+        return;
+    }
+}
 } // namespace
 
 class tst_DiscardProtection : public QObject {
@@ -53,6 +75,7 @@ private slots:
     void closeWithDiscardClosesWindow();
     void closeWithCancelKeepsWindow();
     void cleanCloseNeedsNoDialog();
+    void closeWithSavePersistsAndCloses();
 };
 
 void tst_DiscardProtection::freshWindowIsClean() {
@@ -193,13 +216,34 @@ void tst_DiscardProtection::cleanCloseNeedsNoDialog() {
     QVERIFY(QTest::qWaitForWindowExposed(&window));
     QVERIFY(!window.hasUnsavedChanges());
 
-    // Sem sujeira, nenhum QMessageBox pode aparecer durante o close.
-    QTimer::singleShot(300, [] {
-        for (QWidget *top : QApplication::topLevelWidgets())
-            QVERIFY2(!qobject_cast<QMessageBox *>(top), "dialogo inesperado em close limpo");
+    // Sem sujeira, o close retorna de imediato e nenhum QMessageBox existe.
+    QVERIFY(window.close());
+    QVERIFY(window.isHidden());
+    for (QWidget *top : QApplication::topLevelWidgets())
+        QVERIFY2(!qobject_cast<QMessageBox *>(top), "dialogo inesperado em close limpo");
+}
+
+void tst_DiscardProtection::closeWithSavePersistsAndCloses() {
+    MainWindow window;
+    window.show();
+    QVERIFY(QTest::qWaitForWindowExposed(&window));
+    QString error;
+    QVERIFY(window.automationAddWidget("label", "lbl_probe", {}, &error));
+    QVERIFY(window.hasUnsavedChanges());
+
+    QTemporaryDir dir;
+    QVERIFY(dir.isValid());
+    const QString path = dir.filePath("via-dialog.sbxproj");
+    // O close abre o QMessageBox (modal) e o Save abre o QFileDialog
+    // (modal aninhado); os timers disparam dentro dos loops modais.
+    QTimer::singleShot(300, [] { clickMessageBoxButton(QMessageBox::Save); });
+    QTimer::singleShot(1500, [directory = dir.path()] {
+        acceptSaveDialog(directory, "via-dialog");
     });
     QVERIFY(window.close());
     QVERIFY(window.isHidden());
+    QVERIFY2(QFile::exists(path), "Save do dialogo nao persistiu o arquivo");
+    QVERIFY(!window.hasUnsavedChanges());
 }
 
 QTEST_MAIN(tst_DiscardProtection)
